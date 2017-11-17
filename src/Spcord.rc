@@ -1,0 +1,1469 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""../res\\Spcord.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "../res\\spcord.ico"
+IDR_LOCOTYPE            ICON                    "../res\\idr_loco.ico"
+IDR_LIMBVIEW            ICON                    "../res\\limb_view.ico"
+IDR_NSMTYPE             ICON                    "../res\\idr_loco.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_LOCOTYPE            BITMAP                  "../res\\locoframe.bmp"
+IDR_NSMTYPE             BITMAP                  "../res\\nsmframe.bmp"
+IDB_TREE_IMAGES         BITMAP                  "../res\\tree_images.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_LOCOTYPE TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_MODEL_START
+    BUTTON      ID_MODEL_STOP
+    BUTTON      ID_MODEL_PAUSE
+    SEPARATOR
+    BUTTON      ID_REDRAW_RESULTS
+    BUTTON      ID_IS_STICK
+    SEPARATOR
+    BUTTON      ID_WINDOW_NEW
+    BUTTON      IDM_NEW_LIMB_WINDOW
+END
+
+IDR_NSMTYPE TOOLBAR 16, 16
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_MODEL_START
+    BUTTON      ID_MODEL_STOP
+    BUTTON      ID_MODEL_PAUSE
+    SEPARATOR
+    BUTTON      ID_REDRAW_RESULTS
+    SEPARATOR
+    BUTTON      ID_WINDOW_NEW
+    SEPARATOR
+    BUTTON      ID_NETWORK_INIT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About SpC...",               ID_APP_ABOUT
+    END
+END
+
+IDR_LOCOTYPE MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Network View...",            ID_NETWORK_VIEW
+        MENUITEM "&Limb View..",                ID_LIMB_VIEW
+        MENUITEM "Save view...",                ID_SAVE_VIEW
+        MENUITEM SEPARATOR
+        MENUITEM "&ToolBar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "SpC &Model"
+    BEGIN
+        MENUITEM "&Network Setup...",           ID_NETWORK_SETUP
+        MENUITEM "Connections Setup...",        ID_CONNECTION_SETUP
+        MENUITEM "Network &Control...",         ID_NETWORK_CONTROL
+        MENUITEM SEPARATOR
+        MENUITEM "&Biomechanics setup...",      ID_BIOMECHANICS
+        MENUITEM SEPARATOR
+        MENUITEM "&Init Network",               ID_NETWORK_INIT
+        MENUITEM SEPARATOR
+        MENUITEM "Diff...",                     ID_NETWORK_DIFF
+    END
+    POPUP "&Simulation"
+    BEGIN
+        MENUITEM "&Initial Parameters...",      ID_MODEL_PARAM
+        MENUITEM SEPARATOR
+        MENUITEM "&Start",                      ID_MODEL_START
+        MENUITEM "S&top",                       ID_MODEL_STOP
+        MENUITEM "&Pause",                      ID_MODEL_PAUSE
+        MENUITEM SEPARATOR
+        MENUITEM "Redraw &Results",             ID_REDRAW_RESULTS
+        MENUITEM "Stick &Diagramm",             ID_IS_STICK, CHECKED
+        MENUITEM SEPARATOR
+        MENUITEM "S&ave Results...",            ID_SAVE_RESULTS
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Network View",           ID_WINDOW_NEW
+        MENUITEM "&Open Limb View",             IDM_NEW_LIMB_WINDOW
+        MENUITEM SEPARATOR
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About SpC...",               ID_APP_ABOUT
+    END
+END
+
+IDR_NSMTYPE MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Network View...",            ID_NETWORK_VIEW
+        MENUITEM "Save view...",                ID_SAVE_VIEW
+        MENUITEM SEPARATOR
+        MENUITEM "&ToolBar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+    END
+    POPUP "NSM &Model"
+    BEGIN
+        MENUITEM "&Network Setup...",           ID_NETWORK_SETUP
+        MENUITEM "Connections Setup...",        ID_CONNECTION_SETUP
+        MENUITEM "Network &Control...",         ID_NETWORK_CONTROL
+        MENUITEM SEPARATOR
+        MENUITEM "&Init Network",               ID_NETWORK_INIT
+        MENUITEM SEPARATOR
+        MENUITEM "Diff...",                     ID_NETWORK_DIFF
+    END
+    POPUP "&Simulation"
+    BEGIN
+        MENUITEM "&Initial Parameters...",      ID_MODEL_PARAM
+        MENUITEM SEPARATOR
+        MENUITEM "&Start",                      ID_MODEL_START
+        MENUITEM "S&top",                       ID_MODEL_STOP
+        MENUITEM "&Pause",                      ID_MODEL_PAUSE
+        MENUITEM SEPARATOR
+        MENUITEM "Redraw &Results",             ID_REDRAW_RESULTS
+        MENUITEM SEPARATOR
+        MENUITEM "S&ave Results...",            ID_SAVE_RESULTS
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Network View",           ID_WINDOW_NEW
+        MENUITEM SEPARATOR
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About SpC...",               ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 255, 196
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Neurosim"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,21,20
+    LTEXT           "Neurosim Version 2.5.11",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    DEFPUSHBUTTON   "OK",IDOK,198,7,50,14,WS_GROUP
+    LTEXT           "Ilya A. Rybak",IDC_STATIC,39,21,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2000-2010",IDC_STATIC,39,32,119,8
+    LTEXT           "Modifications log.\n\n1. Probability bug was fixed.\n2.The calculation method was speeded up.\n3.The code was adopted to MPI (in process).\n4.The latest biomechanical model was implemented.\n5.The connections between network elements can depend on each other.",IDC_STATIC,7,53,241,56
+    LTEXT           "6. The controls can modify the same parameter simultaneously\n7. Differences analysis.\n8. Control the distribution of parameters for each population.\n9. OpenMP optimization.\n10. Muscle model has been modified.",IDC_STATIC,7,109,241,40
+    LTEXT           "11. Adopt respiritory models to multi-theading enviroment.",IDC_STATIC,7,149,241,40
+END
+
+IDD_DRIVE_SETUP DIALOGEX 0, 0, 195, 254
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "External Drives"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Number of drives",IDC_DRIVE_SIZE,12,19,159,8
+    LISTBOX         IDC_LIST_DRIVE,12,49,101,195,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Drive list",IDC_STATIC,12,36,63,8
+    PUSHBUTTON      "Add",IDC_ADD_DRIVE,124,53,50,14
+    PUSHBUTTON      "Delete",IDC_DEL_DRIVE,124,86,50,14
+    PUSHBUTTON      "Properties...",IDC_PROP_DRIVE,124,119,50,14
+    GROUPBOX        "External drives ",IDC_STATIC,1,5,181,247
+END
+
+IDD_OUTPUT_SETUP DIALOGEX 0, 0, 193, 252
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "NSM Objects"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Number of outputs",IDC_OUTPUT_SIZE,12,19,159,8
+    LISTBOX         IDC_LIST_OUTPUT,12,49,101,196,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Output list",IDC_STATIC,12,36,63,8
+    PUSHBUTTON      "Add",IDC_ADD_OUTPUT,124,53,50,14
+    PUSHBUTTON      "Delete",IDC_DEL_OUTPUT,124,86,50,14
+    PUSHBUTTON      "Properties...",IDC_PROP_OUTPUT,124,119,50,14
+    GROUPBOX        "Network output",IDC_STATIC,1,5,181,247
+END
+
+IDD_FEEDBACK_SETUP DIALOGEX 0, 0, 191, 247
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Feedback"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Number of feedbacks",IDC_FEEDBACK_SIZE,12,19,159,8
+    LISTBOX         IDC_LIST_FEEDBACK,12,49,101,190,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Feedback list",IDC_STATIC,12,36,63,8
+    PUSHBUTTON      "Add",IDC_ADD_FEEDBACK,124,53,50,14
+    PUSHBUTTON      "Delete",IDC_DEL_FEEDBACK,124,86,50,14
+    PUSHBUTTON      "Properties...",IDC_PROP_FEEDBACK,124,119,50,14
+    GROUPBOX        "Network feedback",IDC_STATIC,1,5,181,241
+END
+
+IDD_CONTROL_SETUP DIALOGEX 0, 0, 215, 178
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Control Setup"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Number of control modules",IDC_CONTROL_SIZE,19,21,159,8
+    LISTBOX         IDC_LIST_CONTROL,19,51,101,89,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Control modules",IDC_STATIC,19,38,63,8
+    PUSHBUTTON      "Add",IDC_ADD_CONTROL,131,57,71,14
+    PUSHBUTTON      "Delete",IDC_DEL_CONTROL,131,79,71,14
+    PUSHBUTTON      "Properties...",IDC_PROP_CONTROL,131,100,71,14
+    GROUPBOX        "",IDC_STATIC,8,7,203,143
+    DEFPUSHBUTTON   "OK",IDOK,51,159,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,115,159,50,14
+END
+
+IDD_CONTROLLED_SETUP DIALOG 0, 0, 372, 151
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION
+CAPTION "Controlled setup"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Tree2",IDC_CONTROLLED_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,16,25,120,108
+    GROUPBOX        " SpCord units/parameters ",IDC_STATIC,10,9,133,133
+    GROUPBOX        " Controlled parameters ",IDC_STATIC,209,9,154,133
+    CONTROL         "List2",IDC_CONTROLLED_PARAM,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,218,25,136,108
+    PUSHBUTTON      "Add --->",IDC_ADD_PARAM,149,26,53,14
+    PUSHBUTTON      "Remove <---",IDC_REMOVE_PARAM,149,47,53,14,WS_DISABLED
+END
+
+IDD_NN_UNIT_SEL DIALOG 0, 0, 172, 58
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Connections"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,115,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,115,35,50,14
+    GROUPBOX        " Network element  ",IDC_STATIC,7,7,100,43
+    COMBOBOX        IDC_TAG_SEL,15,24,83,57,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_WEIGHTS_RESP DIALOGEX 0, 0, 281, 254
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Connection"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,224,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,224,33,50,14
+    LTEXT           "Weight",IDC_STATIC,21,48,25,8
+    EDITTEXT        IDC_EDIT_EX_WEIGHT,21,61,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_EX_WEIGHT,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,67,61,10,14
+    LTEXT           "Variance, %",IDC_STATIC,92,48,37,8
+    EDITTEXT        IDC_EDIT_EX_WEIGHT_VAR,92,61,32,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_EX_WEIGHT_VAR,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,130,61,10,14
+    LTEXT           "Weight",IDC_STATIC,20,159,42,8
+    EDITTEXT        IDC_EDIT_INH1_WEIGHT,20,172,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH1_WEIGHT,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,66,172,11,14
+    LTEXT           "Variance, %",IDC_STATIC,92,159,37,8
+    EDITTEXT        IDC_EDIT_INH1_WEIGHT_VAR,92,172,32,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH1_WEIGHT_VAR,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,130,172,11,14
+    LTEXT           "Weight",IDC_STATIC,20,216,49,8
+    EDITTEXT        IDC_EDIT_INH2_WEIGHT,20,229,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH2_WEIGHT,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,66,229,11,14
+    LTEXT           "Variance, %",IDC_STATIC,92,216,37,8
+    EDITTEXT        IDC_EDIT_INH2_WEIGHT_VAR,92,229,32,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH2_WEIGHT_VAR,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,130,229,11,14
+    GROUPBOX        " Excitatory ",IDC_STATIC,9,36,202,50
+    GROUPBOX        " Inhibitory I ",IDC_STATIC,9,145,202,50
+    GROUPBOX        " Inhibitory II ",IDC_STATIC,9,199,202,50
+    LTEXT           "Connect to",IDC_STATIC,9,16,36,8
+    COMBOBOX        IDC_CONNECT_TYPE,65,14,148,62,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Weight",IDC_STATIC,21,102,39,8
+    EDITTEXT        IDC_EDIT_EX_WEIGHT2,21,114,40,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_EX_WEIGHT2,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,67,114,10,14
+    LTEXT           "Variance, %",IDC_STATIC,92,102,37,8
+    EDITTEXT        IDC_EDIT_EX_WEIGHT_VAR2,92,114,32,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_EX_WEIGHT_VAR2,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,130,114,10,14
+    GROUPBOX        " Excitatory II ",IDC_STATIC,9,90,202,50
+    LTEXT           "Probability",IDC_STATIC,224,58,40,8
+    EDITTEXT        IDC_EDIT_PROBABILITY,224,70,36,14,ES_AUTOHSCROLL | ES_OEMCONVERT
+    CONTROL         "Spin1",IDC_SPIN_PROBABILITY,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,264,70,10,14
+    LTEXT           "Specific",IDC_STATIC,156,48,37,8
+    COMBOBOX        IDC_EX_SPEC,156,61,48,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Specific",IDC_STATIC,156,102,37,8
+    COMBOBOX        IDC_EX2_SPEC,156,114,48,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Specific",IDC_STATIC,156,162,37,8
+    COMBOBOX        IDC_INH1_SPEC,156,172,48,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Specific",IDC_STATIC,156,219,37,8
+    COMBOBOX        IDC_INH2_SPEC,156,229,48,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Dependencies",ID_WEIGHT_DEP,224,235,50,14
+    CONTROL         "Chained",IDC_CHAINED,"Button",BS_AUTOCHECKBOX | BS_RIGHT | WS_DISABLED | WS_TABSTOP,224,217,42,10
+END
+
+IDD_WEIGHTS DIALOGEX 0, 0, 281, 203
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Connection"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,224,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,224,32,50,14
+    LTEXT           "Weight",IDC_STATIC,21,48,29,8
+    EDITTEXT        IDC_EDIT_EX_WEIGHT,21,61,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_EX_WEIGHT,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,67,61,10,14
+    LTEXT           "Variance, %",IDC_STATIC,92,48,37,8
+    EDITTEXT        IDC_EDIT_EX_WEIGHT_VAR,92,61,32,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_EX_WEIGHT_VAR,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,130,61,10,14
+    LTEXT           "Weight",IDC_STATIC,20,106,32,8
+    EDITTEXT        IDC_EDIT_INH1_WEIGHT,20,119,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH1_WEIGHT,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,66,119,11,14
+    LTEXT           "Variance, %",IDC_STATIC,92,106,37,8
+    EDITTEXT        IDC_EDIT_INH1_WEIGHT_VAR,92,119,32,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH1_WEIGHT_VAR,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,130,119,11,14
+    LTEXT           "Weight",IDC_STATIC,20,163,33,8
+    EDITTEXT        IDC_EDIT_INH2_WEIGHT,20,176,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH2_WEIGHT,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,66,176,11,14
+    LTEXT           "Variance, %",IDC_STATIC,92,163,37,8
+    EDITTEXT        IDC_EDIT_INH2_WEIGHT_VAR,92,176,32,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_INH2_WEIGHT_VAR,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,130,176,11,14
+    GROUPBOX        " Excitatory ",IDC_STATIC,9,36,202,50
+    GROUPBOX        " Inhibitory I ",IDC_STATIC,9,92,202,50
+    GROUPBOX        " Inhibitory II ",IDC_STATIC,9,149,202,50
+    LTEXT           "Connect to",IDC_STATIC,9,16,36,8
+    COMBOBOX        IDC_CONNECT_TYPE,65,14,148,62,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Probability",IDC_STATIC,224,58,43,8
+    EDITTEXT        IDC_EDIT_PROBABILITY,224,70,36,14,ES_AUTOHSCROLL | ES_OEMCONVERT
+    CONTROL         "Spin1",IDC_SPIN_PROBABILITY,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,264,70,10,14
+    LTEXT           "Specific",IDC_STATIC,156,48,37,8
+    COMBOBOX        IDC_EX_SPEC,156,61,48,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Specific",IDC_STATIC,156,109,37,8
+    COMBOBOX        IDC_INH1_SPEC,156,119,48,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Specific",IDC_STATIC,156,166,37,8
+    COMBOBOX        IDC_INH2_SPEC,156,176,48,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Dependencies",ID_WEIGHT_DEP,224,185,50,14
+    CONTROL         "Chained",IDC_CHAINED,"Button",BS_AUTOCHECKBOX | BS_RIGHT | WS_DISABLED | WS_TABSTOP,224,169,42,10
+END
+
+IDD_OUTPUT_PROP DIALOG 0, 0, 153, 169
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Output"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,93,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,93,35,50,14
+    EDITTEXT        IDC_EDIT_T1,16,69,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_T1,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,62,69,10,14
+    EDITTEXT        IDC_EDIT_T2,16,105,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_T2,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,62,105,10,14
+    EDITTEXT        IDC_EDIT_OUTPUT_NAME,16,32,55,14,ES_AUTOHSCROLL
+    LTEXT           "Name",IDC_STATIC,16,19,20,8
+    GROUPBOX        " Output properties ",IDC_STATIC,7,7,76,154
+    LTEXT           "Time constant up",IDC_STATIC,15,56,56,8
+    LTEXT           "Time constant down",IDC_STATIC,15,92,65,8
+    EDITTEXT        IDC_EDIT_THRESHOLD,16,141,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_THRESHOLD,"msctls_updown32",UDS_ARROWKEYS,62,141,10,14
+    LTEXT           "Threshold",IDC_STATIC,16,128,32,8
+END
+
+IDD_CONTROL_FUNCTION DIALOGEX 0, 0, 291, 155
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION
+CAPTION "Control function setup"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        " Function ",IDC_STATIC,8,31,282,117
+    LISTBOX         IDC_LIST_POINTS,18,46,123,72,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add",IDC_ADD_POINT,205,47,62,14
+    PUSHBUTTON      "Delete",IDC_DEL_POINT,205,68,61,14
+    PUSHBUTTON      "Properties...",IDC_PROP_POINT,205,89,63,14
+    PUSHBUTTON      "Load...",IDC_LOAD,20,127,50,14
+    PUSHBUTTON      "Save...",IDC_SAVE,87,127,50,14
+    EDITTEXT        IDC_EDIT_NAME_CTR,67,11,133,14,ES_AUTOHSCROLL
+    LTEXT           "Control name",IDC_STATIC,16,11,42,14,SS_CENTERIMAGE
+    CONTROL         "Noise",IDC_ADD_NOISE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,205,130,33,10
+    EDITTEXT        IDC_EDIT_NOISE,243,126,25,14,ES_AUTOHSCROLL
+    CONTROL         "Step",IDC_CRL_ITERPOL,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,205,113,33,10
+END
+
+IDD_PROP_POINT DIALOG 0, 0, 215, 65
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Properties of point"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,158,9,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,158,33,50,14
+    GROUPBOX        "",IDC_STATIC,7,4,139,54
+    LTEXT           "Time, msec",IDC_STATIC,16,20,36,8
+    EDITTEXT        IDC_EDIT_TIME,16,33,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_TIME,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,62,33,10,14
+    LTEXT           "Value",IDC_STATIC,87,20,39,8
+    EDITTEXT        IDC_EDIT_MUL,87,33,32,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_MUL,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,125,33,10,14
+END
+
+IDD_PAR_SEL DIALOG 0, 0, 187, 57
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Parameter Type"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,130,11,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,130,34,50,14
+    COMBOBOX        IDC_PAR_SEL,20,25,83,70,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        " Parameter type ",IDC_STATIC,7,5,111,45
+END
+
+IDD_NETWORK_VIEW DIALOGEX 0, 0, 374, 193
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Network view"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,158,174,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,217,174,50,14
+    CONTROL         "Tree2",IDC_VIEW_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,19,48,101,108
+    GROUPBOX        " Network parameters ",IDC_STATIC,10,32,120,133
+    GROUPBOX        " View's parameters ",IDC_STATIC,195,32,166,133
+    CONTROL         "List2",IDC_LIST_VIEW,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,204,48,146,108
+    PUSHBUTTON      "&Add --->",IDC_ADD_VIEW,138,48,50,14
+    PUSHBUTTON      "&Remove <---",IDC_REMOVE_VIEW,138,71,50,14
+    PUSHBUTTON      "&Scale...",IDC_SCALE_VIEW,138,140,50,14
+    PUSHBUTTON      "Geometry...",IDC_GEOMETRY_VIEW,313,174,50,14
+    PUSHBUTTON      "Move &Up",IDC_MOVE_UP,138,94,50,14
+    PUSHBUTTON      "Move &Down",IDC_MOVE_DOWN,138,117,50,14
+    EDITTEXT        IDC_EDIT_VIEW_NAME,205,10,142,14,ES_AUTOHSCROLL
+    LTEXT           "View name",IDC_STATIC,17,12,36,8
+END
+
+IDD_SCALE_VIEW DIALOG 0, 0, 143, 102
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Scale view"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,86,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,86,35,50,14
+    GROUPBOX        " Scale ",IDC_STATIC,7,7,71,88
+    LTEXT           "Maximum",IDC_STATIC,14,22,30,8
+    EDITTEXT        IDC_EDIT_YMAX,14,35,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_YMAX,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,60,35,10,14
+    LTEXT           "Minimum",IDC_STATIC,14,60,28,8
+    EDITTEXT        IDC_EDIT_YMIN,14,73,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_YMIN,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,60,73,10,14
+END
+
+IDD_GEOMETRY_VIEW DIALOG 0, 0, 143, 102
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Scale view"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,86,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,86,35,50,14
+    GROUPBOX        " Geometry ",IDC_STATIC,7,7,71,88
+    LTEXT           "Number of row",IDC_STATIC,14,22,47,8
+    EDITTEXT        IDC_EDIT_ROW,14,35,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_ROW,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,60,35,10,14
+    LTEXT           "Number of column",IDC_STATIC,14,60,58,8
+    EDITTEXT        IDC_EDIT_COL,14,73,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_COL,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,60,73,10,14
+END
+
+IDD_DRIVE_NAME DIALOG 0, 0, 193, 60
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Drive Properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,136,13,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,136,37,50,14
+    EDITTEXT        IDC_DRIVE_NAME,24,27,90,14,ES_AUTOHSCROLL
+    GROUPBOX        " Drive name ",IDC_STATIC,11,9,115,43
+END
+
+IDD_FEEDBACK_PROP DIALOGEX 0, 0, 337, 190
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Feedback properties"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,248,12,82,14
+    PUSHBUTTON      "Cancel",IDCANCEL,248,33,82,14
+    GROUPBOX        " Properties ",IDC_STATIC,8,9,232,179
+    COMBOBOX        IDC_COMBO_TYPE,268,65,62,56,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_KV,162,62,40,14,ES_AUTOHSCROLL | WS_GROUP
+    EDITTEXT        IDC_PV,162,92,40,14,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "Spin2",IDC_SPIN_PV,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,210,92,10,14
+    CONTROL         "Spin2",IDC_SPIN_KV,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,210,62,10,14
+    LTEXT           "Type",IDC_STATIC,247,66,17,12,SS_CENTERIMAGE
+    LTEXT           "Kv",IDC_STATIC,144,62,10,14,SS_CENTERIMAGE
+    LTEXT           "Pv",IDC_STATIC,144,92,10,14,SS_CENTERIMAGE
+    LTEXT           "Name",IDC_STATIC,19,24,21,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_FB_NAME,44,24,74,14,ES_AUTOHSCROLL
+    GROUPBOX        " Velocity ",IDC_STATIC,135,50,98,61
+    GROUPBOX        " Force ",IDC_STATIC,19,50,100,62
+    GROUPBOX        " Length ",IDC_STATIC,19,118,100,27
+    GROUPBOX        " Constant ",IDC_STATIC,19,152,100,29
+    GROUPBOX        " Ground reaction ",IDC_STATIC,135,152,98,29
+    EDITTEXT        IDC_KF,50,62,40,14,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "",IDC_SPIN_KF,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,98,62,10,14
+    LTEXT           "Kf",IDC_STATIC,32,62,10,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_KL,49,128,40,14,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "",IDC_SPIN_KL,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,97,128,11,14
+    LTEXT           "Kl",IDC_STATIC,31,128,10,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_KC,48,162,40,14,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "",IDC_SPIN_KC,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,96,162,10,14
+    LTEXT           "Kc",IDC_STATIC,30,162,10,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_KGR,163,162,40,14,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "",IDC_SPIN_KGR,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,211,162,10,14
+    LTEXT           "Kg",IDC_STATIC,145,162,10,14,SS_CENTERIMAGE
+    GROUPBOX        " EMG ",IDC_STATIC,135,118,100,27
+    EDITTEXT        IDC_KEMG,162,127,40,14,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "",IDC_SPIN_KEMG,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,210,127,11,14
+    LTEXT           "Ke",IDC_STATIC,144,127,10,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_KFTR,49,92,40,14,ES_AUTOHSCROLL | WS_GROUP
+    CONTROL         "",IDC_SPIN_KFTR,"msctls_updown32",UDS_ARROWKEYS | WS_GROUP,97,92,10,14
+    LTEXT           "Tr",IDC_STATIC,31,92,10,14,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_LISTFB,160,26,73,56,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "List",IDC_STATIC,143,26,13,12,SS_CENTERIMAGE
+END
+
+IDD_MEASURES_PROP DIALOG 0, 0, 396, 143
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "Measures"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Link",IDC_STATIC,9,5,40,14,SS_CENTERIMAGE | NOT WS_GROUP
+    GROUPBOX        "Link properties",IDC_STATIC,3,27,129,109
+    LTEXT           "Length",IDC_STATIC,9,38,40,14,SS_CENTERIMAGE | NOT WS_GROUP
+    LTEXT           "Mass",IDC_STATIC,9,60,18,8,NOT WS_GROUP
+    LTEXT           "Center of",IDC_STATIC,9,76,30,8,NOT WS_GROUP
+    LTEXT           "Mass",IDC_STATIC,9,85,18,8,NOT WS_GROUP
+    LTEXT           "Moment of",IDC_STATIC,9,96,34,8,NOT WS_GROUP
+    LTEXT           "Inertia",IDC_STATIC,9,105,20,8,NOT WS_GROUP
+    GROUPBOX        "Viscosity && Elasticity",IDC_STATIC,163,9,227,127
+    CTEXT           "Viscosity",IDC_STATIC,222,22,58,8,NOT WS_GROUP
+    CTEXT           "Elasticity",IDC_STATIC,311,22,58,8,NOT WS_GROUP
+    LTEXT           "Joint viscosity",IDC_STATIC,172,38,48,14,SS_CENTERIMAGE
+    LTEXT           "Angles fixing",IDC_STATIC,172,58,40,14,SS_CENTERIMAGE
+    LTEXT           "Hip fixing",IDC_STATIC,172,78,40,14,SS_CENTERIMAGE
+    LTEXT           "Ground",IDC_STATIC,172,98,40,14,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_LINK,53,6,55,66,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_LENGTH,53,38,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_LENGTH,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,115,38,11,14
+    EDITTEXT        IDC_EDIT_MASS,53,58,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin2",IDC_SPIN_MASS,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,115,58,11,14
+    EDITTEXT        IDC_EDIT_CENTER,53,78,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin3",IDC_SPIN_CENTER,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,115,78,11,14
+    EDITTEXT        IDC_EDIT_INERTIA,53,98,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin4",IDC_SPIN_INERTIA,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,115,98,11,14
+    CONTROL         "Simple",IDC_CHECK_SIMPLE,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | BS_VCENTER | WS_TABSTOP,8,118,54,14
+    EDITTEXT        IDC_EDIT_BV,222,38,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin5",IDC_SPIN_BV,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,284,38,11,14
+    EDITTEXT        IDC_EDIT_BA,222,58,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin6",IDC_SPIN_BA,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,284,58,11,14
+    EDITTEXT        IDC_EDIT_KA,311,58,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin7",IDC_SPIN_KA,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,373,58,11,14
+    EDITTEXT        IDC_EDIT_BH,222,78,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin9",IDC_SPIN_BH,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,284,78,11,14
+    EDITTEXT        IDC_EDIT_KH,311,78,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin10",IDC_SPIN_KH,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,373,78,11,14
+    EDITTEXT        IDC_EDIT_BG,222,98,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin11",IDC_SPIN_BG,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,284,98,11,14
+    EDITTEXT        IDC_EDIT_KG,311,98,58,14,ES_AUTOHSCROLL
+    CONTROL         "Spin12",IDC_SPIN_KG,"msctls_updown32",UDS_ARROWKEYS | UDS_NOTHOUSANDS,373,98,11,14
+END
+
+IDD_SIMULATE_VIEW DIALOG 0, 0, 222, 140
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "Visualization"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT_BEGIN_VIEW,99,22,40,14,ES_AUTOHSCROLL
+    LTEXT           "From, msec",IDC_STATIC,17,22,72,14,SS_CENTERIMAGE
+    CONTROL         "Spin1",IDC_SPIN_BEGIN_VIEW,"msctls_updown32",UDS_ARROWKEYS,143,22,10,14
+    EDITTEXT        IDC_EDIT_END_VIEW,99,44,40,14,ES_AUTOHSCROLL
+    LTEXT           "To, msec",IDC_STATIC,17,44,72,14,SS_CENTERIMAGE
+    CONTROL         "Spin1",IDC_SPIN_END_VIEW,"msctls_updown32",UDS_ARROWKEYS,143,44,10,14
+    LTEXT           "Update, msec",IDC_STATIC,17,66,72,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_UPDATE_TIME,99,66,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_UPDATE_TIME,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,143,66,10,14
+    CONTROL         "All views",IDC_CHECK_ALL_VIEWS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,167,22,41,14
+    EDITTEXT        IDC_EDIT_HIST_BIN,99,88,40,14,ES_AUTOHSCROLL
+    LTEXT           "Histogram bin, msec",IDC_STATIC,17,88,72,14,SS_CENTERIMAGE
+    CONTROL         "Spin1",IDC_SPIN_HIST_BIN,"msctls_updown32",UDS_ARROWKEYS,143,88,10,14
+    EDITTEXT        IDC_EDIT_HIST_NORM,99,110,40,14,ES_AUTOHSCROLL
+    LTEXT           "Histogram factor",IDC_STATIC,17,110,72,14,SS_CENTERIMAGE
+    CONTROL         "Spin1",IDC_SPIN_HIST_NORM,"msctls_updown32",UDS_ARROWKEYS,143,110,10,14
+END
+
+IDD_SIMULATE_LIMB DIALOGEX 0, 0, 186, 118
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "Limb view"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Skip, step ",IDC_STATIC,17,22,72,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_SIM_LIMB_SKIP,99,22,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_SIM_LIMB_SKIP,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,143,22,10,14
+    LTEXT           "Limb scale",IDC_STATIC,17,44,72,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_LIMB_SCALE,99,44,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_LIMB_SCALE,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,143,44,10,14
+    LTEXT           "Limb origin X",IDC_STATIC,18,67,72,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_LIMB_ORIGIN_X,100,67,40,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_LIMB_ORIGIN_X,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,144,67,10,14
+    LTEXT           "Limb origin Y",IDC_STATIC,18,89,72,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_LIMB_ORIGIN_Y,100,89,40,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_LIMB_ORIGIN_Y,"msctls_updown32",UDS_AUTOBUDDY | UDS_ARROWKEYS,144,89,10,14
+END
+
+IDD_CONNECT_SOURCE_SETUP DIALOG 0, 0, 360, 177
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "Source ---> Target"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Connections ",IDC_STATIC,249,4,102,164
+    COMBOBOX        IDC_COMBO_SOURCES,14,29,84,70,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Source",IDC_STATIC,14,17,56,8
+    LTEXT           "Current source targets",IDC_STATIC,257,51,70,8
+    PUSHBUTTON      "==>",IDC_ADD,203,70,26,14
+    PUSHBUTTON      "<==",IDC_DELETE,203,93,26,14
+    PUSHBUTTON      "Weights...",IDC_WEIGHTS,271,145,50,14
+    LISTBOX         IDC_LIST_USED_SOURCES,14,62,84,103,LBS_NOINTEGRALHEIGHT | WS_DISABLED | WS_VSCROLL
+    LTEXT           "Used sources",IDC_STATIC,14,51,58,8
+    LTEXT           "Targets",IDC_STATIC,109,51,58,8
+    EDITTEXT        IDC_EDIT_SOURCE,257,29,84,12,ES_AUTOHSCROLL | WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "Source ",IDC_STATIC,257,17,56,8
+    CONTROL         "List1",IDC_LIST_ALL_TARGETS,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,109,62,84,103
+    CONTROL         "List1",IDC_LIST_TARGETS,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,257,62,84,75
+END
+
+IDD_CONNECT_TARGET_SETUP DIALOGEX 0, 0, 360, 177
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "Target <--- Source"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Connections ",IDC_STATIC,249,4,102,164
+    COMBOBOX        IDC_COMBO_TARGETS,14,29,84,70,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Target",IDC_STATIC,14,17,70,8
+    LTEXT           "Current target sources",IDC_STATIC,257,51,70,8
+    PUSHBUTTON      "==>",IDC_ADD,203,70,26,14
+    PUSHBUTTON      "<==",IDC_DELETE,203,93,26,14
+    PUSHBUTTON      "Weights...",IDC_WEIGHTS,271,145,50,14
+    LISTBOX         IDC_LIST_USED_TARGETS,14,62,84,103,LBS_NOINTEGRALHEIGHT | WS_DISABLED | WS_VSCROLL
+    LTEXT           "Used targets",IDC_STATIC,14,51,58,8
+    LTEXT           "Sources",IDC_STATIC,109,51,58,8
+    EDITTEXT        IDC_EDIT_TARGET,257,29,84,12,ES_AUTOHSCROLL | WS_DISABLED | NOT WS_TABSTOP
+    LTEXT           "Target",IDC_STATIC,257,17,56,8
+    CONTROL         "List1",IDC_LIST_ALL_SOURCES,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,109,62,84,103
+    CONTROL         "List1",IDC_LIST_SOURCES,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,257,62,84,75
+END
+
+IDD_NETWORK_PARAMETERS DIALOGEX 0, 0, 286, 252
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Network properties"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Custom1",IDC_SYNAPSES_PROP,"MFCGridCtrl",WS_TABSTOP,2,9,280,243
+END
+
+IDD_POPULAT_SETUP DIALOGEX 0, 0, 193, 252
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION | WS_SYSMENU
+CAPTION "Population"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Number of populations",IDC_NETWORK_SIZE,12,19,137,8
+    LTEXT           "Population list",IDC_STATIC,12,36,44,8
+    GROUPBOX        "Neuron population",IDC_STATIC,1,5,181,246
+    LISTBOX         IDC_LIST_POPULAT,12,49,101,195,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add",IDC_ADD_POPULAT,124,53,50,14
+    PUSHBUTTON      "Delete",IDC_DEL_POPULAT,124,86,50,14
+    PUSHBUTTON      "Properties...",IDC_PROP_POPULAT,124,119,50,14
+END
+
+IDD_POPULAT_PROPERTIES DIALOGEX 0, 0, 374, 362
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Population properties"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Custom1",IDC_GRID,"MFCGridCtrl",WS_TABSTOP,7,8,359,329,WS_EX_CLIENTEDGE
+    DEFPUSHBUTTON   "OK",IDOK,262,344,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,317,344,50,14
+END
+
+IDD_IMAGE_SIZE DIALOG 0, 0, 197, 61
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Size of Picture"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,140,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,140,35,50,14
+    LTEXT           "Width, pixel",IDC_STATIC,14,12,38,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_WIDTH,61,12,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_WIDTH,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,107,12,10,14
+    LTEXT           "Height, pixel",IDC_STATIC,14,35,40,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_HEIGHT,61,35,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN_HEIGHT,"msctls_updown32",UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS,107,35,10,14
+END
+
+IDD_SAVE_RESULTS DIALOGEX 0, 0, 302, 242
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select the data format and data to be saved"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,243,202,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,243,220,50,14
+    LTEXT           "Data format",IDC_STATIC,16,202,40,8
+    COMBOBOX        IDC_COMBO_FORMAT,69,202,159,68,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_DATA_LIST,"SysListView32",LVS_SHAREIMAGELISTS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,16,36,211,156
+    LTEXT           "Number of selected items",IDC_STATIC,16,16,82,8
+    EDITTEXT        IDC_EDIT_NUMDATA,120,15,108,12,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "Select all",IDC_BUTTON_SELECTALL,243,36,50,14
+    PUSHBUTTON      "Unselect all",IDC_BUTTON_UNSELECTALL,243,54,50,14
+    LTEXT           "Window              from                             to                             msec",IDC_STATIC,16,225,213,8
+    EDITTEXT        IDC_EDIT_DATA_WND1,92,223,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_DATA_WND2,158,223,40,14,ES_AUTOHSCROLL
+END
+
+IDD_NSM_SIMULATE_PARAM DIALOGEX 0, 0, 186, 111
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "General parameters"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_EDIT_SIM_TIME,99,18,40,14,ES_AUTOHSCROLL
+    LTEXT           "Simaulation time, msec",-1,17,18,72,14,SS_CENTERIMAGE
+    CONTROL         "Spin1",IDC_SPIN_SIM_TIME,"msctls_updown32",UDS_ARROWKEYS,143,18,10,14
+    EDITTEXT        IDC_EDIT_SIM_NN_STEP,99,40,40,14,ES_AUTOHSCROLL
+    LTEXT           "Network step, msec",-1,17,40,72,14,SS_CENTERIMAGE
+    CONTROL         "Spin1",IDC_SPIN_SIM_NN_STEP,"msctls_updown32",UDS_ARROWKEYS,143,40,10,14
+    EDITTEXT        IDC_EDIT_TIME_FACTOR,99,62,40,14,ES_AUTOHSCROLL
+    LTEXT           "Time factor",-1,17,62,72,14,SS_CENTERIMAGE
+    CONTROL         "Spin1",IDC_SPIN_TIME_FACTOR,"msctls_updown32",UDS_ARROWKEYS,143,62,10,14
+    LTEXT           "Number of threads",-1,17,84,72,14,SS_CENTERIMAGE
+    COMBOBOX        IDC_NUM_THREADS,99,84,54,74,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_BIOMECH_PARAMETERS DIALOGEX 0, 0, 455, 401
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Biomechanics setup"
+FONT 8, "MS Sans Serif", 400, 0, 0xCC
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,398,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,398,24,50,14
+    CONTROL         "Custom1",IDC_BIOMECH_PROP,"MFCGridCtrl",WS_TABSTOP,7,7,377,387,WS_EX_CLIENTEDGE
+END
+
+IDD_WEIGHT_DEP DIALOGEX 0, 0, 235, 76
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Weights dependencies"
+FONT 8, "Microsoft Sans Serif", 400, 0, 0xCC
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,179,12,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,179,33,50,14
+    CONTROL         "Chained",IDC_CHECK_CLONE,"Button",BS_AUTOCHECKBOX | BS_RIGHT | WS_TABSTOP,179,59,43,10
+    LTEXT           "Source",IDC_STATIC,18,24,26,8
+    LTEXT           "Target",IDC_STATIC,18,48,24,8
+    GROUPBOX        " Dependencies ",IDC_STATIC,7,7,160,62
+    COMBOBOX        IDC_SRC_CLONE,59,21,98,123,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_TRG_CLONE,59,46,98,126,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_NETWORK_DIFF DIALOGEX 0, 0, 288, 46
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Network diff..."
+FONT 8, "MS Sans Serif", 400, 0, 0xCC
+BEGIN
+    DEFPUSHBUTTON   "Start",IDOK,231,4,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,231,25,50,14
+    LTEXT           "Setup pattern to analize",IDC_STATIC,5,17,78,8
+    EDITTEXT        IDC_EDIT_NETDIFF,90,15,129,14,ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,2,3,1
+ PRODUCTVERSION 2,2,3,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Ilya A. Rybak"
+            VALUE "FileDescription", "NSM MFC Application"
+            VALUE "FileVersion", "2, 0, 0, 1"
+            VALUE "InternalName", "NSM"
+            VALUE "LegalCopyright", "Copyright (C) 2000-2008"
+            VALUE "OriginalFilename", "nsm_2_2.EXE"
+            VALUE "ProductName", "NSM Application"
+            VALUE "ProductVersion", "2, 2, 0, 1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 189
+    END
+
+    IDD_DRIVE_SETUP, DIALOG
+    BEGIN
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 252
+    END
+
+    IDD_OUTPUT_SETUP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 191
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_FEEDBACK_SETUP, DIALOG
+    BEGIN
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 246
+    END
+
+    IDD_CONTROL_SETUP, DIALOG
+    BEGIN
+    END
+
+    IDD_CONTROLLED_SETUP, DIALOG
+    BEGIN
+    END
+
+    IDD_WEIGHTS_RESP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 274
+    END
+
+    IDD_WEIGHTS, DIALOG
+    BEGIN
+        RIGHTMARGIN, 274
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_CONTROL_FUNCTION, DIALOG
+    BEGIN
+    END
+
+    IDD_PROP_POINT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 208
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_NETWORK_VIEW, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 171
+    END
+
+    IDD_SCALE_VIEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 136
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
+    END
+
+    IDD_GEOMETRY_VIEW, DIALOG
+    BEGIN
+        RIGHTMARGIN, 136
+    END
+
+    IDD_FEEDBACK_PROP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 330
+        BOTTOMMARGIN, 188
+    END
+
+    IDD_MEASURES_PROP, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 142
+    END
+
+    IDD_SIMULATE_VIEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 215
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 133
+    END
+
+    IDD_SIMULATE_LIMB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 111
+    END
+
+    IDD_CONNECT_SOURCE_SETUP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 359
+        BOTTOMMARGIN, 176
+    END
+
+    IDD_CONNECT_TARGET_SETUP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 357
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_NETWORK_PARAMETERS, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 282
+    END
+
+    IDD_POPULAT_SETUP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 192
+        BOTTOMMARGIN, 251
+    END
+
+    IDD_POPULAT_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 366
+        BOTTOMMARGIN, 358
+    END
+
+    IDD_IMAGE_SIZE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 190
+    END
+
+    IDD_SAVE_RESULTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 239
+    END
+
+    IDD_NSM_SIMULATE_PARAM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 104
+    END
+
+    IDD_BIOMECH_PARAMETERS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 448
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 394
+    END
+
+    IDD_WEIGHT_DEP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 229
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 69
+    END
+
+    IDD_NETWORK_DIFF, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 281
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 39
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_MUSCLE_SEL DLGINIT
+BEGIN
+    1097, 0x403, 7, 0
+0x6c46, 0x7865, 0x726f, "\000" 
+    1097, 0x403, 9, 0
+0x7845, 0x6574, 0x736e, 0x726f, "\000" 
+    0
+END
+
+IDD_FEEDBACK_PROP DLGINIT
+BEGIN
+    IDC_COMBO_TYPE, 0x403, 7, 0
+0x4e3c, 0x6e6f, 0x3e65, "\000" 
+    IDC_COMBO_TYPE, 0x403, 12, 0
+0x6149, 0x6620, 0x6565, 0x6264, 0x6361, 0x006b, 
+    IDC_COMBO_TYPE, 0x403, 12, 0
+0x4949, 0x6620, 0x6565, 0x6264, 0x6361, 0x006b, 
+    IDC_COMBO_TYPE, 0x403, 12, 0
+0x6249, 0x6620, 0x6565, 0x6264, 0x6361, 0x006b, 
+    IDC_COMBO_TYPE, 0x403, 16, 0
+0x7247, 0x756f, 0x646e, 0x7220, 0x6165, 0x7463, 0x6f69, 0x006e, 
+    0
+END
+
+IDD_MEASURES_PROP DLGINIT
+BEGIN
+    IDC_COMBO_LINK, 0x403, 6, 0
+0x7254, 0x6e75, 0x006b, 
+    IDC_COMBO_LINK, 0x403, 7, 0
+0x6550, 0x766c, 0x7369, "\000" 
+    IDC_COMBO_LINK, 0x403, 6, 0
+0x6854, 0x6769, 0x0068, 
+    IDC_COMBO_LINK, 0x403, 6, 0
+0x6853, 0x6e61, 0x006b, 
+    IDC_COMBO_LINK, 0x403, 5, 0
+0x6f46, 0x746f, "\000" 
+    0
+END
+
+IDD_WEIGHTS_RESP DLGINIT
+BEGIN
+    IDC_EX_SPEC, 0x403, 8, 0
+0x6567, 0x656e, 0x6972, 0x0063, 
+    IDC_EX_SPEC, 0x403, 6, 0
+0x6973, 0x6d67, 0x0061, 
+    IDC_EX_SPEC, 0x403, 11, 0
+0x6564, 0x7270, 0x7365, 0x6973, 0x6e6f, "\000" 
+    IDC_EX_SPEC, 0x403, 11, 0
+0x6e69, 0x6968, 0x6962, 0x6974, 0x6e6f, "\000" 
+    IDC_EX2_SPEC, 0x403, 8, 0
+0x6567, 0x656e, 0x6972, 0x0063, 
+    IDC_EX2_SPEC, 0x403, 6, 0
+0x6973, 0x6d67, 0x0061, 
+    IDC_EX2_SPEC, 0x403, 11, 0
+0x6564, 0x7270, 0x7365, 0x6973, 0x6e6f, "\000" 
+    IDC_EX2_SPEC, 0x403, 11, 0
+0x6e69, 0x6968, 0x6962, 0x6974, 0x6e6f, "\000" 
+    IDC_INH1_SPEC, 0x403, 8, 0
+0x6567, 0x656e, 0x6972, 0x0063, 
+    IDC_INH1_SPEC, 0x403, 6, 0
+0x6973, 0x6d67, 0x0061, 
+    IDC_INH1_SPEC, 0x403, 11, 0
+0x6564, 0x7270, 0x7365, 0x6973, 0x6e6f, "\000" 
+    IDC_INH1_SPEC, 0x403, 11, 0
+0x6e69, 0x6968, 0x6962, 0x6974, 0x6e6f, "\000" 
+    IDC_INH2_SPEC, 0x403, 8, 0
+0x6567, 0x656e, 0x6972, 0x0063, 
+    IDC_INH2_SPEC, 0x403, 6, 0
+0x6973, 0x6d67, 0x0061, 
+    IDC_INH2_SPEC, 0x403, 11, 0
+0x6564, 0x7270, 0x7365, 0x6973, 0x6e6f, "\000" 
+    IDC_INH2_SPEC, 0x403, 11, 0
+0x6e69, 0x6968, 0x6962, 0x6974, 0x6e6f, "\000" 
+    0
+END
+
+IDD_WEIGHTS DLGINIT
+BEGIN
+    IDC_EX_SPEC, 0x403, 8, 0
+0x6567, 0x656e, 0x6972, 0x0063, 
+    IDC_EX_SPEC, 0x403, 6, 0
+0x6973, 0x6d67, 0x0061, 
+    IDC_EX_SPEC, 0x403, 11, 0
+0x6564, 0x7270, 0x7365, 0x6973, 0x6e6f, "\000" 
+    IDC_EX_SPEC, 0x403, 11, 0
+0x6e69, 0x6968, 0x6962, 0x6974, 0x6e6f, "\000" 
+    IDC_INH1_SPEC, 0x403, 8, 0
+0x6567, 0x656e, 0x6972, 0x0063, 
+    IDC_INH1_SPEC, 0x403, 6, 0
+0x6973, 0x6d67, 0x0061, 
+    IDC_INH1_SPEC, 0x403, 11, 0
+0x6564, 0x7270, 0x7365, 0x6973, 0x6e6f, "\000" 
+    IDC_INH1_SPEC, 0x403, 11, 0
+0x6e69, 0x6968, 0x6962, 0x6974, 0x6e6f, "\000" 
+    IDC_INH2_SPEC, 0x403, 8, 0
+0x6567, 0x656e, 0x6972, 0x0063, 
+    IDC_INH2_SPEC, 0x403, 6, 0
+0x6973, 0x6d67, 0x0061, 
+    IDC_INH2_SPEC, 0x403, 11, 0
+0x6564, 0x7270, 0x7365, 0x6973, 0x6e6f, "\000" 
+    IDC_INH2_SPEC, 0x403, 11, 0
+0x6e69, 0x6968, 0x6962, 0x6974, 0x6e6f, "\000" 
+    0
+END
+
+IDD_NSM_SIMULATE_PARAM DLGINIT
+BEGIN
+    IDC_NUM_THREADS, 0x403, 5, 0
+0x7541, 0x6f74, "\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDR_MAINFRAME           "Neurosim"
+    IDR_LOCOTYPE            "Network\nModel\nModel\nNSM file (*.nsm)\n.nsm\nNSM.Document\nNSM Document"
+    IDR_NSMTYPE             "Network\nModel\nModel\nNSM file (*.nsm)\n.nsm\nNSM.Document\nNSM Document"
+    IDR_LIMBVIEW            "Limb\nModel\n\nNSM file (*.nsm)\n.nsm\nNSM.Document\nNSM Document"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_APP_TITLE       "Neurosim"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew network"
+    ID_FILE_OPEN            "Open an existing document\nOpen network"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave network"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave network as"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE
+BEGIN
+    ID_WINDOW_NEW           "Add new network window\nNew window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nSave Window (wmf)"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle toolbar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle status bar"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+END
+
+STRINGTABLE
+BEGIN
+    IDM_NEW_LIMB_WINDOW     "Open Limb Window\nLimb window"
+    IDM_REFRESH             "Update all views"
+END
+
+STRINGTABLE
+BEGIN
+    ID_NETWORK_SETUP        "Neural network setup\nNeural network setup"
+END
+
+STRINGTABLE
+BEGIN
+    ID_NETWORK_INIT         "Initialization of network\nInit network"
+    ID_MODEL_START          "Start the simulation\nStart"
+    ID_MODEL_STOP           "Stop the simulation\nStop"
+    ID_MODEL_PARAM          "Setting up the simulation parameters\nSimulation parameters"
+    ID_MODEL_PAUSE          "Pause the simulation\nPause"
+    ID_NETWORK_CONTROL      "Setting control signals for network\nNetwork control"
+    ID_ADD_NNVIEW           "Add a new view for network parameters\nAdd  network view "
+    ID_NETWORK_VIEW         "Setting view's parameters\nNetwork view"
+    ID_LIMB_VIEW            "Setting view's parameters\nLimb view"
+END
+
+STRINGTABLE
+BEGIN
+    ID_IS_STICK             "Show as stick diagramm\nStick"
+    ID_REDRAW_RESULTS       "Display the simulation result\nRedraw"
+    ID_SAVE_RESULTS         "Save the simulation result to a file\nSave results "
+    ID_CONNECTION_SETUP     "Network connections setup\nNetwork connections setup"
+END
+
+STRINGTABLE
+BEGIN
+    ID_SAVE_VIEW            "Save the active view as a bitmap file\nSave view"
+    ID_Menu                 "ID_MODEL_SERIES"
+    ID_BIOMECHANICS         "Setting of biomechanical system\nSetting of biomechanical system"
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "../res\Spcord.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
