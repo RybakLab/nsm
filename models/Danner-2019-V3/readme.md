@@ -1,3 +1,5 @@
+Model files for Danner SM, Zhang H, Shevtsova NA, Borowska-Fielding J, Deska-Gauthier D, Rybak IA, Zhang Y. Spinal V3 interneurons and left-right coordination in mammalian locomotion. Frontiers in Cellular Neuroscience.
+
 All simulations were performed using the custom neural simulation package NSM 2.5.11 
 developed at Drexel University. 
 
