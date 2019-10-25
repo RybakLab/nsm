@@ -8,8 +8,8 @@ UpdatingTime = 500
 Freq = 0.3
 HistBin = 100
 HistNorm = 1000
-BeginView = 0
-EndView = 200000
+BeginView = 62000
+EndView = 82000
 TimeFactor = 1
 NumThreads = 0
 </SimulateData>
@@ -2017,7 +2017,7 @@ Noise = -1
 StepFunc = 1
 
 <Function>
-(0,1)
+(0,20)
 </Function>
 
 <Target>
@@ -2112,7 +2112,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2125,7 +2125,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2188,7 +2188,7 @@ ChanIndex = 4294967295
 Param = 2
 </Code>
 </Parameter>
-LimitView = (20400,40400)
+LimitView = (20000,40000)
 ViewName = High frequency
 
 <Position>
@@ -2215,7 +2215,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2228,7 +2228,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2254,7 +2254,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 60
+Ymax = 100
 Ymin = 0
 
 <Code>
@@ -2291,7 +2291,7 @@ ChanIndex = 4294967295
 Param = 2
 </Code>
 </Parameter>
-LimitView = (180000,200000)
+LimitView = (65000,85000)
 ViewName = Low frequency
 
 <Position>
@@ -2308,16 +2308,6 @@ Format = 0
 
 <Record>
 <Code>
-Unit = r-E
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Record>
-
-<Record>
-<Code>
 Unit = r-F
 HhnIndex = 4294967295
 PartIndex = 4294967295
@@ -2329,16 +2319,6 @@ Param = 2
 <Record>
 <Code>
 Unit = l-F
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Record>
-
-<Record>
-<Code>
-Unit = l-E
 HhnIndex = 4294967295
 PartIndex = 4294967295
 ChanIndex = 4294967295

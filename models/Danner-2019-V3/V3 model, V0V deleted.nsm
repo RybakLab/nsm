@@ -1755,8 +1755,7 @@ StepFunc = 1
 
 <Function>
 (0,0.92)
-(40000,0.97)
-(100000,0.99)
+(42000,0.99)
 </Function>
 
 <Target>
@@ -1964,7 +1963,7 @@ Noise = -1
 StepFunc = 1
 
 <Function>
-(0,1)
+(0,20)
 </Function>
 
 <Target>
@@ -2113,7 +2112,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2126,7 +2125,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2189,12 +2188,12 @@ ChanIndex = 4294967295
 Param = 2
 </Code>
 </Parameter>
-LimitView = (20000,40000)
+LimitView = (20400,40400)
 ViewName = High frequency
 
 <Position>
 ShowCmd = 1
-WindowRect = (884,3,1325,591)
+WindowRect = (443,-3,884,585)
 </Position>
 </View>
 
@@ -2216,7 +2215,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2229,7 +2228,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2292,110 +2291,7 @@ ChanIndex = 4294967295
 Param = 2
 </Code>
 </Parameter>
-LimitView = (80000,100000)
-ViewName = Medium frequency
-
-<Position>
-ShowCmd = 1
-WindowRect = (444,0,885,588)
-</Position>
-</View>
-
-<View Chart>
-NumRow = 7
-NumCol = 1
-
-<Parameter>
-Ymax = 200
-Ymin = 0
-
-<Code>
-Unit = r-F
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Parameter>
-
-<Parameter>
-Ymax = 200
-Ymin = 0
-
-<Code>
-Unit = r-E
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Parameter>
-
-<Parameter>
-Ymax = 200
-Ymin = 0
-
-<Code>
-Unit = l-E
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Parameter>
-
-<Parameter>
-Ymax = 200
-Ymin = 0
-
-<Code>
-Unit = l-F
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Parameter>
-
-<Parameter>
-Ymax = 60
-Ymin = 0
-
-<Code>
-Unit = l-V0V
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Parameter>
-
-<Parameter>
-Ymax = 60
-Ymin = 0
-
-<Code>
-Unit = l-V0D
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Parameter>
-
-<Parameter>
-Ymax = 20
-Ymin = 0
-
-<Code>
-Unit = l-V3
-HhnIndex = 4294967295
-PartIndex = 4294967295
-ChanIndex = 4294967295
-Param = 2
-</Code>
-</Parameter>
-LimitView = (170000,190000)
+LimitView = (179500,199500)
 ViewName = Low frequency
 
 <Position>
@@ -2412,6 +2308,16 @@ Format = 0
 
 <Record>
 <Code>
+Unit = r-E
+HhnIndex = 4294967295
+PartIndex = 4294967295
+ChanIndex = 4294967295
+Param = 2
+</Code>
+</Record>
+
+<Record>
+<Code>
 Unit = r-F
 HhnIndex = 4294967295
 PartIndex = 4294967295
@@ -2423,6 +2329,16 @@ Param = 2
 <Record>
 <Code>
 Unit = l-F
+HhnIndex = 4294967295
+PartIndex = 4294967295
+ChanIndex = 4294967295
+Param = 2
+</Code>
+</Record>
+
+<Record>
+<Code>
+Unit = l-E
 HhnIndex = 4294967295
 PartIndex = 4294967295
 ChanIndex = 4294967295

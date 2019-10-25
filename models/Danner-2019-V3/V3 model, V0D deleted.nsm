@@ -1963,7 +1963,7 @@ Noise = -1
 StepFunc = 1
 
 <Function>
-(0,20)
+(0,1)
 </Function>
 
 <Target>
@@ -2112,7 +2112,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2125,7 +2125,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2215,7 +2215,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2228,7 +2228,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 200
+Ymax = 120
 Ymin = 0
 
 <Code>
@@ -2254,7 +2254,7 @@ Param = 2
 </Parameter>
 
 <Parameter>
-Ymax = 60
+Ymax = 100
 Ymin = 0
 
 <Code>
@@ -2291,7 +2291,7 @@ ChanIndex = 4294967295
 Param = 2
 </Code>
 </Parameter>
-LimitView = (170000,190000)
+LimitView = (180000,200000)
 ViewName = Low frequency
 
 <Position>
