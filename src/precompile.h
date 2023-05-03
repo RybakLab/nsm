@@ -135,7 +135,6 @@
 
 #include <commctrl.h>
 #include <uxtheme.h>
-//#include <tmschema.h>
 
 #define _SCB_REPLACE_MINIFRAME
 #include "sizecbar.h"
