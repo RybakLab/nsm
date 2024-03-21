@@ -280,6 +280,8 @@ protected:
     int HotKeyBtnMatch( char acHotKey); // hot key character
     // returns:  index of button or -1 if no hot key matches
 
+private:
+        using CGridCellBase::GetTipText;
 protected:
     short    m_sLastCtlClicked; // what control was last clicked?
     short    m_sNbrDrawCtls;// how many controls?

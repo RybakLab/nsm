@@ -2,7 +2,7 @@
 // walker.cpp
 #include "precompile.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "walker.h"
 #include "hhnnetwork.h"
@@ -11,11 +11,11 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
-static double _Q_ini[NUM_INDEPEND] = {
+static alignas( 16 ) double _Q_ini[NUM_INDEPEND] = {
 	-1.75997231338469,
 	-2.76907231338469,
 	-1.96772231338469,
@@ -28,7 +28,7 @@ static double _Q_ini[NUM_INDEPEND] = {
 	-0.0586138013023647,
 };
 
-static double _P_ini[NUM_INDEPEND] = {
+static alignas( 16 ) double _P_ini[NUM_INDEPEND] = {
 	0.003571666667,
 	-0.004845833333,
 	0.000527500000000001,
@@ -245,10 +245,12 @@ void *walker::select( CHhnControlled *ctrl )
 {
 	int ctrl_par = ctrl->get_par().Param;
 	switch( ctrl_par){
-		case _id_Treadmill:
-			return &GV;
 		case _id_Ground:
 			return &GL;
+		case _id_TreadmillL:
+			return &GV_L;
+		case _id_TreadmillR:
+			return &GV_R;
 		default:
 			return NULL;
 	}
@@ -257,8 +259,7 @@ void *walker::select( CHhnControlled *ctrl )
 double walker::ground( double x )
 {
 	if( IsTouched ){
-		x -= X0; GL = -TanSl*x;
-		x += Gdist*CosSl;
+		GL = -TanSl*( x-X0 );
 		return GL;
 	}
 	return 0.;
@@ -307,13 +308,12 @@ void walker::reg_unit( runman *man )		// new code
 }
 
 void walker::calc_biomech( double step )	// new code
-// void walker::next_step( double step )	// old code
 {
-	const int DN_MUS = 20;
-	static long double qc[NUM_INDEPEND], pc[NUM_INDEPEND];
-	static long double fq0[NUM_INDEPEND],fq1[NUM_INDEPEND],fq2[NUM_INDEPEND],fq3[NUM_INDEPEND];
-	static long double lt0[DN_MUS], vt0[DN_MUS], ltc[DN_MUS], vtc[DN_MUS];
-	static long double flt0[DN_MUS], flt1[DN_MUS], flt2[DN_MUS], flt3[DN_MUS];
+	const alignas( 16 ) int DN_MUS = 20;
+	alignas( 16 ) double qc[NUM_INDEPEND] = {0.}, pc[NUM_INDEPEND] = {0.};
+	alignas( 16 ) double fq0[NUM_INDEPEND] = {0.}, fq1[NUM_INDEPEND] = {0.}, fq2[NUM_INDEPEND] = {0.}, fq3[NUM_INDEPEND] = {0.};
+	alignas( 16 ) double lt0[DN_MUS] = {0.}, vt0[DN_MUS] = {0.}, ltc[DN_MUS] = {0.}, vtc[DN_MUS] = {0.};
+	alignas( 16 ) double flt0[DN_MUS] = {0.}, flt1[DN_MUS] = {0.}, flt2[DN_MUS] = {0.}, flt3[DN_MUS] = {0.};
 	size_t m_size = Muscles.size();
 	for( size_t i = 0; i < m_size; ++i ){
 		zmuscle *m = Muscles[i];
@@ -368,11 +368,11 @@ void walker::calc_biomech( double step )	// new code
 			m->VT = 0.0;
 			m->LT = m->LT0;
 		}
-		double blt = 1./( 1.+EXP( 20000.0*( m->LT0-m->LT ))); 
+		double blt = 1./( 1.+EXP( 20000.0*( m->LT0-m->LT )));
 		m->VT = m->VT*blt;
-		m->LT = m->LT0+( m->LT-m->LT0 )*blt; 
+		m->LT = m->LT0+( m->LT-m->LT0 )*blt;
 	}
-	for( size_t i = 0; i < Muscles.size(); ++i ){
+	for( size_t i = 0; i < m_size; ++i ){
 		zmuscle *m = Muscles[i];
 		m->proc( Joint );
 		m->calc_lvm();
@@ -380,45 +380,14 @@ void walker::calc_biomech( double step )	// new code
 	for( size_t i = 0; i < NUM_JOINT; ++i ){
 		JointDeg[i] = rad2deg( Joint[i], i );
 	}
-	Gdist += step*GV;
-	for( size_t i = 0; i < NUM_TOUCH; ++i ){
-		TG[i].X0 += step*GV*CosSl;
-		TG[i].Y0 -= step*GV*SinSl;
-	}
-
-/*
-We also added history dependent force depression/enhancement
-New muscle variables:
-VMp – previous fiber velocity;
-Wnet – accumulated muscle work
-  
-After calculation of one time step (One Runge-Kutta step) 
-For each muscle we update VMp: For example
-{CWalkerMuscle1 *m = GetMuscle1(j); 	m->VMp =m->VM;}
-
-In order to calculate force depression/enhancement 
-For each muscle we calculate work produced by muscle during one time step 
-Wi and then based on carrent Act and VM we update accumulated muscle work Wnet
-
-Example:
-{
-		CWalkerMuscle1 * m = GetMuscle1(i);
-			if (Act[i]>1.0e-02)	
-			{
-				double Wi = m->f*m->V*9.43*Step*0.001;//*N_sc; //F*v*dt ~[N]*[m/sec]*[sec]
-				if (m->VM >0) Wi /= 2.; //Force enhancement less then force depession about twice
-				if (m->Wnet ==0 ||Wi ==0 || signum(m->VM) == signum(m->VMp)) m->Wnet += Wi; 
-				else if (m->VM>0 && m->VMp<0) m->Wnet = m->Wnet/2 +Wi;
-				else m->Wnet = 0;
-			} 
-			else 
-			{
-				m->Wnet = 0;
-			}
-			 m->f += m->Wnet; 
-			 if(m->f<0) m->f=0;
-}
-*/
+	TG[HEEL_L].X0 += step*GV_L*CosSl;
+	TG[HEEL_L].Y0 -= step*GV_L*SinSl;
+	TG[TOE_L].X0 += step*GV_L*CosSl;
+	TG[TOE_L].Y0 -= step*GV_L*SinSl;
+	TG[HEEL_R].X0 += step*GV_R*CosSl;
+	TG[HEEL_R].Y0 -= step*GV_R*SinSl;
+	TG[TOE_R].X0 += step*GV_R*CosSl;
+	TG[TOE_R].Y0 -= step*GV_R*SinSl;
 }
 
 void walker::attach( CHhnNetwork *net )
@@ -440,9 +409,9 @@ void walker::attach( CHhnNetwork *net )
 
 void walker::init( double *m, double *cm, double *i, double x, double y )
 {
-	static long double cosq[NUM_INDEPEND], sinq[NUM_INDEPEND];
+	alignas( 16 ) double cosq[NUM_INDEPEND], sinq[NUM_INDEPEND];
 	init_qp(); sincos( Q, cosq, sinq );
-	Gdist = 0.0; X0 = 0.0; IsTouched = false;
+	X0 = 0.0; IsTouched = false;
 	AB[0] = m[THIGH]*cm[THIGH]+( m[SHANK]+m[FOOT] )*L[THIGH];
 	AB[1] = m[SHANK]*cm[SHANK]+m[FOOT]*L[SHANK];
 	AB[2] = m[FOOT]*cm[FOOT];
@@ -464,7 +433,7 @@ void walker::init( double *m, double *cm, double *i, double x, double y )
 	Q_Plvs = Q[A_P];
 	X_Trunk = x+L[PELVIS]*cosq[A_P]+L[TRUNK]*cosq[A_R];
 	Y_Trunk = y+L[PELVIS]*sinq[A_P]+L[TRUNK]*sinq[A_R]-ground( X_Trunk );
-	for( size_t i = 0; i < NUM_TOUCH; ++i ){
+	for( size_t i = 0; i < NUM_TOUCH; ++i ){ 
 		TG[i].Underground = false;
 		TG[i].X0 = 0.0;		// coordinates of touch point
 		TG[i].Y0 = 0.0;
@@ -484,11 +453,11 @@ void walker::init( double *m, double *cm, double *i, double x, double y )
 	}
 }
 
-void walker::vfill( long double *q, long double *cosq, long double *sinq, long double *p )
+void walker::vfill( double *q, double *cosq, double *sinq, double *p )
 {
 	// coordinates of Hip
-	long double cosl = L[PELVIS]*cosq[A_P];
-	long double sinl = L[PELVIS]*sinq[A_P];
+	alignas( 16 ) double cosl = L[PELVIS]*cosq[A_P];
+	alignas( 16 ) double sinl = L[PELVIS]*sinq[A_P];
 	vertex *ver = Ver;
 	ver[HIP].X  = q[X_H];
 	ver[HIP].Y  = q[Y_H];
@@ -546,9 +515,9 @@ void walker::vfill( long double *q, long double *cosq, long double *sinq, long d
 	ver[TOE__R].dY = ver[ANKLE_R].dY+cosl*p[A_FR];
 }
 
-void walker::jfill( long double *q, long double *p )
+void walker::jfill( double *q, double *p )
 {
-	wjoint *joint = Joint;
+	alignas( 16 ) wjoint *joint = Joint;
 	joint[A_L].A = PI+q[A_R]-q[A_P];
 	joint[A_HL].A = -q[A_TL]+q[A_P]; 
 	joint[A_HR].A = -q[A_TR]+q[A_P];
@@ -566,13 +535,13 @@ void walker::jfill( long double *q, long double *p )
 	joint[A_AR].dA =  -p[A_FR]+p[A_SR];
 }
 
-void walker::bcvfill( long double *q, long double *cosq, long double *sinq, long double *p, long double *b )
+void walker::bcvfill( double *q, double *cosq, double *sinq, double *p, double *b )
 {
 #define __SINAB( a, b )		\
 	(( sinq[a] )*( cosq[b] )-( cosq[a] )*( sinq[b] ))
 
-	static long double p2[NUM_INDEPEND];
-	static long double m1, m2, m3;
+	alignas( 16 ) double p2[NUM_INDEPEND] = {0.f};
+	double m1, m2, m3;
 	for( size_t i = 0; i < NUM_INDEPEND; p2[i] = p[i]*p[i], ++i ); 
 	m1 = __SINAB( A_SL, A_TL )*A0[0][1];
 	m2 = __SINAB( A_FL, A_TL )*A0[0][2];
@@ -607,7 +576,7 @@ void walker::bcvfill( long double *q, long double *cosq, long double *sinq, long
 #undef __SINAB
 }
 
-void walker::gfill( long double *q, long double *cosq, long double *sinq, touch *tg, long double *b )
+void walker::gfill( double *q, double *cosq, double *sinq, touch *tg, double *b )
 {
 	if( !IsTouched ){
 		bool touch_l = false;
@@ -649,18 +618,6 @@ void walker::gfill( long double *q, long double *cosq, long double *sinq, touch 
 		double fp = kgr*Ground.force( yp, vp );
 		tg[i].Fx = xt2x( ft, fp );
 		tg[i].Fy = yp2y( ft, fp );
-/*
-		double xt = tg[i].X0-Ver[ANKLE_L+i].X; // x2xt( tg[i].X0-Ver[ANKLE_L+i].X, tg[i].Y0-Ver[ANKLE_L+i].Y );
-		double yp = tg[i].Y0-Ver[ANKLE_L+i].Y; // y2yp( tg[i].X0-Ver[ANKLE_L+i].X, tg[i].Y0-Ver[ANKLE_L+i].Y );
-		double vt = Ver[ANKLE_L+i].dX; // x2xt( Ver[ANKLE_L+i].dX, Ver[ANKLE_L+i].dY );
-		double vp = Ver[ANKLE_L+i].dY; // y2yp( Ver[ANKLE_L+i].dX, Ver[ANKLE_L+i].dY );
-		vp = vp/( 1+EXP( 4000000.0*vp ));
-		double kgr = 1./( 1+EXP( 40000.0*yp_toe ));
-		double ft = kgr*Ground.force( xt, vt );//( Ground.K*( tg[i].X0-Ver[ANKLE_L+i].X )-Ground.B*Ver[ANKLE_L+i].dX ); 
-		double fp = kgr*Ground.force( yp, vp ); //( Ground.K*( tg[i].Y0-Ver[ANKLE_L+i].Y )-Ground.B*Ver[ANKLE_L+i].dY/(1+EXP( 4000000.0*Ver[ANKLE_L+i].dY )));
-		tg[i].Fx = ft; // xt2x( ft, fp );
-		tg[i].Fy = fp; // yp2y( ft, fp );
-*/
 	}
 	// Heels
 	if( tg[HEEL_L].Fx != 0. ){
@@ -710,7 +667,7 @@ void walker::gfill( long double *q, long double *cosq, long double *sinq, touch 
 	}
 }
 
-void walker::restrictions( long double *cosq, long double *sinq, long double *b )
+void walker::restrictions( double *cosq, double *sinq, double *b )
 {
 /*
 //	In current model forepart of the cat model supported at constant height 
@@ -755,7 +712,7 @@ void walker::restrictions( long double *cosq, long double *sinq, long double *b 
 			b[RGJ[i].LowSegment] -= vf;
 		}
 	}
-	long double xh = 0.0, yh = 0.0;
+	double xh = 0.0, yh = 0.0;
 	if( IsTrXFixed ){
 		xh -= Forepart.force( X_Trunk-Ver[TRUNK_H].X, Ver[TRUNK_H].dX ); //( KCat*( X_Trunk-Ver[TRUNK_H].X )-BCat*Ver[TRUNK_H].dX );
 	}
@@ -773,9 +730,9 @@ void walker::restrictions( long double *cosq, long double *sinq, long double *b 
 	b[A_P] -= L[PELVIS]*( yh*cosq[A_P]-xh*sinq[A_P] );
 }
 
-void walker::add_fm( long double *b )
+void walker::add_fm( double *b )
 {
-	double f[NUM_INDEPEND];		// Generalized forces
+	alignas( 16 ) double f[NUM_INDEPEND];		// Generalized forces
 	for( size_t i = 0; i < NUM_INDEPEND; f[i] = 0.0, ++i );
 	for( size_t i = 0; i < Muscles.size(); ++i ){
 		Muscles[i]->add_f( f, Link );			//avoid virtual functions. overhead is too big
@@ -783,19 +740,19 @@ void walker::add_fm( long double *b )
 	for( size_t i = 0; i < A_R; b[i] += f[i], ++i );
 }
 
-void walker::solve( long double *q, long double *cosq, long double *sinq, long double *b, long double *result )
+void walker::solve( double *q, double *cosq, double *sinq, double *b, double *result )
 {
 #define COSAB( a, b )		\
 	(( cosq[a] )*( cosq[b] )+( sinq[a] )*( sinq[b] ))
 
 	const size_t max_inx = 5;	// Setting Dimension of System
-	static long double y[max_inx];
-	static long double ai[NUM_INDEPEND][NUM_INDEPEND];
-	static long double ar[3];
-	static long double ap[2];
-	static long double at[4];
-	static long double as[3];
-	static long double af[2];
+	alignas( 16 ) double y[max_inx] = {0.};
+	alignas( 16 ) double ai[NUM_INDEPEND][NUM_INDEPEND] = {0.};
+	alignas( 16 ) double ar[3] = {0.};
+	alignas( 16 ) double ap[2] = {0.};
+	alignas( 16 ) double at[4] = {0.};
+	alignas( 16 ) double as[3] = {0.};
+	alignas( 16 ) double af[2] = {0.};
 	ai[X_H][Y_H] = ai[Y_H][X_H] = 0.0;
 	ai[X_H][X_H] = ai[Y_H][Y_H] = A0[2][0];
 	ai[A_TL][A_TL] = A0[0][0];
@@ -830,7 +787,7 @@ void walker::solve( long double *q, long double *cosq, long double *sinq, long d
 	ai[A_R][Y_H]  = ai[Y_H][A_R]  =  AB[4]*cosq[A_R];
 	ai[A_P][A_R]  = ai[A_R][A_P]  =  AB[5]*COSAB( A_P, A_R );
 	// A_R Exclusion 9
-	long double bR = -b[A_R]/ai[A_R][A_R];
+	double bR = -b[A_R]/ai[A_R][A_R];
 	ar[0] = -ai[A_R][X_H]/ai[A_R][A_R];
 	ar[1] = -ai[A_R][Y_H]/ai[A_R][A_R];
 	ar[2] = -ai[A_R][A_P]/ai[A_R][A_R];
@@ -839,8 +796,8 @@ void walker::solve( long double *q, long double *cosq, long double *sinq, long d
 	ai[A_P][A_P] += ai[A_P][A_R]*ar[2];
 	b[A_P] += ai[A_P][A_R]*bR;
 	// A_P Exclusion 8 & A_TL Exclusion 0
-	long double bP = -b[A_P]/ai[A_P][A_P];
-	long double bT = -b[A_TL]/ai[A_TL][A_TL];
+	double bP = -b[A_P]/ai[A_P][A_P];
+	double bT = -b[A_TL]/ai[A_TL][A_TL];
 	ap[0] = -ai[A_P][X_H]/ai[A_P][A_P];
 	ap[1] = -ai[A_P][Y_H]/ai[A_P][A_P];
 	at[0] = -ai[A_TL][A_SL]/ai[A_TL][A_TL];
@@ -858,7 +815,7 @@ void walker::solve( long double *q, long double *cosq, long double *sinq, long d
 	b[A_SL] += ai[A_SL][A_TL]*bT;
 	b[A_FL] += ai[A_FL][A_TL]*bT;
 	// A_SL Exclusion 1
-	long double bS = -b[A_SL]/ai[A_SL][A_SL];
+	double bS = -b[A_SL]/ai[A_SL][A_SL];
 	as[0] = -ai[A_SL][A_FL]/ai[A_SL][A_SL];
 	as[1] = -ai[A_SL][X_H]/ai[A_SL][A_SL];
 	as[2] = -ai[A_SL][Y_H]/ai[A_SL][A_SL];
@@ -867,7 +824,7 @@ void walker::solve( long double *q, long double *cosq, long double *sinq, long d
 	ai[A_FL][Y_H]  += ai[A_FL][A_SL]*as[2];
 	b[A_FL] += ai[A_FL][A_SL]*bS;
 	// A_FL Exclusion 2
-	long double bF = -b[A_FL]/ai[A_FL][A_FL];
+	double bF = -b[A_FL]/ai[A_FL][A_FL];
 	af[0] = -ai[A_FL][X_H]/ai[A_FL][A_FL];
 	af[1] = -ai[A_FL][Y_H]/ai[A_FL][A_FL];
 	ai[X_H][A_P]  += ai[X_H][A_R]*ar[2];
@@ -883,16 +840,16 @@ void walker::solve( long double *q, long double *cosq, long double *sinq, long d
 	b[X_H] += ai[X_H][A_R]*bR+ai[X_H][A_SL]*bS+ai[X_H][A_FL]*bF+ai[X_H][A_TL]*bT+ai[X_H][A_P]*bP;
 	b[Y_H] += ai[Y_H][A_R]*bR+ai[Y_H][A_SL]*bS+ai[Y_H][A_FL]*bF+ai[Y_H][A_TL]*bT+ai[Y_H][A_P]*bP;
 	//Shifting Maxtix A and vector b  
-	memcpy( ai[0], ai[3]+3, 5*sizeof( long double ));
-	memcpy( ai[1], ai[4]+3, 5*sizeof( long double ));
-	memcpy( ai[2], ai[5]+3, 5*sizeof( long double ));
-	memcpy( ai[3], ai[6]+3, 5*sizeof( long double ));
-	memcpy( ai[4], ai[7]+3, 5*sizeof( long double ));
-	memcpy( b, b+3, 5*sizeof( long double ));
+	memcpy( ai[0], ai[3]+3, 5*sizeof( double ));
+	memcpy( ai[1], ai[4]+3, 5*sizeof( double ));
+	memcpy( ai[2], ai[5]+3, 5*sizeof( double ));
+	memcpy( ai[3], ai[6]+3, 5*sizeof( double ));
+	memcpy( ai[4], ai[7]+3, 5*sizeof( double ));
+	memcpy( b, b+3, 5*sizeof( double ));
 	//LU Decomposition of Matrix A
 	for( size_t k = 1; k < max_inx; ++k ){
 		for( size_t km = k-1, j = k; j < max_inx; ++j ){
-			long double ss = 0;
+			double ss = 0;
 			for( size_t m = 0; m < km; ss += ai[km][m]*ai[m][j], ++m );
 			ai[km][j] = ( ai[km][j]-ss )/ai[km][km];
 			ss = 0;
@@ -922,10 +879,10 @@ void walker::solve( long double *q, long double *cosq, long double *sinq, long d
 #undef COSAB
 }
 
-void walker::mfill( long double *q, long double *p, long double *fq, touch *tg )
+void walker::mfill( double *q, double *p, double *fq, touch *tg )
 {
-	static long double b[NUM_INDEPEND];
-	static long double cosq[NUM_INDEPEND], sinq[NUM_INDEPEND];
+	alignas( 16 ) double b[NUM_INDEPEND] = {0.};
+	alignas( 16 ) double cosq[NUM_INDEPEND], sinq[NUM_INDEPEND] = {0.};
 	sincos( q, cosq, sinq );		// 30
 	bcvfill( q, cosq, sinq, p, b );	// < 1
 	vfill( q, cosq, sinq, p );		// < 1
@@ -935,18 +892,19 @@ void walker::mfill( long double *q, long double *p, long double *fq, touch *tg )
 	solve( q, cosq, sinq, b, fq );	// 16
 }
 
-void walker::get_f( touch *tg, long double *q, long double *p, long double *lt, long double *vt, long double *fq, long double *flt )
+void walker::get_f( touch *tg, double *q, double *p, double *lt, double *vt, double *fq, double *flt )
 {
 	jfill( q, p );				// < 1
 	for( size_t i = 0; i < Muscles.size(); ++i ){ // avoid virtual functions. overhead is too big
 		zmuscle *m = Muscles[i];
 		m->proc( Joint );			// 157
+		// add restriction
 		flt[i] = m->get_at( lt[i], vt[i] ); // 375
 	}
 	mfill( q, p, fq, tg );	// 94
 }
 
-void walker::sincos( long double *q, long double *cosq, long double *sinq )
+void walker::sincos( double *q, double *cosq, double *sinq )
 {
 	for( size_t i = 0; i < NUM_INDEPEND; cosq[i] = cos( q[i] ), sinq[i] = sin( q[i] ), ++i );
 }
@@ -1001,4 +959,6 @@ void walker::init_qp( void )
 	P[A_FR] = P[A_SR]-Joint[A_AR].dA;
 }
 
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__

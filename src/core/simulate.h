@@ -1,7 +1,13 @@
+#include "config.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // file: simulate.h
 #ifndef _SIMULATE_H_
 #define _SIMULATE_H_
+
+#ifndef __CONSOLE__
+	#include <WinDef.h>
+#endif // __CONSOLE__
 
 #include "../usermessage.h"
 #include "./nsm/hhnnetwork.h"
@@ -13,12 +19,14 @@ class CFrameView;
 class CSimulateData;
 /////////////////////////////////////////////////////////////////////////////
 // class CSimParameters
-class CSimParameters{
+class alignas( 16 ) CSimParameters{
 	public:
 		CSimParameters( void );
 		CSimParameters( const CSimParameters &par );
 		~CSimParameters( void ){};
 	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 		CSimParameters &operator = ( const CSimParameters &par );
 	public:
 		bool IsValidate( void ) const;
@@ -35,12 +43,14 @@ class CSimParameters{
 
 /////////////////////////////////////////////////////////////////////////////
 // class CSimulateData
-class CSimulateData{
+class alignas( 16 ) CSimulateData{
 	public:
 		CSimulateData( void );
 		CSimulateData( const CSimulateData &data );
 		~CSimulateData( void );
 	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 		CSimulateData &operator = ( const CSimulateData &data );
 	public:
 #ifdef __CONSOLE__
@@ -71,27 +81,32 @@ class CSimulateData{
 		bool IsRedrawResults;
 		string Promt;
 		string ModelName;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		bool IsStickDiagram;		// interface flags
 		double LimbOriginX;			// [0:1]
 		double LimbOriginY;			// [0:1]
 		double Slope;				// in deg [-90:90] 
 		unsigned long LimbSkip;
 		unsigned long LimbScale;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // class CSimulate
-class CSimulate{
+class alignas( 16 ) CSimulate{
 	public:
 		CSimulate( void );
-		~CSimulate( void );
+virtual		~CSimulate( void );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void init( long seed, bool rand = false );
 
-	////////////////////////////////////////////////////
-	// single-threading implementation
+		////////////////////////////////////////////////////
+		// single-threading implementation
 		bool is_unique_name( const char *name ) const;
 		const char *find_unique_name( const char *name, const char *prefix ) const;
 		CFrameView *get_view( const char *name ) const;
@@ -107,10 +122,12 @@ class CSimulate{
 		hhn_pair<int> get_uid(const string &name ) const
 		{
 			hhn_pair<int> unit = Network.get_uid( name );
-		#ifdef __MECHANICS__
+		#if defined (__MECHANICS_2D__)
 			if( unit.X == -1 )
 				unit = BiomechT.get_uid( name );
-		#endif // __MECHANICS__
+		#elif defined (__MECHANICS_3D__)
+			// TODO implementation 3d model
+		#endif // __MECHANICS_2D__
 			return unit;
 		};
 		const string &GetUnitName( const unit_code &code )
@@ -131,7 +148,7 @@ class CSimulate{
 					  if( Network.get_crtunit( code ) )
 						  return Network.get_crtunit( code )->get_name();
 					 }
-		#ifdef __MECHANICS__
+		#if defined (__MECHANICS_2D__)
 				case _id_Body:
 				case _id_Vertex:
 				case _id_Link:
@@ -139,7 +156,9 @@ class CSimulate{
 				case _id_Muscle:
 				case _id_Ground:
 					return Walker->get_name( code );	//make sure Walker returns apropriate name
-		#endif // __MECHANICS__
+		#elif defined (__MECHANICS_3D__)
+			// TODO implementation 3d model
+		#endif // __MECHANICS_2D__
 				default:
 					name = "";
 			}
@@ -148,24 +167,25 @@ class CSimulate{
 		int GetFormatType( void ) const{ return DataFormat;	};
 		const vector<unit_code> &GetResults( void ) const{	return Results;	};
 		double GetSimStep( void ) const{ return SimPar.SimStep; };
-		unsigned long GetNumSteps( void ) const{ return NumSteps; };
-		const vector<float> &GetTimeScale( void ) const{ return ChartBuffer->timescale(); };
+		size_t GetNumSteps( void ) const{ return NumSteps; };
+		const nsm_vector(float) &GetTimeScale( void ) const{ return ChartBuffer->timescale(); };
 		CChartBuffer &GetChartBuffer( void ) const{ return *ChartBuffer; };
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		void upd_outlist( void );
 		CWalkerBuffer &GetWalkerBuffer( void ) const{ return *WalkerBuffer; };
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 		void SetTimeScale( double begin, double end);
 		void InitViews( void );
 		void ReleaseViews( void );
 		void SaveModel( const char *filename );
 		void PreSaveData( const vector<unit_code> &buffers, int format = 0 );
-		void SaveData( const char *filename, const hhn_pair<int> &wnd = hhn_pair<int>( -1, -1 ), double prec = 0. /*msec*/ ); /*insert window*/
+		void SaveData( const char *filename, const hhn_pair<int> &wnd = hhn_pair<int>( -1, -1 ), double prec_t = 0. /*msec*/, int prec_a = -1 /*number of digits afte the dec. point*/);
 	private:
 		void SaveViews( ostream &file );
 		bool LoadRecords( istream &file );
 		void SaveRecords( ostream &file );
-
 	private:
 		bool IsParPresent( CHhnNetwork &network, const unit_code &code );
 		void CheckViews( CHhnNetwork &network );
@@ -175,21 +195,25 @@ class CSimulate{
 
 		void Initialize( double freq = -1. );
 		void Shutdown( void );
-
 	public:
 		CSimulateData SimData;
 		CHhnNetwork Network;
-#ifdef __MECHANICS__
+		runman *RunMan;
+#if defined (__MECHANICS_2D__)
 		walker *Walker;
 		t_biomech BiomechT;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	private:
 	////////////////////////////////////////////////////
 	// view buffers
 		CChartBuffer *ChartBuffer;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		CWalkerBuffer *WalkerBuffer;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	////////////////////////////////////////////////////
 	// views framework
 		vector<CFrameView *> Views;
@@ -197,79 +221,63 @@ class CSimulate{
 		vector<unit_code> Results;
 
 		CSimParameters SimPar;
-		unsigned long NumSteps;
-		unsigned long CurrStep;
-	public:
+		size_t NumThreads;
+		size_t NumSteps;
+		size_t CurrStep;
 #ifdef __CONSOLE__
+	public:
 		bool LoadModel( const char *filename );
 		bool StartSimulation( const char *ifilename, const char *ofilename );
 	private:
 		bool LoadViews( istream &file );
 #else
 	public:
-		bool diff( const string &pattern, ostream &log, char delim1 = '/', char delim2 = '|' );
 		bool LoadModel( const char *filename, queue<CFrameView *> &viewfifo );
+		bool diff( const string &pattern, ostream &log, char delim1 = '/', char delim2 = '|' );
+	private:
+		bool LoadViews( istream &file, queue<CFrameView *> &viewfifo );
+	public: // simulation management
+		void PauseSimulation( bool pause ){ pause? ResetEvent( IsSimulate ): SetEvent( IsSimulate ); };
 		bool UpdateResults( bool complete = true )
 		{
-			unsigned long counter = 0;
-			if( IsStopped()){
-				if( complete )
-					counter = NumSteps;
-			}
-			else{
-				if( !complete )
-					counter = CurrStep;
-			}
-			if( ::PostMessage( SimPar.NotifyWindow, WM_UPDATE_MAIN_WND, complete, counter ))
+			size_t counter = IsStopped()? ( complete? NumSteps:0 ): (!complete? CurrStep: 0 );
+			if( ::PostMessage( SimPar.NotifyWindow, WM_UPDATE_MAIN_WND, complete, counter ) ){
 				return true;
+			}
 			return false;
-		};
-		void PauseSimulation( bool pause )
-		{
-			if( pause ){
-				ResetEvent( IsSimulate );
-			}
-			else{
-				SetEvent( IsSimulate );
-			}
 		};
 		bool IsPaused( void )
 		{
-			if( WaitForSingleObject( IsSimulate, 0 ) != WAIT_OBJECT_0 )
+			if( WaitForSingleObject( IsSimulate, 0 ) != WAIT_OBJECT_0 ){
 				return true;
+			}
 			return false;
 		};
 		bool IsStopped( void )
 		{
-			if( WaitForSingleObject( IsStop, 0 ) == WAIT_OBJECT_0 )
+			if( WaitForSingleObject( IsStop, 0 ) == WAIT_OBJECT_0 ){
 				return true;
+			}
 			return false;
 		};
 		bool StartSimulation( const CSimParameters &par );
 		bool StopSimulation( void );
-		void CreateNetwork( CHhnNetwork &network, long seed );
-//		size_t ctrl_handler( bool *run, bool *quit, size_t *currstep );
-		size_t ctrl_handler( bool *quit, size_t *currstep );
+		void InitNetwork( CHhnNetwork &network, long seed );
+virtual		size_t ctrl_handler( bool *quit, size_t *currstep );
 	private:
-		bool LoadViews( istream &file, queue<CFrameView *> &viewfifo );
 		void EnableTimer( bool enabled );
 
 		bool startsim( void );
 		void stopsim( void );
 		size_t runsim( void );
-	////////////////////////////////////////////////////
-	// thread
-static	unsigned int WINAPI SimulationThread( void *param );
-	////////////////////////////////////////////////////
-	// synchronization objects
-	private:
-		size_t NumThreads;
-		HANDLE IsHandleLocked;          // mutex
-		HANDLE IsShutdown;				// manual-reset event
-		HANDLE IsStop;					// manual-reset event
-		HANDLE Timer;                   // waitable timer
-		HANDLE IsSimulate;				// manual-reset event
-		HANDLE SimThread;				// handle of simulation thread
+	private: // thread & synchronization objects
+static		unsigned int WINAPI SimulationThread( void *param );
+		HANDLE IsHandleLocked;	// mutex
+		HANDLE IsShutdown;	// manual-reset event
+		HANDLE IsStop;		// manual-reset event
+		HANDLE Timer;		// waitable timer
+		HANDLE IsSimulate;	// manual-reset event
+		HANDLE SimThread;	// handle of simulation thread
 #endif // __CONSOLE__
 };
 

@@ -2,7 +2,7 @@
 // hhnfeedback.cpp
 #include "precompile.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "hhnfeedback.h"
 #include "runman.h"
@@ -12,7 +12,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
@@ -70,13 +70,14 @@ hhn_feedback &hhn_feedback::operator = ( const hhn_feedback &feedback )
 
 //////////////////////////////////////////////////////////////////////
 // methods
-void hhn_feedback::init( void )
+bool hhn_feedback::init( void )
 {
 	Units.clear();
 	Units.push_back( this );
 	Output = 1.0;
 	CtrlOut = 1.0;
 	for( size_t i = 0; i < _id_NUM_FBS; FbBuff[i] = &_FbNull, ++i );
+	return true;
 }
 
 void hhn_feedback::attach( zmuscle *muscle, touch *grf )
@@ -217,4 +218,6 @@ void hhn_feedback::save( ostream &file )
 	file << "</Feedback>" << endl;
 }
 
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__

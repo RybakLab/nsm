@@ -1,6 +1,6 @@
 /*****************************************************************
  ****              (C)  1997 - 2000                           ****
- **           Model of Hodgkin-Haxley type neuron               **
+ **           Model of Hodgkin-Huxley type neuron               **
  **       Development by Ilia Rybak and Sergey Markin           **
  ****                  Populations                            ****
  *****************************************************************/
@@ -14,12 +14,12 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
 /*****************************************************************
- *       Model of population of Hodgkin-Haxley type neuron       *
+ *       Model of population of Hodgkin-Huxley type neuron       *
  *****************************************************************/
 //--- constructor
 hhn_populat::hhn_populat( void )
@@ -31,6 +31,8 @@ hhn_populat::hhn_populat( void )
 		_Synapses.push_back( base_synapse() );
 		SynapsesD.push_back( base_dsynapse());
 		SynapsesS.push_back( base_ssynapse());
+		SynapsesMS.push_back( base_modssynapse());
+		SynapsesL.push_back( base_lsynapse());
 	}
 	Network = NULL;
 	ConnectType.add_connect( CConnect( CHhnConnect(), _id_NN_SOMA ));    // default target (type 0)
@@ -46,16 +48,20 @@ hhn_populat::hhn_populat( const string &name )
 		_Synapses.push_back( base_synapse() );
 		SynapsesD.push_back( base_dsynapse());
 		SynapsesS.push_back( base_ssynapse());
+		SynapsesMS.push_back( base_modssynapse());
+		SynapsesL.push_back( base_lsynapse());
 	}
 	Network = NULL;
 	ConnectType.add_connect( CConnect( CHhnConnect(), _id_NN_SOMA ));    // default target (type 0)
 	hhn_neuron hhn( this );
 	Neurons.push_back( hhn );
-	Spikes.resize( Neurons.size(), 0 );
+	Spikes.reserve( Neurons.size());
+	std::generate_n( std::back_inserter( Spikes ), Neurons.size(), []{ return 0; });
 }
 
 hhn_populat::hhn_populat( const hhn_populat &populat )
-	: nn_unit( populat ), NeuronT( populat.NeuronT ), _Synapses( populat._Synapses ), SynapsesD( populat.SynapsesD ), SynapsesS( populat.SynapsesS )
+	: nn_unit( populat ), SynapsesS( populat.SynapsesS ), SynapsesMS( populat.SynapsesMS ), SynapsesL( populat.SynapsesL ), 
+	SynapsesD( populat.SynapsesD ), NeuronT( populat.NeuronT ), _Synapses( populat._Synapses )
 {
 	for( size_t id = 0; id < _id_MAX_SYN; ++id ){
 		Synapses.push_back( NULL );
@@ -64,7 +70,8 @@ hhn_populat::hhn_populat( const hhn_populat &populat )
 }
 
 hhn_populat::hhn_populat( const CHhnNetwork *network, const hhn_populat &populat )
-	: nn_unit( populat ), NeuronT( populat.NeuronT ), _Synapses( populat._Synapses ),	SynapsesD( populat.SynapsesD ),	SynapsesS( populat.SynapsesS )
+	: nn_unit( populat ), SynapsesS( populat.SynapsesS ), SynapsesMS( populat.SynapsesMS ), SynapsesL( populat.SynapsesL ), 
+	SynapsesD( populat.SynapsesD ), NeuronT( populat.NeuronT ), _Synapses( populat._Synapses )
 {
 	for( size_t id = 0; id < _id_MAX_SYN; ++id ){
 		Synapses.push_back( NULL );
@@ -85,6 +92,8 @@ hhn_populat &hhn_populat::operator = ( const hhn_populat &populat )
 	_Synapses = populat._Synapses;
 	SynapsesD = populat.SynapsesD;
 	SynapsesS = populat.SynapsesS;
+	SynapsesMS = populat.SynapsesMS;
+	SynapsesL = populat.SynapsesL;
 	create( populat.Network, populat.NeuronT, populat.size() );
 	return *this;
 }
@@ -95,6 +104,8 @@ void hhn_populat::create( const CHhnNetwork *network, const hhn_populat &populat
 	_Synapses = populat._Synapses;
 	SynapsesD = populat.SynapsesD;
 	SynapsesS = populat.SynapsesS;
+	SynapsesMS = populat.SynapsesMS;
+	SynapsesL = populat.SynapsesL;
 	create( network, populat.NeuronT, populat.size() );
 }
 
@@ -104,10 +115,10 @@ void hhn_populat::create( const CHhnNetwork *network, const t_hhn &neuron, unsig
 	NeuronT = neuron;
 	Neurons.clear();
 	hhn_neuron hhn( this );
-	for( size_t i = 0; i < size; ++i ){
-		Neurons.push_back( hhn );
-	}
-	Spikes.resize( Neurons.size(), 0 );
+	Neurons.reserve( size );
+	std::generate_n( std::back_inserter( Neurons ), size, [hhn]{ return hhn; });
+	Spikes.reserve( Neurons.size());
+	std::generate_n( std::back_inserter( Spikes ), Neurons.size(), []{ return 0; });
 	ConnectType.del_connect();
 	for( size_t i = 0; i < NeuronT.size(); i++ ){
 		switch( NeuronT.get_compart( i )->uid()){
@@ -128,17 +139,23 @@ bool hhn_populat::pre_del( void )
 	return false;
 }
 
-void hhn_populat::init( void )
+bool hhn_populat::init( void )
 {
 	Units.clear();
 	for( size_t i = 0; i < Neurons.size(); Neurons[i].init(), Units.push_back( &Neurons[i] ), ++i );
 	set_kgmax();
+	fill( Spikes.begin(), Spikes.end(), 0 ); // set spikes to zero
+	return true;
+}
+
+void hhn_populat::prerun( double step )
+{
+	if( !Neurons.empty() ){ Neurons[0].prerun( step ); }
 }
 
 void hhn_populat::reg_unit( runman *man )
 {
 	if( !Neurons.empty()){
-		::reg_unit( this, hhn_populat::reset, _id_PASS_PREVM, -1, man ); 
 		::reg_unit( this, hhn_populat::calc_out, _id_PASS_NNUNIT, -1, man ); 
 		for( size_t i = 0; i < Neurons.size(); ++i ){
 			Neurons[i].reg_unit( i, man );
@@ -149,15 +166,10 @@ void hhn_populat::reg_unit( runman *man )
 	}
 }
 
-void hhn_populat::reset( double step )
-{
-	fill( Spikes.begin(), Spikes.end(), 0 );	// reset spikes moments for next step;
-}
-
 void hhn_populat::calc_out( double step )
 {
 	size_t nsize = Neurons.size();
-	size_t nspikes = accumulate( Spikes.begin(), Spikes.end(), 0 );
+	size_t nspikes = accumulate( Spikes.begin(), Spikes.end(), 0 ); // spikes array is updated by hhn_soma::calc_vm
 	Output = double( nspikes )/double( nsize );
 }
 
@@ -171,7 +183,7 @@ void *hhn_populat::select( unit_code *view )
 				if( view->HhnIndex != -1 && view->NNIndex != -1 && view->PartIndex != -1 ){
 					hhn_compart *compart = ( hhn_compart *)( Neurons[view->HhnIndex].get_compart( view->PartIndex ));
 					if( compart )
-						return &compart->Vm[1];
+						return &compart->get_vm();
 				}
 				break;
 			case CViewParam::CaConc:
@@ -249,14 +261,12 @@ void *hhn_populat::select( CHhnControlled *ctrl )
 			return &KGmax[id_chan];
 		else
 			return &KIonE[id_chan];
-	}
-	else if( ctrl_par >= _id_MAX_CHAN && ctrl_par < _id_MAX_CHAN+_id_MAX_SYN ){
+	} else if( ctrl_par >= _id_MAX_CHAN && ctrl_par < _id_MAX_CHAN+_id_MAX_SYN ){
 		int id_syn = ctrl_par-_id_MAX_CHAN;
 		_Synapses[id_syn] = Network->synapse( id_syn );
 		Synapses[id_syn] = &_Synapses[id_syn];
 		return &( Synapses[id_syn]->Gmax );
-	}
-	else if( ctrl_par >= _id_NUM_CONTROLLED && ctrl_par < _id_MAX_CTRL ){	// hack
+	} else if( ctrl_par >= _id_NUM_CONTROLLED && ctrl_par < _id_MAX_CTRL ){	// hack
 		if( part_index != 0 )
 			return &KGmax[ctrl_par];
 		else
@@ -267,7 +277,7 @@ void *hhn_populat::select( CHhnControlled *ctrl )
 
 bool hhn_populat::load( CHhnNetwork *network, istream &file )
 {
-    setup( network );
+	setup( network );
 	nn_unit::load( file );
 	t_hhn neuron( NULL );
 	string str;
@@ -275,15 +285,16 @@ bool hhn_populat::load( CHhnNetwork *network, istream &file )
 	while( file >> str){
 		if( str == "Size"){
 			file >> str >> size;
-		}
-		else if( str == "<Neuron>"){
+		} else if( str == "RndOp"){ // keep for nsm compatibility
+			file >> str >> str;
+		} else if( str == "Seed"){ // keep for nsm compatibility
+			file >> str >> str;
+		} else if( str == "<Neuron>"){
 			neuron.load( file );
-		}
-		else if( str == "</Population>"){
+		} else if( str == "</Population>"){
 			create( network, neuron, size );
 			return true;
-		}
-		else{
+		} else{
 			unknown_string( file, str);
 		}
 	}
@@ -310,7 +321,6 @@ void hhn_populat::set_kgmax( void )
 // run throught all channel and pickup correspondent KGmax
 				int channelId = ( *cmp )[iii]->get_chanid(); // put new identification
 				if( channelId == _id_generic_Chan ){
-					hhn_channel *chan = ( *cmp )[iii];
 					channelId = _id_generic_Chan+_id_NUM_CONTROLLED+( *cmp )[iii]->get_gchanid();
 				}
 				( *cmp )[iii]->set_kgmax( &KGmax[channelId] );
@@ -333,22 +343,16 @@ void hhn_populat::add_inputs( const vector<wconnect> &inputs )
 {
 	for( size_t i = 0; i < inputs.size(); ++i ){
 		hhn_process *inp = inputs[i].Source;
-		int sid = inputs[i].SynapseID;
-		bool sigma = inputs[i].Sigma;
-		bool depr = inputs[i].Depression;
-		bool pre_inh = inputs[i].PreInh;
 		hhn_synapse *syn = ( hhn_synapse *)inputs[i].Target;
-		inp->retrace( sid, ( sigma )? sid:-1, ( depr )? sid:-1 );
-
-		double weight = inputs[i].Weight;
-		double *src = ( depr )? inp->get_hy( sid ): inp->get_y( sid );
-		double *trg = ( pre_inh )? &syn->Ginh: &syn->G;
+		int sid = inp->retrace( inputs[i].SynapseID, inputs[i].Sigma, inputs[i].ModSigma, inputs[i].Linear );
+		double *src = inp->get_y( sid );
+		double *trg = ( inputs[i].Modulate == 0 )? &syn->G: &syn->Ginh;
 		inputs_::iterator pos = Inputs.find( size_t( trg ));
 		if( pos == Inputs.end()){
 			Inputs.insert( make_pair( size_t( trg ), hhn_input( trg, inputs.size()/2 )));
 			pos = Inputs.find( size_t( trg ));
 		}
-		pos->second.add_src( src, weight );
+		pos->second.add_src( src, inputs[i].Weight );
 	}
 }
 
@@ -361,22 +365,22 @@ void hhn_populat::add_connection( const vector<nn_unit *> sources, const vector<
 		connect.reserve( _id_MAX_SYN*Neurons.size()*src_size );
 		for( size_t k = 0; k < Neurons.size(); ++k ){
 			for( size_t i = 0; i < sources.size(); ++i ){
-				for( size_t id = _id_ExSyn; id < _id_MAX_SYN; ++id ){
-					CHhnConnect weight = weights[i].Connect;
+				wconnect wc;
+				CHhnConnect weight = weights[i].Connect;
+				wc.Modulate = weight.Modulate;
+				for( size_t id = 0; id < _id_MAX_SYN; ++id ){
 					CStat WS = weight.Weights[id];
 					WS.Value /= sources[i]->size();
 					if( WS.Value > 0.0 ){
-						wconnect wc;
 						wc.SynapseID = id;
 						wc.Sigma = weight.Sigma[id];
-						wc.PreInh = weight.PreInh[id];
-						wc.Depression = weight.Depression[id];
+						wc.ModSigma = weight.ModSigma[id];
+						wc.Linear = weight.Linear[id];
 						wc.Target = get_syn( weights[i].Type, k, id );
 						for( size_t j = 0; j < sources[i]->size(); ++j ){
 							wc.Weight = double( WS );
 							wc.Source = sources[i]->Units[j];
 							if( CStat::Random() <= weight.Probability && wc.Source != NULL && wc.Weight > 0.0  ){
-								(( hhn_synapse *)wc.Target )->Active = true;
 								connect.push_back( wc );
 							}
 						}

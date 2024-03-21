@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // SpcordDoc.h : interface of the neurosim_doc class
-#include "../config.h"
+#include "config.h"
 
 #ifndef __CONSOLE__
 #ifndef __NEUROSIM_DOC_H
@@ -44,13 +44,13 @@ virtual	~neurosim_doc();
 		void UpdateViews( bool complete, unsigned long counter );
 		void ClearAllViews( void );
 	public:
-virtual	BOOL OnNewDocument( void );
-virtual	BOOL OnOpenDocument( LPCTSTR lpszPathName );
-virtual	BOOL OnSaveDocument( LPCTSTR lpszPathName );
+virtual		BOOL OnNewDocument( void );
+virtual		BOOL OnOpenDocument( LPCTSTR lpszPathName );
+virtual		BOOL OnSaveDocument( LPCTSTR lpszPathName );
 	private:
-afx_msg	void OnRefresh( void );
-afx_msg	void OnUpdateFilePrint( CCmdUI *pCmdUI );
-afx_msg	void OnUpdateFilePrintPreview( CCmdUI *pCmdUI );
+afx_msg		void OnRefresh( void );
+afx_msg		void OnUpdateFilePrint( CCmdUI *pCmdUI );
+afx_msg		void OnUpdateFilePrintPreview( CCmdUI *pCmdUI );
 	public:
 		queue<CFrameView *> ViewFIFO;
 		CSimulateData *SimData;

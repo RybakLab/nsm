@@ -7,7 +7,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "hhnunit.h"
 #include "muscle.h"
@@ -91,7 +91,9 @@ enum _TouchPoints {
 };
 //////////////////////////////////////////////////////////////////////
 // Joint properties
-struct RG_Joint{
+struct alignas( 16 ) RG_Joint{
+	void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+	void operator delete( void * p ){ nsm_free( p ); };
 	double Min;		// Minimum of Angle
 	double Max;		// Maximum of Angle
 	int UppSegment;	// Upper link
@@ -100,24 +102,30 @@ struct RG_Joint{
 
 //////////////////////////////////////////////////////////////////////
 // Touch ground properties
-struct touch{
+struct alignas( 16 ) touch{
+	touch() : Underground( false ), X0( 0. ), Y0( 0. ), Fx( 0. ), Fy( 0. ){};
+	void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+	void operator delete( void * p ){ nsm_free( p ); };
 	bool Underground;
-	long double X0;		// Coordinates of touch point
-	long double Y0;
+	double X0;		// Coordinates of touch point
+	double Y0;
 	double Fx;			// Force of ground reaction
 	double Fy;
 };
 //////////////////////////////////////////////////////////////////////
 // vertex properties
-struct vertex{
-	long double X;
-	long double Y;
-	long double dX;
-	long double dY;
+struct alignas( 16 ) vertex{
+	vertex( void ) : X (0.), Y( 0. ), dX( 0. ), dY( 0. ){};
+	void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+	void operator delete( void * p ){ nsm_free( p ); };
+	double X;
+	double Y;
+	double dX;
+	double dY;
 };
 //////////////////////////////////////////////////////////////////////
 // spring properties
-class spring{
+class alignas( 16 ) spring{
 	public:
 		spring( void ) : K( 0. ), B( 0. ){};
 		spring( double k, double b ) : K( k ), B( b ){};
@@ -127,6 +135,9 @@ class spring{
 		spring &operator = ( const spring &s ){ K = s.K; B = s.K; return *this; };
 		spring &operator() ( double k, double b ){ K = k; B = b; return *this; };
 	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); };
+	public:
 		double force( double x, double v ){ return K*x-B*v; };
 	public:
 		double K;
@@ -135,17 +146,21 @@ class spring{
 
 //////////////////////////////////////////////////////////////////////
 // walker
-class walker : public hhn_process{ // new line
+class alignas( 16 ) walker : public hhn_process{ // new line
 	public:
 		walker( void );
 		~walker( void );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); };
 	public: // general constants
-		double GL;				// ground level
-		double GV;				// treadmil velocity
+		double GL;			// ground level
+		double GV_L;			// treadmil velocity (left)
+		double GV_R;			// treadmil velocity (right)
 		double Gravity;			// gravity
-		double BM;				// muscle viscosity (for all muscles)
-		double BT;				// tendon viscosity (for all muscles)
-		double BJ;				// joint viscosity (for all joints)
+		double BM;			// muscle viscosity (for all muscles)
+		double BT;			// tendon viscosity (for all muscles)
+		double BJ;			// joint viscosity (for all joints)
 		double L[NUM_TYPELINK];	// link lenghts
 		spring Ground;			// ground reaction
 		spring Forepart;		// forepart reaction
@@ -163,24 +178,23 @@ class walker : public hhn_process{ // new line
 		double Q_Trunk;			// angle of trunk
 		double Q_Plvs;			// angle of trunk
 	public: // independence variables
-		long double Q[NUM_INDEPEND];
-		long double P[NUM_INDEPEND];
+		double Q[NUM_INDEPEND];
+		double P[NUM_INDEPEND];
 	public: // dependence variables
 		wlink	Link[NUM_LINK];		// absolute angles
-		RG_Joint RGJ[NUM_INDEPEND];	//???
+		RG_Joint RGJ[NUM_INDEPEND];	// ???
 		wjoint Joint[NUM_JOINT];	// Relative angles
 		wjoint JointDeg[NUM_JOINT];	// Relative angles
 	private:
 		touch TG[NUM_TOUCH];
 		vertex Ver[NUM_VERTEX];		// Massive of endpoints of links
-		double TanSl;				// tg(slope)
-		double SinSl;				// sin(slope)
-		double CosSl;				// cos(slope)
-		bool IsTouched;				// first touch
-		double X0;					// position where a toe touch the ground first time
-		double Gdist;				// the distance 
-		long double A0[3][3];		// Kinetic energy
-		long double AB[6]; 
+		double TanSl;			// tg(slope)
+		double SinSl;			// sin(slope)
+		double CosSl;			// cos(slope)
+		bool IsTouched;			// first touch
+		double X0;			// position where a toe touch the ground first time
+		double A0[3][3];		// Kinetic energy
+		double AB[6]; 
 	public: // the modified code
 		const void *select( void ) const{ return Ver; };
 		const void *select( unit_code *view )const;
@@ -195,18 +209,18 @@ class walker : public hhn_process{ // new line
 		void reg_unit( runman *man = NULL ); // new code
 	private:
 		void calc_biomech( double step ); // new code
-static	void calc_biomech( size_t currstep, double step, hhn_process **start ); // new code
+static		void calc_biomech( size_t currstep, double step, hhn_process **start ); // new code
 
 	private: // calculation
-		void get_f( touch *tg, long double *q, long double *p, long double *lt, long double *vt, long double *fq, long double *flt );
-		void add_fm( long double *b );
-		void jfill( long double *q, long double *p );
-		void vfill( long double *q, long double *cosq, long double *sinq, long double *p );
-		void bcvfill( long double *q, long double *cosq, long double *sinq, long double *p, long double *b );
-		void gfill( long double *q, long double *cosq, long double *sinq, touch *tg, long double *b );
-		void mfill( long double *q, long double *p, long double *fq, touch *tg );
-		void restrictions( long double *cosq, long double *sinq, long double *b );
-		void solve( long double *q, long double *cosq, long double *sinq, long double *b, long double *result );
+		void get_f( touch *tg, double *q, double *p, double *lt, double *vt, double *fq, double *flt );
+		void add_fm( double *b );
+		void jfill( double *q, double *p );
+		void vfill( double *q, double *cosq, double *sinq, double *p );
+		void bcvfill( double *q, double *cosq, double *sinq, double *p, double *b );
+		void gfill( double *q, double *cosq, double *sinq, touch *tg, double *b );
+		void mfill( double *q, double *p, double *fq, touch *tg );
+		void restrictions( double *cosq, double *sinq, double *b );
+		void solve( double *q, double *cosq, double *sinq, double *b, double *result );
 		double x2xt( double x, double y )
 		{
 			return x*CosSl-y*SinSl;
@@ -227,7 +241,7 @@ static	void calc_biomech( size_t currstep, double step, hhn_process **start ); /
 		zmuscle *get_muscle( const char *name );
 		touch *get_ground( const char *name );
 		void init_qp( void );
-		void sincos( long double *q, long double *cosq, long double *sinq );
+		void sincos( double *q, double *cosq, double *sinq );
 	public:
 		vector<zmuscle *> Muscles;	// all muscles
 };
@@ -237,5 +251,7 @@ extern const char *get_jname( size_t joint );
 extern const char *get_tname( size_t tg );
 extern const char *get_vname( size_t ver );
 
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 #endif // __WALKER_H

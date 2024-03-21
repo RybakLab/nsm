@@ -41,7 +41,8 @@ public:
 	CTitleTip();
 	virtual ~CTitleTip();
 	virtual BOOL Create( CWnd *pParentWnd);
-
+private:
+	using CWnd::Create;
 // Attributes
 public:
     void SetParentWnd(CWnd* pParentWnd)  { m_pParentWnd = pParentWnd; }

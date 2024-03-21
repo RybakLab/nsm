@@ -22,14 +22,14 @@ using std::ostream;
 #define EPS1 1.2e-7
 #define RNMX ( 1.-EPS1 )
 
-class CStat{
+class alignas( 16 ) CStat{
 	public:
 		CStat( void ) : Value( -1 ), Variance( -1 ){};
 		CStat( double val, double var = 0 ): Value( val ), Variance( var ){};
 		CStat( const CStat &x ): Value( x.Value ), Variance( x.Variance ){};
 		~CStat( void ){};
 	public:
-		operator double ( void )
+		operator double ( void ) const
 		{
 			if( Variance >= EPS1 ){
 				double var = Variance*GaussDistr();
@@ -45,20 +45,19 @@ class CStat{
 		CStat &operator = ( double x ){ Value = x; Variance = 0; return *this; };
 		CStat &operator = ( const CStat &x ){ Value = x.Value; Variance = x.Variance; return *this; };
 	public:
-static	void SetSeed( long seed );
-static	double Random( void );
+static		void SetSeed( long seed );
+static		double Random( void );
 	private:
-static	double GaussDistr( void );
-
+static		double GaussDistr( void );
 	public:
 		double Value;                     // Value
 		double Variance;                  // 0 <= Variance <= 1
 	private:
-static	bool Flag;
-static	long Seed;
-static	long Iy;
-static	long Iv[NTAB];
-static	double Gset;
+alignas( 16 )	static bool Flag;
+alignas( 16 )	static long Seed;
+alignas( 16 )	static long Iy;
+alignas( 16 )	static long Iv[NTAB];
+alignas( 16 )	static double Gset;
 };
 
 extern ostream &operator << ( ostream &s, const CStat &x );

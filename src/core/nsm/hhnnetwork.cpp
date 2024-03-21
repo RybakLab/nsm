@@ -10,12 +10,9 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
-
-
-using namespace std::tr1;
 
 netuni_templ::netuni_templ( void )
 {
@@ -151,9 +148,7 @@ bool netuni_templ::load_chan( istream &file )
 			file >> str >> ws;
 			getline( file, str, '(' );
 			string name = str;			
-
 // <todo>	remove white spaces at the end of the name
-
 			if( getid( name ) == -1 ){	// the channel 'name' is not exist
 				getline( file, str, ')' );
 				__id newid;
@@ -176,7 +171,6 @@ bool netuni_templ::load_chan( istream &file )
 int netuni_templ::make_newid( void )
 {
 	typedef map<string,__id>::const_iterator it;
-	typedef vector<int>::iterator vit;
 	vector<int> ids;
 	ids.reserve( ChanList.size());
 	for( it pos = ChanList.begin(); pos != ChanList.end(); ++pos ){
@@ -195,14 +189,13 @@ bool netuni_templ::remove( map<string,__id>::iterator pos )
 	ChanList.erase( pos );
 	return true;
 }
-
 /*****************************************************************
- *  Model of neural network based on Hodgkin-Haxley type neuron  *
+ *  Model of neural network based on Hodgkin-Huxley type neuron  *
  *****************************************************************/
 //--- constructor
 CHhnNetwork::CHhnNetwork( void )
-	: RunMan( NULL ), NetParam( NULL ),
-	Threshold( -10.0 ), TUniList()
+	: RunMan( NULL ), Threshold( -10.0 ), 
+	NetParam( NULL ), TUniList()
 {
 	NNIndex = 0;
 	UnitId = _id_Network;
@@ -214,13 +207,14 @@ CHhnNetwork::CHhnNetwork( void )
 }
 
 CHhnNetwork::CHhnNetwork( CHhnNetwork &network )
-	: nn_unit( network ), RunMan( network.RunMan ), NetParam( network.NetParam ),
-	Threshold( network.Threshold ), Drive( network.Drive ),
-	Output( network.Output ), TUniList( network.TUniList ),
-	NNConnect( network.NNConnect ),	Control( network.Control )
-#ifdef __MECHANICS__
-	, Feedback( network.Feedback )
-#endif // __MECHANICS__
+	: nn_unit( network ), NNConnect( network.NNConnect ), Drive( network.Drive ), Output( network.Output ),
+	Control( network.Control ), RunMan( network.RunMan ), Threshold( network.Threshold ), 
+#if defined (__MECHANICS_2D__)
+	Feedback( network.Feedback ),
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
+	NetParam( network.NetParam ), TUniList( network.TUniList )
 {
 	for( size_t id = 0; id < network.Synapses.size(); ++id ){
 		Synapses.push_back( new base_synapse( *network.Synapses[id] ) );
@@ -252,9 +246,11 @@ CHhnNetwork &CHhnNetwork::operator = ( const CHhnNetwork &network )
 	} 
 	Drive = network.Drive;
 	Output = network.Output;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	Feedback = network.Feedback;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	Control = network.Control;
 	NNConnect = network.NNConnect;
 	for( size_t i = 0; i < network.size_pop(); i++ ){
@@ -270,8 +266,8 @@ bool CHhnNetwork::add_pop( const hhn_populat &populat )
 		hhn_populat newpopulat;
 		newpopulat.create( this, populat );
 		Populat.push_back( newpopulat );
-		for( size_t i = 0; i < Populat.size(); Populat[i].nn_inx() = i++ );
-
+		for( size_t i = 0; i < Populat.size(); i++ )
+			Populat[i].nn_inx() = i;
 		NNConnect.add_trg( newpopulat.get_name() );
 		NNConnect.add_src( newpopulat.get_name() );
 		return true;
@@ -289,7 +285,8 @@ bool CHhnNetwork::set_pop( const hhn_populat &populat, size_t inx )
 			NNConnect.rename_trg( oldname, newname );
 		}
 		Populat[inx].create( this, populat );
-		for( size_t i = 0; i < Populat.size(); Populat[i].nn_inx() = i++ );
+		for( size_t i = 0; i < Populat.size(); i++ )
+			Populat[i].nn_inx() = i;
 		return true;
 	}
 	return false;
@@ -302,7 +299,8 @@ bool CHhnNetwork::del_pop( size_t inx )
 		NNConnect.del_src( Populat[inx].get_name() );
 		Populat[inx].pre_del();
 		Populat.erase( Populat.begin()+inx );
-		for( size_t i = 0; i < size_pop(); Populat[i].nn_inx() = i++ );
+		for( size_t i = 0; i < size_pop(); i++ )
+			Populat[i].nn_inx() = i;
 		return true;
 	}
 	return false;
@@ -312,8 +310,8 @@ bool CHhnNetwork::add_drv( const hhn_drive &drive )
 {
 	if( !NNConnect.occupied( drive.get_name() )){
 		Drive.push_back( drive );
-		for( size_t i = 0; i < Drive.size(); Drive[i].nn_inx() = i++ );
-
+		for( size_t i = 0; i < Drive.size(); i++ )
+			Drive[i].nn_inx() = i;
 		NNConnect.add_src( drive.get_name() );
 		return true;
 	}
@@ -340,7 +338,8 @@ bool CHhnNetwork::del_drv( size_t inx )
 	if( inx < Drive.size() ){
 		NNConnect.del_src( Drive[inx].get_name() );
 		Drive.erase( Drive.begin()+inx );
-		for( size_t i = 0; i < Drive.size(); Drive[i].nn_inx() = i++ );
+		for( size_t i = 0; i < Drive.size(); i++ )
+			Drive[i].nn_inx() = i;
 		return true;
 	}
 	return false;
@@ -350,8 +349,8 @@ bool CHhnNetwork::add_out( const hhn_output &output )
 {
 	if( !NNConnect.occupied( output.get_name()) ){
 		Output.push_back( output );
-		for( size_t i = 0; i < Output.size(); Output[i].nn_inx() = i++ );
-
+		for( size_t i = 0; i < Output.size(); i++ )
+			Output[i].nn_inx() = i;
 		NNConnect.add_trg( output.get_name() );
 		NNConnect.add_src( output.get_name() );
 		return true;
@@ -369,7 +368,8 @@ bool CHhnNetwork::set_out( const hhn_output &output, size_t inx )
 			NNConnect.rename_trg( oldname, newname );
 		}
 		Output[inx] = output;
-		for( size_t i = 0; i < Output.size(); Output[i].nn_inx() = i++ );
+		for( size_t i = 0; i < Output.size(); i++ )
+			Output[i].nn_inx() = i;
 		return true;
 	}
 	return false;
@@ -381,19 +381,21 @@ bool CHhnNetwork::del_out( size_t inx )
 		NNConnect.del_trg( Output[inx].get_name() );
 		NNConnect.del_src( Output[inx].get_name() );
 		Output.erase( Output.begin()+inx );
-		for( size_t i = 0; i < size_out(); Output[i].nn_inx() = i++ );
+		for( size_t i = 0; i < Output.size(); i++ )
+			Output[i].nn_inx() = i;
 		return true;
 	}
 	return false;
 }
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 bool CHhnNetwork::add_fbk( const hhn_feedback &feedback )
 {
 	if( !NNConnect.occupied( feedback.get_name()) ){
 		hhn_feedback newfeedback( feedback );
 		Feedback.push_back( newfeedback );
-		for( unsigned int i = 0; i < size_fbk(); Feedback[i].nn_inx() = i++ );
+		for( unsigned int i = 0; i < size_fbk(); i++ )
+			Feedback[i].nn_inx() = i;
 
 		NNConnect.add_src( newfeedback.get_name() );
 		return true;
@@ -410,7 +412,8 @@ bool CHhnNetwork::set_fbk( const hhn_feedback &feedback, size_t inx )
 			NNConnect.rename_src( oldname, newname );
 		}
 		Feedback[inx] = feedback;
-		for( unsigned int i = 0; i < size_fbk(); Feedback[i].nn_inx() = i++ );
+		for( unsigned int i = 0; i < size_fbk(); i++ )
+			Feedback[i].nn_inx() = i;
 		return true;
 	}
 	return false;
@@ -421,12 +424,15 @@ bool CHhnNetwork::del_fbk( size_t inx )
 	if( inx < Feedback.size() ){
 		NNConnect.del_src( Feedback[inx].get_name() );
 		Feedback.erase( Feedback.begin()+inx );
-		for( unsigned int i = 0; i < size_fbk(); Feedback[i].nn_inx() = i++ );
+		for( unsigned int i = 0; i < size_fbk(); i++ )
+			Feedback[i].nn_inx() = i;
 		return true;
 	}
 	return false;
 }
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 
 bool CHhnNetwork::add_ctr( const hhn_control &control )
 {
@@ -455,17 +461,6 @@ bool CHhnNetwork::set_ctr( const hhn_control &control, size_t inx )
 void CHhnNetwork::init_syn( void )
 {
 	for( size_t id = 0; id < _id_MAX_SYN; ++id ){
-		t_dsynapse *dsyn = ( t_dsynapse *)NetParam.get_child( "Depression", _SynapseNames[id] );
-		if( dsyn ){
-			base_dsynapse *syn = NULL;
-			dsyn->copy_to( &syn );
-			if( syn ){
-				for( size_t i = 0; i < Populat.size(); ++i ){
-					Populat[i].SynapsesD[id] = *syn;
-				}
-				delete syn;
-			}
-		}
 		t_ssynapse *ssyn = ( t_ssynapse *)NetParam.get_child( "Sigma", _SynapseNames[id] );
 		if( ssyn ){
 			base_ssynapse *syn = NULL;
@@ -473,6 +468,28 @@ void CHhnNetwork::init_syn( void )
 			if( syn ){
 				for( size_t i = 0; i < Populat.size(); ++i ){
 					Populat[i].SynapsesS[id] = *syn;
+				}
+				delete syn;
+			}
+		}
+		t_modssynapse *modssyn = ( t_modssynapse *)NetParam.get_child( "ModSigma", _SynapseNames[id] );
+		if( modssyn ){
+			base_modssynapse *syn = NULL;
+			modssyn->copy_to( &syn );
+			if( syn ){
+				for( size_t i = 0; i < Populat.size(); ++i ){
+					Populat[i].SynapsesMS[id] = *syn;
+				}
+				delete syn;
+			}
+		}
+		t_lsynapse *lsyn = ( t_lsynapse *)NetParam.get_child( "Linear", _SynapseNames[id] );
+		if( lsyn ){
+			base_lsynapse *syn = NULL;
+			lsyn->copy_to( &syn );
+			if( syn ){
+				for( size_t i = 0; i < Populat.size(); ++i ){
+					Populat[i].SynapsesL[id] = *syn;
 				}
 				delete syn;
 			}
@@ -524,9 +541,11 @@ void CHhnNetwork::init( long seed, runman *man, bool rand )
 	init_ions();
 	init_syn();
 	for( size_t i = 0; i < Drive.size(); Drive[i].init(), ++i );
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	for( size_t i = 0; i < Feedback.size(); Feedback[i].init(), ++i );
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	for( size_t i = 0; i < Output.size(); Output[i].init(), ++i );
 	for( size_t i = 0; i < Populat.size(); Populat[i].init(), ++i );
 	for( size_t i = 0; i < Control.size(); Control[i].init( this ), ++i );
@@ -541,14 +560,28 @@ void CHhnNetwork::init( long seed, runman *man, bool rand )
 		vector<CNNConnect> weights = NNConnect.sources( trg_name[i] );
 		trg[i]->connect( src, weights );
 	}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	for( size_t i = 0; i < Feedback.size(); Feedback[i].reg_unit( RunMan ), ++i );
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	for( size_t i = 0; i < Output.size(); Output[i].reg_unit( RunMan ), ++i );
 	for( size_t i = 0; i < Populat.size(); Populat[i].reg_unit( RunMan ), ++i );
 	for( size_t i = 0; i < Control.size(); Control[i].reg_unit( RunMan ), ++i );
 	for( size_t i = 0; i < Ions.size(); Ions[i]->reg_unit( RunMan ), ++i );
+#ifdef __OMP__
+	}
+#endif
+}
 
+void CHhnNetwork::prerun( double step )
+{
+#ifdef __OMP__
+	#pragma omp master	// control/reaction on external events
+	{
+#endif
+	if( !Populat.empty() ){ Populat[0].prerun( step ); }
+	for( size_t i = 0; i < Output.size(); Output[i].prerun( step ), ++i );
 #ifdef __OMP__
 	}
 #endif
@@ -592,7 +625,7 @@ bool CHhnNetwork::load( istream &file, CSimulate *manager )
 			LoadConnections( file );
 		}
 		else if( str == "<Control"){
-			hhn_control control( this );
+			hhn_control control;
 			if( control.load( file, manager ))
 				add_ctr( control );
 		}
@@ -617,7 +650,6 @@ void CHhnNetwork::save( ostream &file, CSimulate *manager )
 
 void CHhnNetwork::diff( const string &p1, const string &p2, const string &expr, ostream &log )
 {
-	typedef string::size_type size_type;
 	vector<string> src = NNConnect.name_src();
 	vector<string> trg = NNConnect.name_trg();
 	vector<string> allunits = src;
@@ -629,14 +661,14 @@ void CHhnNetwork::diff( const string &p1, const string &p2, const string &expr, 
 	vector<string> p1units, p2units;
 	log << "start searching" << endl;
 	log << "==============================" << endl;
-	regex re1( p1+expr ), re2( p2+expr );
+	std::regex re1( p1+expr ), re2( p2+expr );
 	for( size_t i = 0; i < allunits.size(); ++i ){
 		bool found = false;
-		if( regex_match( allunits[i], re1 )){
+		if( std::regex_match( allunits[i], re1 )){
 			p1units.push_back( allunits[i] );
 			found = true;
 		}
-		if( regex_match( allunits[i], re2 )){
+		if( std::regex_match( allunits[i], re2 )){
 			p2units.push_back( allunits[i] );
 			found = true;
 		}
@@ -648,20 +680,20 @@ void CHhnNetwork::diff( const string &p1, const string &p2, const string &expr, 
 	log << "compare selected units...." << endl;
 	log << "==============================" << endl;
 	multimap<string,string> unitsmap;
-	regex nre1( p1 );
+	std::regex nre1( p1 );
 	for( size_t i = 0; i < p1units.size(); ++i ){
-		smatch matches;
-		if( regex_search( p1units[i], matches, nre1 )){
+		std::smatch matches;
+		if( std::regex_search( p1units[i], matches, nre1 )){
 			string key = matches.suffix();
 			if( !key.empty() ){
 				unitsmap.insert( make_pair( key, p1units[i] ));
 			}
 		}
 	}
-	regex nre2( p2 );
+	std::regex nre2( p2 );
 	for( size_t i = 0; i < p2units.size(); ++i ){
-		smatch matches;
-		if( regex_search( p2units[i], matches, nre2 )){
+		std::smatch matches;
+		if( std::regex_search( p2units[i], matches, nre2 )){
 			string key = matches.suffix();
 			if( !key.empty() ){
 				unitsmap.insert( make_pair( key, p2units[i] ));
@@ -748,10 +780,10 @@ bool CHhnNetwork::compare_connections( const nn_unit *u1, const nn_unit *u2, con
 				continue;
 			}
 			else if( !diff1.empty() && !diff2.empty() ){ // try to guess
-				smatch matches;
+				std::smatch matches;
 				string guess1, guess2;
-				regex d1( string( "^" )+diff1 );
-				if( regex_search( all_src[i], matches, d1 )){
+				std::regex d1( string( "^" )+diff1 );
+				if( std::regex_search( all_src[i], matches, d1 )){
 					string key = matches.suffix();
 					if( !key.empty() ){
 						guess1 = diff1+key;
@@ -759,9 +791,9 @@ bool CHhnNetwork::compare_connections( const nn_unit *u1, const nn_unit *u2, con
 					}
 				}
 				else{
-					regex d2( string( "^" )+diff2 );
-					smatch matches;
-					if( regex_search( all_src[i], matches, d2 )){
+					std::regex d2( string( "^" )+diff2 );
+					std::smatch matches;
+					if( std::regex_search( all_src[i], matches, d2 )){
 						string key = matches.suffix();
 						if( !key.empty() ){
 							guess1 = diff1+key;
@@ -815,34 +847,32 @@ bool CHhnNetwork::LoadNNUnits( istream &file )
 	while( file >> str){
 		if( str == "</Units>"){
 			return success;
-		}
-		else if( str == "<Population"){
-            hhn_populat populat;
+		} else if( str == "<Population"){
+			hhn_populat populat;
 			success &= populat.load( this, file );
 			success &= add_pop( populat );
-		}
-		else if( str == "<Drive"){
-            hhn_drive drive;
+		} else if( str == "<Drive"){
+			hhn_drive drive;
 			success &= drive.load( file );
 			success &= add_drv( drive );
-		}
-		else if( str == "<Output"){
-            hhn_output output;
+		} else if( str == "<Output"){
+			hhn_output output;
 			success &= output.load( file );
 			success &= add_out( output );
-		}
-		else if( str == "<Object"){
-            hhn_output output;
+		} else if( str == "<Object"){
+			hhn_output output;
 			success &= output.load( file );
 			success &= add_out( output );
-		}
-#ifdef __MECHANICS__
+		} 
+#if defined (__MECHANICS_2D__)
 		else if( str == "<Feedback"){
-            hhn_feedback feedback;
+			hhn_feedback feedback;
 			success &= feedback.load( file );
 			success &= add_fbk( feedback );
 		}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 		else{
 			unknown_string( file, str);
 		}
@@ -857,9 +887,11 @@ void CHhnNetwork::SaveNNUnits( ostream &file )
 	for( size_t i = 0; i < Populat.size(); Populat[i].save( file ), ++i );
 	for( size_t i = 0; i < Drive.size(); Drive[i].save( file ), ++i );
 	for( size_t i = 0; i < Output.size(); Output[i].save( file ), ++i );
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	for( size_t i = 0; i < Feedback.size(); Feedback[i].save( file ), ++i );
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	file << "\n</Units>\n";
 }
 
@@ -885,22 +917,26 @@ bool CHhnNetwork::LoadConnections( istream &file )
 
 void CHhnNetwork::SaveConnections( ostream &file )
 {
-  vector<string> src_name = NNConnect.name_src();
-  vector<string> trg_name = NNConnect.name_trg();
-  sort( src_name.begin(), src_name.end());
-  sort( trg_name.begin(), trg_name.end());
-  file << endl << "<Connections>" << endl;
-  for( size_t i = 0; i < src_name.size(); ++i ){          // loop for sources
-       file << endl << "<Source " << src_name[i] << ">" << endl;
-       for( size_t j = 0; j < trg_name.size(); ++j ){     // loop for targets
-            if( !NNConnect( trg_name[j], src_name[i] ).empty() ){
-                file << endl << "<Target " << trg_name[j] << ">" << endl;
-                NNConnect( trg_name[j], src_name[i] ).save( file );
-                }
-            }
-       file << endl << "</Source>" << endl;
-       }
-  file << endl << "</Connections>" << endl;
+	
+	vector<string> src_name = NNConnect.name_src();
+	vector<string> trg_name = NNConnect.name_trg();
+	sort( src_name.begin(), src_name.end());
+	sort( trg_name.begin(), trg_name.end());
+	file << endl << "<Connections>" << endl;
+	for( size_t i = 0; i < src_name.size(); ++i ){          // loop for sources
+		file << endl << "<Source " << src_name[i] << ">" << endl;
+		bool new_line = false;
+		for( size_t j = 0; j < trg_name.size(); ++j ){     // loop for targets
+			if( !NNConnect( trg_name[j], src_name[i] ).empty() ){
+				file << endl << "<Target " << trg_name[j] << ">" << endl;
+				NNConnect( trg_name[j], src_name[i] ).save( file );
+				new_line = true;
+			}
+		}
+		if( new_line ){ file << endl; }
+		file << "</Source>" << endl;
+	}
+	file << endl << "</Connections>" << endl;
 }
 
 bool CHhnNetwork::LoadSource( const string &src, istream &file )
@@ -941,13 +977,15 @@ hhn_pair<int> CHhnNetwork::get_uid( const string &name )const
 			unit = hhn_pair<int>(_id_NNPopulat, i);
 			return unit;
 		}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	for( i = 0; i < Feedback.size(); i++ )
 		if( name == Feedback[i].get_name()){
 			unit = hhn_pair<int>(_id_NNFeedback, i);
 			return unit;
 		}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	for( i = 0; i < Drive.size(); i++ )
 		if( name == Drive[i].get_name()){
 			unit = hhn_pair<int>(_id_NNDrive, i);
@@ -975,11 +1013,13 @@ nn_unit *CHhnNetwork::get_nnunit( const unit_code &code )
 		case _id_NNPopulat:
 			if( code.NNIndex < Populat.size() )
 				return &Populat[code.NNIndex];
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		case _id_NNFeedback:
 			if( code.NNIndex < Feedback.size() )
 				return &Feedback[code.NNIndex];
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 		case _id_NNDrive:
 			if( code.NNIndex < Drive.size() )
 				return &Drive[code.NNIndex];
@@ -997,11 +1037,13 @@ nn_unit *CHhnNetwork::get_nnunit( const string &name )
 	for( size_t i = 0; i < Populat.size(); i++ )
 		if( name == Populat[i].get_name())
 			return &Populat[i];
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	for( size_t i = 0; i < Feedback.size(); i++ )
 		if( name == Feedback[i].get_name())
 			return &Feedback[i];
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	for( size_t i = 0; i < Drive.size(); i++ )
 		if( name == Drive[i].get_name())
 			return &Drive[i];
@@ -1036,9 +1078,11 @@ void CHhnNetwork::clear( void )
 	Populat.clear();
 	Drive.clear();
 	Output.clear();
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	Feedback.clear();
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	Control.clear();
 	NNConnect.clear();
 	for( size_t id = 0; id < Ions.size(); ++id ){

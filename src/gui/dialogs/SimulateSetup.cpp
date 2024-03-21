@@ -9,7 +9,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
@@ -17,15 +17,15 @@ static char THIS_FILE[]=__FILE__;
 IMPLEMENT_DYNCREATE(CSimParamSetup, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(CSimParamSetup, CPropertyPage)
-	ON_EN_UPDATE(IDC_EDIT_SIM_TIME, OnUpdateEditSimTime)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_SIM_TIME, OnDeltaposSpinSimTime)
-	ON_EN_KILLFOCUS(IDC_EDIT_SIM_TIME, OnKillfocusEditSimTime)
-	ON_EN_UPDATE(IDC_EDIT_SIM_NN_STEP, OnUpdateEditSimNnStep)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_SIM_NN_STEP, OnDeltaposSpinSimNnStep)
-	ON_EN_KILLFOCUS(IDC_EDIT_SIM_NN_STEP, OnKillfocusEditSimNnStep)
-	ON_EN_UPDATE(IDC_EDIT_TIME_FACTOR, OnUpdateEditTimeFactor)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_TIME_FACTOR, OnDeltaposSpinTimeFactor)
-	ON_EN_KILLFOCUS(IDC_EDIT_TIME_FACTOR, OnKillfocusEditTimeFactor)
+	ON_EN_UPDATE(IDC_EDIT_SIM_TIME, &CSimParamSetup::OnUpdateEditSimTime)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_SIM_TIME, &CSimParamSetup::OnDeltaposSpinSimTime)
+	ON_EN_KILLFOCUS(IDC_EDIT_SIM_TIME, &CSimParamSetup::OnKillfocusEditSimTime)
+	ON_EN_UPDATE(IDC_EDIT_SIM_NN_STEP, &CSimParamSetup::OnUpdateEditSimNnStep)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_SIM_NN_STEP, &CSimParamSetup::OnDeltaposSpinSimNnStep)
+	ON_EN_KILLFOCUS(IDC_EDIT_SIM_NN_STEP, &CSimParamSetup::OnKillfocusEditSimNnStep)
+	ON_EN_UPDATE(IDC_EDIT_TIME_FACTOR, &CSimParamSetup::OnUpdateEditTimeFactor)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_TIME_FACTOR, &CSimParamSetup::OnDeltaposSpinTimeFactor)
+	ON_EN_KILLFOCUS(IDC_EDIT_TIME_FACTOR, &CSimParamSetup::OnKillfocusEditTimeFactor)
 END_MESSAGE_MAP()
 
 CSimParamSetup::CSimParamSetup()
@@ -68,6 +68,7 @@ BOOL CSimParamSetup::OnInitDialog()
 	Spin_SimTime.SetRange(0,UD_MAXVAL);
 	Spin_TimeFactor.SetBuddy(&Edit_TimeFactor);
 	Spin_TimeFactor.SetRange(0,UD_MAXVAL);
+	NumThreadsCombo.AddString( "Auto" );
 #ifdef __OMP__
 	int numThreads = omp_get_num_procs();
 	if( numThreads > 1 ){
@@ -78,7 +79,7 @@ BOOL CSimParamSetup::OnInitDialog()
 			NumThreadsCombo.AddString( num );
 		}
 	}
-#endif
+#endif	
 	NumThreadsCombo.SetCurSel( NumThreadsCombo.GetCount()-1 );
 	return TRUE;
 }
@@ -174,14 +175,14 @@ void CSimParamSetup::OnDeltaposSpinSimTime(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CSimParamSetup::OnUpdateEditTimeFactor() 
 {
-    CString str;
+	CString str;
 	Edit_TimeFactor.GetWindowText( str );
-    TimeFactor = atof( LPCTSTR( str ));
+	TimeFactor = atof( LPCTSTR( str ));
 }
 
 void CSimParamSetup::OnKillfocusEditTimeFactor() 
 {
-    CString str;
+	CString str;
 	if(TimeFactor < 0.01){
 		TimeFactor = 0.01;
 		str.Format( "%lg", TimeFactor );
@@ -192,12 +193,12 @@ void CSimParamSetup::OnKillfocusEditTimeFactor()
 void CSimParamSetup::OnDeltaposSpinTimeFactor(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    TimeFactor += pNMUpDown->iDelta*0.1;
+	TimeFactor += pNMUpDown->iDelta*0.1;
 	if( TimeFactor < 0.01)
 		TimeFactor = 0.01;
-    CString str;
-    str.Format( "%lg", TimeFactor );
-    Edit_TimeFactor.SetWindowText( LPCTSTR( str ));
+	CString str;
+	str.Format( "%lg", TimeFactor );
+	Edit_TimeFactor.SetWindowText( LPCTSTR( str ));
 	*pResult = 0;
 }
 
@@ -244,18 +245,18 @@ void CSimViewSetup::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CSimViewSetup, CPropertyPage)
-	ON_EN_UPDATE(IDC_EDIT_BEGIN_VIEW, OnUpdateEditBeginView)
-	ON_EN_UPDATE(IDC_EDIT_END_VIEW, OnUpdateEditEndView)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_BEGIN_VIEW, OnDeltaposSpinBeginView)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_END_VIEW, OnDeltaposSpinEndView)
-	ON_EN_KILLFOCUS(IDC_EDIT_BEGIN_VIEW, OnKillfocusEditBeginView)
-	ON_EN_KILLFOCUS(IDC_EDIT_END_VIEW, OnKillfocusEditEndView)
-	ON_EN_KILLFOCUS(IDC_EDIT_HIST_BIN, OnKillfocusEditHistBin)
-	ON_EN_UPDATE(IDC_EDIT_HIST_BIN, OnUpdateEditHistBin)
-	ON_EN_KILLFOCUS(IDC_EDIT_HIST_NORM, OnKillfocusEditHistNorm)
-	ON_EN_UPDATE(IDC_EDIT_HIST_NORM, OnUpdateEditHistNorm)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_HIST_BIN, OnDeltaposSpinHistBin)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_HIST_NORM, OnDeltaposSpinHistNorm)
+	ON_EN_UPDATE(IDC_EDIT_BEGIN_VIEW, &CSimViewSetup::OnUpdateEditBeginView)
+	ON_EN_UPDATE(IDC_EDIT_END_VIEW, &CSimViewSetup::OnUpdateEditEndView)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_BEGIN_VIEW, &CSimViewSetup::OnDeltaposSpinBeginView)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_END_VIEW, &CSimViewSetup::OnDeltaposSpinEndView)
+	ON_EN_KILLFOCUS(IDC_EDIT_BEGIN_VIEW, &CSimViewSetup::OnKillfocusEditBeginView)
+	ON_EN_KILLFOCUS(IDC_EDIT_END_VIEW, &CSimViewSetup::OnKillfocusEditEndView)
+	ON_EN_KILLFOCUS(IDC_EDIT_HIST_BIN, &CSimViewSetup::OnKillfocusEditHistBin)
+	ON_EN_UPDATE(IDC_EDIT_HIST_BIN, &CSimViewSetup::OnUpdateEditHistBin)
+	ON_EN_KILLFOCUS(IDC_EDIT_HIST_NORM, &CSimViewSetup::OnKillfocusEditHistNorm)
+	ON_EN_UPDATE(IDC_EDIT_HIST_NORM, &CSimViewSetup::OnUpdateEditHistNorm)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_HIST_BIN, &CSimViewSetup::OnDeltaposSpinHistBin)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_HIST_NORM, &CSimViewSetup::OnDeltaposSpinHistNorm)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -301,14 +302,14 @@ BOOL CSimViewSetup::OnKillActive()
 
 void CSimViewSetup::OnUpdateEditBeginView() 
 {
-    CString str;
+	CString str;
 	Edit_BeginView.GetWindowText( str );
-    BeginView = atof( LPCTSTR( str ));
+	BeginView = atof( LPCTSTR( str ));
 }
 
 void CSimViewSetup::OnKillfocusEditBeginView() 
 {
-    CString str;
+	CString str;
 	if(BeginView < 0.0){
 		BeginView = 0.0;
 		str.Format( "%lg", BeginView );
@@ -324,11 +325,11 @@ void CSimViewSetup::OnKillfocusEditBeginView()
 void CSimViewSetup::OnDeltaposSpinBeginView(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    BeginView += pNMUpDown->iDelta*100.;
+	BeginView += pNMUpDown->iDelta*100.;
 	if(BeginView < 0.0)	BeginView = 0.0;
-    CString str;
-    str.Format( "%lg", BeginView );
-    Edit_BeginView.SetWindowText( LPCTSTR( str ));
+	CString str;
+	str.Format( "%lg", BeginView );
+	Edit_BeginView.SetWindowText( LPCTSTR( str ));
 	if(EndView < BeginView){
 		EndView = BeginView;
 		str.Format( "%lg", EndView );
@@ -339,14 +340,14 @@ void CSimViewSetup::OnDeltaposSpinBeginView(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CSimViewSetup::OnUpdateEditEndView() 
 {
-    CString str;
+	CString str;
 	Edit_EndView.GetWindowText( str );
-    EndView = atof( LPCTSTR( str ));
+	EndView = atof( LPCTSTR( str ));
 }
 
 void CSimViewSetup::OnKillfocusEditEndView() 
 {
-    CString str;
+	CString str;
 	if(EndView < BeginView){
 		EndView = BeginView;
 		str.Format( "%lg", EndView );
@@ -357,24 +358,24 @@ void CSimViewSetup::OnKillfocusEditEndView()
 void CSimViewSetup::OnDeltaposSpinEndView(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    EndView += pNMUpDown->iDelta*100.;
+	EndView += pNMUpDown->iDelta*100.;
 	if(EndView < BeginView)	EndView = BeginView;
-    CString str;
-    str.Format( "%lg", EndView );
-    Edit_EndView.SetWindowText(( LPCTSTR ) str );
+	CString str;
+	str.Format( "%lg", EndView );
+	Edit_EndView.SetWindowText(( LPCTSTR ) str );
 	*pResult = 0;
 }
 
 void CSimViewSetup::OnUpdateEditHistBin() 
 {
-    CString str;
+	CString str;
 	Edit_HistBin.GetWindowText( str );
-    HistBin = atof( LPCTSTR( str ));
+	HistBin = atof( LPCTSTR( str ));
 }
 
 void CSimViewSetup::OnKillfocusEditHistBin() 
 {
-    CString str;
+	CString str;
 	if(HistBin < 0.0){
 		HistBin = 0.0;
 		str.Format( "%lg", HistBin );
@@ -385,24 +386,25 @@ void CSimViewSetup::OnKillfocusEditHistBin()
 void CSimViewSetup::OnDeltaposSpinHistBin(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    HistBin += pNMUpDown->iDelta*1.;
-	if(HistBin < 0.0)	HistBin = 0.0;
-    CString str;
-    str.Format( "%lg", HistBin );
-    Edit_HistBin.SetWindowText( LPCTSTR( str ));
+	HistBin += pNMUpDown->iDelta*1.;
+	if(HistBin < 0.0)
+		HistBin = 0.0;
+	CString str;
+	str.Format( "%lg", HistBin );
+	Edit_HistBin.SetWindowText( LPCTSTR( str ));
 	*pResult = 0;
 }
 
 void CSimViewSetup::OnUpdateEditHistNorm() 
 {
-    CString str;
+	CString str;
 	Edit_HistNorm.GetWindowText( str );
-    HistNorm = atof( LPCTSTR( str ));
+	HistNorm = atof( LPCTSTR( str ));
 }
 
 void CSimViewSetup::OnKillfocusEditHistNorm() 
 {
-    CString str;
+	CString str;
 	if( HistNorm < 0.0 ){
 		HistNorm = 0.0;
 		str.Format( "%lg", HistNorm );
@@ -413,16 +415,17 @@ void CSimViewSetup::OnKillfocusEditHistNorm()
 void CSimViewSetup::OnDeltaposSpinHistNorm(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    HistNorm += pNMUpDown->iDelta*1.;
-	if( HistNorm < 0.0 ) HistNorm = 0.0;
-    CString str;
-    str.Format( "%lg", HistNorm );
-    Edit_HistNorm.SetWindowText( LPCTSTR( str ));
+	HistNorm += pNMUpDown->iDelta*1.;
+	if( HistNorm < 0.0 ) 
+		HistNorm = 0.0;
+	CString str;
+	str.Format( "%lg", HistNorm );
+	Edit_HistNorm.SetWindowText( LPCTSTR( str ));
 	*pResult = 0;
 }
 
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CSimLimbSetup property page
 IMPLEMENT_DYNCREATE(CSimLimbSetup, CPropertyPage)
@@ -432,8 +435,8 @@ CSimLimbSetup::CSimLimbSetup()
 {
 	LimbSkip = 0;
 	LimbScale = 0;
-    LimbOriginX = 0.;
-    LimbOriginY = 0.;
+	LimbOriginX = 0.;
+	LimbOriginY = 0.;
 }
 
 CSimLimbSetup::~CSimLimbSetup()
@@ -442,27 +445,27 @@ CSimLimbSetup::~CSimLimbSetup()
 
 void CSimLimbSetup::DoDataExchange(CDataExchange* pDX)
 {
-    CPropertyPage::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_SPIN_LIMB_SCALE, Spin_LimbScale);
-    DDX_Control(pDX, IDC_EDIT_LIMB_SCALE, Edit_LimbScale);
-    DDX_Control(pDX, IDC_SPIN_SIM_LIMB_SKIP, Spin_LimbSkip);
-    DDX_Text(pDX, IDC_EDIT_SIM_LIMB_SKIP, LimbSkip);
-    DDV_MinMaxLong(pDX, LimbSkip, 0, 1000000);
-    DDX_Text(pDX, IDC_EDIT_LIMB_SCALE, LimbScale);
-    DDX_Control(pDX, IDC_SPIN_LIMB_ORIGIN_X, Spin_LimbOriginX);
-    DDX_Control(pDX, IDC_SPIN_LIMB_ORIGIN_Y, Spin_LimbOriginY);
-    DDX_Control(pDX, IDC_EDIT_LIMB_ORIGIN_X, Edit_LimbOriginX);
-    DDX_Control(pDX, IDC_EDIT_LIMB_ORIGIN_Y, Edit_LimbOriginY);
-    DDX_Text(pDX, IDC_EDIT_LIMB_ORIGIN_X, LimbOriginX);
-    DDX_Text(pDX, IDC_EDIT_LIMB_ORIGIN_Y, LimbOriginY);
+	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_SPIN_LIMB_SCALE, Spin_LimbScale);
+	DDX_Control(pDX, IDC_EDIT_LIMB_SCALE, Edit_LimbScale);
+	DDX_Control(pDX, IDC_SPIN_SIM_LIMB_SKIP, Spin_LimbSkip);
+	DDX_Text(pDX, IDC_EDIT_SIM_LIMB_SKIP, LimbSkip);
+	DDV_MinMaxLong(pDX, LimbSkip, 0, 1000000);
+	DDX_Text(pDX, IDC_EDIT_LIMB_SCALE, LimbScale);
+	DDX_Control(pDX, IDC_SPIN_LIMB_ORIGIN_X, Spin_LimbOriginX);
+	DDX_Control(pDX, IDC_SPIN_LIMB_ORIGIN_Y, Spin_LimbOriginY);
+	DDX_Control(pDX, IDC_EDIT_LIMB_ORIGIN_X, Edit_LimbOriginX);
+	DDX_Control(pDX, IDC_EDIT_LIMB_ORIGIN_Y, Edit_LimbOriginY);
+	DDX_Text(pDX, IDC_EDIT_LIMB_ORIGIN_X, LimbOriginX);
+	DDX_Text(pDX, IDC_EDIT_LIMB_ORIGIN_Y, LimbOriginY);
 }
 
 
 BEGIN_MESSAGE_MAP(CSimLimbSetup, CPropertyPage)
-    ON_EN_UPDATE(IDC_EDIT_LIMB_ORIGIN_X, OnUpdateEditLimbOriginX)
-    ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_LIMB_ORIGIN_X, OnDeltaposSpinLimbOriginX)
-    ON_EN_UPDATE(IDC_EDIT_LIMB_ORIGIN_Y, OnUpdateEditLimbOriginY)
-    ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_LIMB_ORIGIN_Y, OnDeltaposSpinLimbOriginY)
+	ON_EN_UPDATE(IDC_EDIT_LIMB_ORIGIN_X, &CSimLimbSetup::OnUpdateEditLimbOriginX)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_LIMB_ORIGIN_X, &CSimLimbSetup::OnDeltaposSpinLimbOriginX)
+	ON_EN_UPDATE(IDC_EDIT_LIMB_ORIGIN_Y, &CSimLimbSetup::OnUpdateEditLimbOriginY)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_LIMB_ORIGIN_Y, &CSimLimbSetup::OnDeltaposSpinLimbOriginY)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -472,10 +475,10 @@ BOOL CSimLimbSetup::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	Spin_LimbSkip.SetRange(0,UD_MAXVAL);
 	Spin_LimbScale.SetRange(0,UD_MAXVAL);
-    Spin_LimbOriginX.SetBuddy(&Edit_LimbOriginX);
-    Spin_LimbOriginX.SetRange(UD_MINVAL,UD_MAXVAL);
-    Spin_LimbOriginY.SetBuddy(&Edit_LimbOriginY);
-    Spin_LimbOriginY.SetRange(UD_MINVAL,UD_MAXVAL);
+	Spin_LimbOriginX.SetBuddy(&Edit_LimbOriginX);
+	Spin_LimbOriginX.SetRange(UD_MINVAL,UD_MAXVAL);
+	Spin_LimbOriginY.SetBuddy(&Edit_LimbOriginY);
+	Spin_LimbOriginY.SetRange(UD_MINVAL,UD_MAXVAL);
 	return TRUE;
 }
 
@@ -483,8 +486,8 @@ BOOL CSimLimbSetup::OnSetActive()
 {
 	LimbSkip = pData->LimbSkip;
 	LimbScale = pData->LimbScale;
-    LimbOriginX = pData->LimbOriginX;
-    LimbOriginY = pData->LimbOriginY;
+	LimbOriginX = pData->LimbOriginX;
+	LimbOriginY = pData->LimbOriginY;
 	UpdateData( FALSE );
 	return CPropertyPage::OnSetActive();
 }
@@ -494,51 +497,53 @@ BOOL CSimLimbSetup::OnKillActive()
 	UpdateData( TRUE );
 	pData->LimbSkip = LimbSkip;
 	pData->LimbScale = LimbScale;
-    pData->LimbOriginX = LimbOriginX;
-    pData->LimbOriginY = LimbOriginY;
+	pData->LimbOriginX = LimbOriginX;
+	pData->LimbOriginY = LimbOriginY;
 	return CPropertyPage::OnKillActive();
 }
 
 void CSimLimbSetup::OnUpdateEditLimbOriginX()
 {
-    CString strLimbOriginX; 
+	CString strLimbOriginX; 
 	Edit_LimbOriginX.GetWindowText( strLimbOriginX );
-    LimbOriginX = atof( LPCTSTR( strLimbOriginX ));
+	LimbOriginX = atof( LPCTSTR( strLimbOriginX ));
 }
 
 void CSimLimbSetup::OnDeltaposSpinLimbOriginX(NMHDR *pNMHDR, LRESULT *pResult)
 {
-    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-    if(( LimbOriginX += pNMUpDown->iDelta*0.1 ) < 0 )
-         LimbOriginX = 0.0;
-    else if( LimbOriginX > 2.0 )
-         LimbOriginX = 2.0;
-    CString strLimbOriginX;
-    strLimbOriginX.Format( "%g", LimbOriginX );
-    Edit_LimbOriginX.SetWindowText(( LPCTSTR ) strLimbOriginX );
-    *pResult = 0;
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	if(( LimbOriginX += pNMUpDown->iDelta*0.1 ) < 0 )
+		LimbOriginX = 0.0;
+	else if( LimbOriginX > 2.0 )
+		LimbOriginX = 2.0;
+	CString strLimbOriginX;
+	strLimbOriginX.Format( "%g", LimbOriginX );
+	Edit_LimbOriginX.SetWindowText(( LPCTSTR ) strLimbOriginX );
+	*pResult = 0;
 }
 
 void CSimLimbSetup::OnUpdateEditLimbOriginY()
 {
-    CString strLimbOriginY; 
+	CString strLimbOriginY; 
 	Edit_LimbOriginY.GetWindowText( strLimbOriginY );
-    LimbOriginY = atof( LPCTSTR( strLimbOriginY ));
+	LimbOriginY = atof( LPCTSTR( strLimbOriginY ));
 }
 
 void CSimLimbSetup::OnDeltaposSpinLimbOriginY(NMHDR *pNMHDR, LRESULT *pResult)
 {
-    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-    if(( LimbOriginY += pNMUpDown->iDelta*0.1 ) < 0 )
-         LimbOriginY = 0.0;
-    else if( LimbOriginY > 2.0 )
-         LimbOriginY = 2.0;
-    CString strLimbOriginY;
-    strLimbOriginY.Format( "%g", LimbOriginY );
-    Edit_LimbOriginY.SetWindowText(( LPCTSTR ) strLimbOriginY );
-    *pResult = 0;
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	if(( LimbOriginY += pNMUpDown->iDelta*0.1 ) < 0 )
+		LimbOriginY = 0.0;
+	else if( LimbOriginY > 2.0 )
+		LimbOriginY = 2.0;
+	CString strLimbOriginY;
+	strLimbOriginY.Format( "%g", LimbOriginY );
+	Edit_LimbOriginY.SetWindowText(( LPCTSTR ) strLimbOriginY );
+	*pResult = 0;
 }
-#endif __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif /*__MECHANICS_2D__*/
 
 /////////////////////////////////////////////////////////////////////////////
 // CSimulateSetup
@@ -551,10 +556,12 @@ CSimulateSetup::CSimulateSetup(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPa
 	AddPage( &SimViewSetup );
 	SimParamSetup.pData = &Data;
 	SimViewSetup.pData = &Data;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	AddPage( &SimLimbSetup );
 	SimLimbSetup.pData = &Data;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 }
 
 CSimulateSetup::CSimulateSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
@@ -564,10 +571,12 @@ CSimulateSetup::CSimulateSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelec
 	AddPage( &SimViewSetup );
 	SimParamSetup.pData = &Data;
 	SimViewSetup.pData = &Data;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	AddPage( &SimLimbSetup );
 	SimLimbSetup.pData = &Data;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 }
 
 CSimulateSetup::~CSimulateSetup()

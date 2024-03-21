@@ -80,7 +80,6 @@ void help( const char *name )
 	cout << "Options:" << endl;
 	cout << "     -i                 specify the model to simulate" << endl;
 	cout << "     -o                 specify the file to save the results of the simulation" << endl;
-	cout << "     -s                 run script-base simulation" << endl;
 	cout << "     -h                 display this help and exit" << endl;
 }
 
@@ -114,8 +113,6 @@ int main( int argc, char *argv[] )
 		ofilename = ifilename+".dat";
 		model.StartSimulation( ifilename.c_str(), ofilename.c_str());
 	}
-	else if( !sfilename.empty())
-		model.StartScript( sfilename.c_str());
 	else{
 		help( argv[0] );
 	}

@@ -26,7 +26,7 @@
 
 #include "sptypes.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "mustemplate.h"
 #include "linktemplate.h"
@@ -40,7 +40,7 @@ class t_limb : public uni_template{
       //--- constructor
 		t_limb( uni_template *parent, const char *name );
 		t_limb( const t_limb &limb );
-virtual	~t_limb( void );
+virtual		~t_limb( void );
 	public:
 		t_limb &operator = ( const t_limb &limb );
 	public:
@@ -48,53 +48,44 @@ virtual	~t_limb( void );
 		void get_muscleslist( vector<string> &m_list ) const;
 	public:
 		void upd_outlist( vector<string> &out_list );
-virtual	void copy_to( uni_template **unit, uni_template *parent );
+virtual		void copy_to( uni_template **unit, uni_template *parent );
 		void copy_to( walker *w, double *m, double *cm, double *I );
 	protected:
 		bool add_child( const char *type, int id, const char *name = NULL );
 		bool add_child( const char *type, const char *name );
-      //--- Load/save parameters 
-virtual	bool load_addpar( string str, istream &file );
-virtual	void save_addpar( ostream &file );
-      protected:
-static	t_link DefaultLink;
-static	t_joint DefaultJoint;
-static	t_muscle DefaultMuscle;
+		//--- Load/save parameters 
+virtual		bool load_addpar( string str, istream &file );
+virtual		void save_addpar( ostream &file );
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // t_body 
 class t_body : public uni_template{
-	public:
-      //--- constructor
+	public: //--- constructor
 		t_body( uni_template *parent, const char *name );
 		t_body( const t_body &body );
-virtual	~t_body( void );
+virtual		~t_body( void );
 	public:
 		t_body &operator = ( const t_body &body );
 	public:
 		void get_fblist( vector<string> &fb_list ) const{};
-virtual	void copy_to( uni_template **unit, uni_template *parent );
+virtual		void copy_to( uni_template **unit, uni_template *parent );
 		void copy_to( walker *w, double *m, double *cm, double *I );
 	protected:
 		bool add_child( const char *type, int id, const char *name = NULL );
 		bool add_child( const char *type, const char *name );
-      //--- Load/save parameters 
-virtual	bool load_addpar( string str, istream &file );
-virtual	void save_addpar( ostream &file );
-	protected:
-static	t_link DefaultLink;
-static	t_joint DefaultJoint;
+		//--- Load/save parameters 
+virtual		bool load_addpar( string str, istream &file );
+virtual		void save_addpar( ostream &file );
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // t_biomech 
 class t_biomech : public uni_template{
-	public:
-      //--- constructor
-		t_biomech( uni_template *parent, int is_active = GRID_NONE );
+	public: //--- constructor
+		t_biomech( uni_template *parent = NULL, int is_active = GRID_NONE );
 		t_biomech( const t_biomech &biomech );
-virtual	~t_biomech( void );
+virtual		~t_biomech( void );
 	public:
 		t_biomech &operator = ( const t_biomech &biomech );
 	public:
@@ -112,13 +103,15 @@ virtual	~t_biomech( void );
 		bool get_addparlist( vector<string> &parlist );
 		bool get_addpar( const char *path, string &name, string &element, int &type );
 		bool upd_addpar( const char *path, const char *name, string &element, bool save );
-      //--- Load/save parameters 
+		//--- Load/save parameters 
 		bool load_addpar( string str, istream &file );
 		void save_addpar( ostream &file );
 	protected:
 		bool IsFixed;
 		t_data G;
 		t_data Vel;
+		t_data AddVelL;
+		t_data AddVelR;
 		t_data MusBM;
 		t_data MusBT;
 		t_data JointVis;
@@ -145,6 +138,7 @@ virtual	~t_biomech( void );
 		t_data dY;
 		t_data dA;
 };
-
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 #endif //__BIOM_TEMPLATE_H

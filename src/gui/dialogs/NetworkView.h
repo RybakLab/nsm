@@ -25,9 +25,9 @@ class CGeomView : public CDialog{
 		CGeomView( CWnd* pParent = NULL );
 		~CGeomView( void ){};
 	protected: // overrides
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	protected: // message map
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 		afx_msg void OnDeltaposSpinRow(NMHDR* pNMHDR, LRESULT* pResult);
 		afx_msg void OnDeltaposSpinCol(NMHDR* pNMHDR, LRESULT* pResult);
 	public: // data
@@ -47,9 +47,9 @@ class CScaleView : public CDialog{
 		CScaleView( CWnd* pParent = NULL );
 		~CScaleView( void ){};
 	protected: // overrides
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	protected: // message map
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 		afx_msg void OnDeltaposSpinYmax(NMHDR* pNMHDR, LRESULT* pResult);
 		afx_msg void OnDeltaposSpinYmin(NMHDR* pNMHDR, LRESULT* pResult);
 		afx_msg void OnUpdateEditYmax();
@@ -72,11 +72,11 @@ class CNetworkView : public CDialog{
 		CNetworkView( CWnd* pParent = NULL );
 		~CNetworkView( void ){};
 	public:// overrides
-virtual	int DoModal();
+virtual		int DoModal();
 	protected:
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	protected: // message map
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 		afx_msg void OnAddView();
 		afx_msg void OnRemoveView();
 		afx_msg void OnScaleView();
@@ -112,9 +112,9 @@ class CImageSize : public CDialog{
 		CImageSize( CWnd* pParent = NULL );   // standard constructor
 		~CImageSize( void ){};
 	public:// overrides
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	protected: // message map
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 	public: // data
 		enum { IDD = IDD_IMAGE_SIZE };
 		CSpinButtonCtrl	Spin_Width;

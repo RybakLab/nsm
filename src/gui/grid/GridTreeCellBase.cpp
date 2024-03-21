@@ -13,10 +13,10 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif
 
-#define TREE_BOX_MARGIN     2   // for drawing "+" or "-" box associated with a Tree
+#define TREE_BOX_MARGIN     0   // for drawing "+" or "-" box associated with a Tree
 
 IMPLEMENT_DYNCREATE(CGridTreeCellBase, CGridCellBase)
 

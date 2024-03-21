@@ -1,6 +1,6 @@
 /*****************************************************************
  ****              (C)  1997 - 2000                           ****
- **           Model of Hodgkin-Haxley type neuron               **
+ **           Model of Hodgkin-Huxley type neuron               **
  **         Developed by Ilia Rybak and Sergey Markin           **
  ****                 Control (module)                        ****
  *****************************************************************/
@@ -14,7 +14,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
@@ -24,12 +24,8 @@ void CHhnControlled::select( nn_unit *object )
 {
 	if( object ){
 		Origin = ( double *)object->select( this );
-		if(	Origin ){
-			Init = *Origin;
-		}
-		else{
-			Origin = &Init;
-		}
+		if( Origin ){ Init = *Origin; }
+		else{ Origin = &Init; }
 	}
 }
 
@@ -40,15 +36,10 @@ bool CHhnControlled::load( istream &file, CSimulate *manager )
 	while( file >> str ){
 		if( str == "<Code>" ){
 			bOk = Code.load( file, manager );
-			if( Code.Param >= _id_MAX_CTRL )
-				bOk = false;
-		}
-		else if( str == "</Target>" ){
+			if( Code.Param >= _id_MAX_CTRL ){ bOk = false; }
+		} else if( str == "</Target>" ){
 			return bOk;
-		}
-		else{
-			unknown_string( file, str );
-		}
+		} else{ unknown_string( file, str ); }
 	}
 	message( "Missing tag </Target>!", "Warning!" );
 	return false;
@@ -65,22 +56,22 @@ void CHhnControlled::save( ostream &file, CSimulate *manager)
 // hhn_control class
 //////////////////////////////////////////////////////////////////////
 // constructors/destructor
-hhn_control::hhn_control( CHhnNetwork *network )
-	: Variance( -1.0 ), StepFunc( true )
+hhn_control::hhn_control( void )
+	:  StepFunc( true ), LastOutput( 1. ), Variance( -1.0 ),CurrTabs( 0 )
 {
 	Name = "";
 }
 
-hhn_control::hhn_control( const string &name, CHhnNetwork *network )
-	: Variance( -1.0 ), StepFunc( true )
+hhn_control::hhn_control( const string &name )
+	:  StepFunc( true ), LastOutput( 1. ), Variance( -1.0 ), CurrTabs( 0 )
 {
 	Name = name;
 }
 
 hhn_control::hhn_control( const hhn_control &ctrl )
-	: nn_unit( ctrl ), hhn_process( ctrl ),
-	CtrUnits( ctrl.CtrUnits ), CtrTabFunc( ctrl.CtrTabFunc ),
-	Variance( ctrl.Variance ), StepFunc( ctrl.StepFunc )
+	: nn_unit( ctrl ), hhn_process( ctrl ), StepFunc( ctrl.StepFunc ),
+	LastOutput( 1. ), Variance( ctrl.Variance ), CurrTabs( 0 ),
+	CtrTabFunc( ctrl.CtrTabFunc ), CtrUnits( ctrl.CtrUnits )
 {
 }
 
@@ -136,8 +127,7 @@ void hhn_control::control( size_t currstep, double step )
 			}
 		}
 		CurrTabs = cur_tab;
-	}
-	else{
+	} else{
 		for( size_t i = 0; i < CtrUnits.size(); ++i ){
 			CtrUnits[i].modify( LastOutput );
 		}
@@ -151,11 +141,12 @@ void hhn_control::add_unit( const CHhnControlled &ctrl )
 
 bool hhn_control::del_unit( const CHhnControlled &ctrl )
 {
-	for( unsigned int i = 0; i < CtrUnits.size(); i++ )
+	for( size_t i = 0; i < CtrUnits.size(); i++ ){
 		if( CtrUnits[i] == ctrl ){
 			CtrUnits.erase( CtrUnits.begin()+i );
 			return true;
 		}
+	}
 	return false;
 }
 
@@ -167,8 +158,9 @@ void hhn_control::add_tab( const hhn_pair<double> &func )
 
 void hhn_control::del_tab( size_t index )
 {
-	if( index < CtrTabFunc.size() )
-	 CtrTabFunc.erase( CtrTabFunc.begin()+index );
+	if( index < CtrTabFunc.size() ){
+		CtrTabFunc.erase( CtrTabFunc.begin()+index );
+	}
 }
 
 void hhn_control::sort_tabs( void )
@@ -199,34 +191,23 @@ void hhn_control::clear_tabs( void )
 bool hhn_control::load( istream &file, CSimulate * manager )
 {
 	string str;
-
 	file >> ws;
 	getline(file, str, '>');
 	set_name(str);
-    CtrUnits.clear();
-
+	CtrUnits.clear();
 	while( file >> str){
 		if( str == "<Function>"){
 			load_tab( file );
-		}
-		else if( str == "<Target>"){
-            CHhnControlled ctrl;
-			if( ctrl.load( file, manager ) ){
-					add_unit( ctrl );
-			}
-		}
-		else if( str == "Noise"){
+		} else if( str == "<Target>"){
+			CHhnControlled ctrl;
+			if( ctrl.load( file, manager )){ add_unit( ctrl ); }
+		} else if( str == "Noise"){
 			file >> str >> Variance;
-		}
-		else if( str == "StepFunc"){
+		} else if( str == "StepFunc"){
 			file >> str >> StepFunc;
-		}
-		else if( str == "</Control>"){
+		} else if( str == "</Control>"){
 			return true;
-		}
-		else{
-			unknown_string( file, str);
-		}
+		} else{ unknown_string( file, str); }
 	}
 	message( "Missing tag </Control>!", "Warning!" );
 	return false;
@@ -238,7 +219,7 @@ void hhn_control::save( ostream &file, CSimulate * manager )
 	file << "Noise = " << Variance << endl;
 	file << "StepFunc = " << StepFunc << endl;
 	save_tab( file );
-	for( unsigned int i = 0; i < CtrUnits.size(); i++ ){
+	for( size_t i = 0; i < CtrUnits.size(); i++ ){
 		CtrUnits[i].save( file, manager );
 	}
 	file << endl << "</Control>" << endl;
@@ -247,29 +228,25 @@ void hhn_control::save( ostream &file, CSimulate * manager )
 bool hhn_control::load_tab( istream &file )
 {
 	hhn_pair<double> point;
-    CtrTabFunc.clear();
+	CtrTabFunc.clear();
 	while(file >> point){
 		add_tab(point);
 	}
 	file.clear();
-
 	string str;
 	while(file >> str){
-		if(str == "</Function>")
+		if( str == "</Function>" ){
 			return true;
-		else{
-			unknown_string( file, str);
-		}
+		} else{ unknown_string( file, str); }
 	}
 	message( "Missing tag </Function>!", "Warning!" );
 	return false;
 }
 
-
 void hhn_control::save_tab( ostream &file )
 {
 	file << endl << "<Function>" << endl;
-	for( unsigned int i = 0; i < CtrTabFunc.size(); i++ )
-		file << CtrTabFunc[i] << endl;
+	for( size_t i = 0; i < CtrTabFunc.size(); i++ )
+	file << CtrTabFunc[i] << endl;
 	file << "</Function>" << endl;
 }

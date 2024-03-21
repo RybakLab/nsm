@@ -9,48 +9,15 @@
 
 #define PROC_TYPE( func ) void (* func )( size_t currstep, double step, hhn_process **start )
 #define proc_type void( * )( size_t currstep, double step, hhn_process **start )
-/*
-enum _pass_id_{
-	_id_PASS_RESET,
-	_id_PASS_INPUTS,
-
-	_id_PASS_IEDS,
-	_id_PASS_CHANNEL,
-#ifdef __RK__
-	_id_PASS_IPUMP_K1,
-	_id_PASS_IDYN_K1,
-	_id_PASS_IPUMP_K2,
-	_id_PASS_IDYN_K2,
-	_id_PASS_IPUMP,
-#else
-	_id_PASS_IPUMP,
-	_id_PASS_IDYN,
-#endif
-	_id_PASS_SYNAPSE,
-	_id_PASS_VM,
-	_id_PASS_NNUNIT,
-	_id_PASS_SMOOTHGS,
-#ifdef __MECHANICS__
-	_id_PASS_WALKER,
-#endif 
-#ifdef __MPI__
-	_id_PASS_MPI,
-#endif 
-	_id_PASS_VIEW,
-	_id_PASS_CONTROL,
-	_id_MAX_PASS,
-};
-*/
 
 enum _pass_id_{
 // 1. start next step
 	_id_PASS_RESET,		// reset all variables
 // 2.  presynaptic calculations on neurons
-	_id_PASS_PREYS,		// presynaptic output
-	_id_PASS_PREH,		// presynaptic depression
+	_id_PASS_PREY,		// presynaptic output
 // 3.  calculate the intrinsic properties of a neurons
 	_id_PASS_IEDS,		// calculate Nernst potentials for all ions (Na, K, Ca, Cl)
-	_id_PASS_G,			// conductance and current for all ions channels and synapses
+	_id_PASS_G,		// conductance and current for all ions channels and synapses
 	_id_PASS_IPUMP,		// pump current
 #ifndef __RK__
 	_id_PASS_IDYN,		// ions dynamics
@@ -66,9 +33,11 @@ enum _pass_id_{
 	_id_PASS_NNUNIT,
 	_id_PASS_POSTY,		// presynaptic output - smoothing
 // 5.  calculate biomechanics if needed
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	_id_PASS_WALKER,
-#endif /*__MECHANICS__*/
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif /*__MECHANICS_2D__*/
 // 6.  control behavior of the model.
 #ifdef __MPI__
 	_id_PASS_MPI,
@@ -118,9 +87,9 @@ class methid_{
 ///////////////////////////////////////////////////////////////////////////////
 // class runman
 class runman{
-typedef	methid_<size_t, void *> method_;
-typedef	multimap<size_t, hhn_process *> units_;
-typedef	map<method_, units_> uproc_;
+	typedef	methid_<size_t, void *> method_;
+	typedef	multimap<size_t, hhn_process *> units_;
+	typedef	map<method_, units_> uproc_;
 	///////////////////////////////////////////////////////////////////////////////
 	// class usched_
 	class usched_{
@@ -181,8 +150,8 @@ typedef	map<method_, units_> uproc_;
 			vector<hhn_process *> Units;
 			
 	};
-typedef uproc_::iterator upiter_;
-typedef vector<usched_>::iterator uschiter_;
+	typedef uproc_::iterator upiter_;
+	typedef vector<usched_>::iterator uschiter_;
 	public:
 		runman( void );
 		runman( const runman &rm );
@@ -191,19 +160,23 @@ typedef vector<usched_>::iterator uschiter_;
 		runman &operator = ( const runman &rm ){ Units = rm.Units; return *this; };
 	public:
 		size_t run( double step, size_t currstep, size_t granularity, CSimulate *sim );
+		size_t next_step( double step, size_t currstep, size_t granularity, CSimulate *sim );
 		bool reg_unit( hhn_process *unit, PROC_TYPE( method ), size_t priority, size_t uid = -1 );
 		void unreg_units( void );
 		void schedule( size_t granularity = 0 );
+		int get_unuts_size( void ){ return  Units.size(); }; //AK
 	private:
 		void balance( size_t granularity );
 	private:
-		uproc_ Units;				// raw data to be process
+		uproc_ Units;			// raw data to be process
 		vector<usched_> SchUnits;	// scheduled data to be process
+static		size_t Copies;
 };
 
-extern bool reg_unit( hhn_process *unit, PROC_TYPE( method ), size_t priority, size_t uid = -1, runman *man = NULL );
-extern void schedule( size_t granularity, runman *man = NULL );
-extern size_t run( double step, size_t currstep, size_t granularity, CSimulate *sim, runman *man = NULL );
+extern bool reg_unit( hhn_process *unit, PROC_TYPE( method ), size_t priority, size_t uid, runman *man );
+extern void schedule( size_t granularity, runman *man );
+extern size_t run( double step, size_t currstep, size_t granularity, CSimulate *sim, runman *man );
+extern size_t next_step( double step, size_t currstep, size_t granularity, CSimulate *sim, runman *man );
 extern void unreg_units( runman *man = NULL );
 
 extern void lock_data( void );

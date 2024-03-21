@@ -3,7 +3,7 @@
 //---------------------------------------------------------------------
 #include "precompile.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "linktemplate.h"
 #include "walker.h"
@@ -26,14 +26,14 @@ struct link_data{
 };
 
 static link_data DD[__id_MAX_LINKS] = {
-	{   0.0,   0.0,    0.0, 0.0 },					// generic link
-	{   0.0,   0.0,    0.0, 0.0 },					// forepart
-	{ 122.5, 245.0, 1448.8, 7249930.0 },			// trunk
-	{  27.5,  54.9,  324.6,   81524.0 },			// pelvis
-	{  43.1,  97.3,  149.5,  140063.0 },			// thigh
-	{  43.4, 102.5,   63.5,   59201.0 },			// shank
-	{  33.5,  68.9,   21.7,    9147.0 }				// foot
-//  no digits
+	{   0.0,   0.0,   0.1,        0.0 },			// generic link
+	{   0.0,   0.0,  843.4,       0.0 },			// forepart
+	{ 123.5, 247.0, 1248.5, 6347640.0 },			// trunk
+	{  28.0,  56.0,  283.1,   73975.0 },			// pelvis
+	{  43.0,  97.0,  126.9,  107208.0 },			// thigh
+	{  43.1, 102.0,   60.5,   56273.0 },			// shank
+	{  37.2,  76.5,   20.9,   10248.0 }			// foot
+	//  no digits
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -42,14 +42,14 @@ t_link::t_link( uni_template *parent, int is_active )
 	: uni_template( parent, is_active, ( char **)__LinkNames, __id_MAX_LINKS ), 
 	IsRod( true )
 {
+	TypeName = TypeNameS = "Link";
+	// IsShowType = true;
 	DList.insert( make_pair( "Center of mass\nCM", &CM ));
 	DList.insert( make_pair( "Length\nL", &L ));
 	DList.insert( make_pair( "Mass\nM", &M ));
 	DList.insert( make_pair( "Inertia\nI", &I ));
 	UnitId = __id_generic_L;
 	Name = __LinkNames[UnitId];
-	TypeName = "Link";
-	TypeNameS = "Link";
 }
 
 t_link::t_link( const t_link &l )
@@ -164,7 +164,7 @@ void t_link::save_addpar( ostream &file )
 
 void t_link::load_dummy( void )
 {
-	set_default_data();
+//	set_default_data();
 }
 
 void t_link::set_default_data( void )
@@ -241,7 +241,6 @@ void t_forepart::save_addpar( ostream &file )
 void t_forepart::load_dummy( void )
 {
 	t_link::load_dummy();
-	set_default_data();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -298,7 +297,6 @@ void t_trunk::save_addpar( ostream &file )
 void t_trunk::load_dummy( void )
 {
 	t_link::load_dummy();
-	set_default_data();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -360,7 +358,6 @@ void t_pelvis::save_addpar( ostream &file )
 void t_pelvis::load_dummy( void )
 {
 	t_link::load_dummy();
-	set_default_data();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -401,7 +398,6 @@ void t_thigh::copy_to( walker *w, int side, double *m, double *cm, double *i )
 void t_thigh::load_dummy( void )
 {
 	t_link::load_dummy();
-	set_default_data();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -442,7 +438,6 @@ void t_shank::copy_to( walker *w, int side, double *m, double *cm, double *i )
 void t_shank::load_dummy( void )
 {
 	t_link::load_dummy();
-	set_default_data();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -483,7 +478,7 @@ void t_foot::copy_to( walker *w, int side, double *m, double *cm, double *i )
 void t_foot::load_dummy( void )
 {
 	t_link::load_dummy();
-	set_default_data();
 }
-
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__

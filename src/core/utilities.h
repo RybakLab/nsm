@@ -19,6 +19,8 @@ const double PI = 3.14159265358979323846;
 #define EXP( x ) exp( x )
 #define COSH( x ) cosh( x )
 
+#define SIGMOID( vm, hvm, slp ) \
+        1./( 1.+exp((( vm )-( hvm ))/( slp )))
 #define GENERIC_G( vm, hvm, slp ) \
         1./( 1.+exp((( vm )-( hvm ))/( slp )))
 #define GENERIC_T( t, vm, hvm, slp ) \
@@ -27,6 +29,8 @@ const double PI = 3.14159265358979323846;
         (( t ) <= EPS ) ? ( shift ) : ( shift )+(2.*( t ))/( exp((( vm )-( hvm ))/( slp_1 ))+exp((( vm )-( hvm ))/( slp_2 )))
 #define EXP_EULER( y, y0, step, t ) \
         (( t ) <= EPS ) ? ( y0 ) : ( exp(-(( step )/(t))))*(( y )-( y0 ))+( y0 )
+#define EXP_EULER_EXPT( y, y0, expt ) \
+        (( expt ) <= EPS ) ? ( y0 ) : ( expt )*(( y )-( y0 ))+( y0 ) /*expt = exp(-(( step )/(t)))*/
 /*
 #define EPS 1.0e-6
 

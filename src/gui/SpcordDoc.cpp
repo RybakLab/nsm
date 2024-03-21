@@ -11,7 +11,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
 extern CHhnNetwork *GlobalNet;
@@ -35,9 +35,9 @@ void neurosim_doc::Dump(CDumpContext& dc) const
 IMPLEMENT_DYNCREATE( neurosim_doc, CDocument )
 
 BEGIN_MESSAGE_MAP( neurosim_doc, CDocument )
-	ON_COMMAND( IDM_REFRESH, OnRefresh )
-	ON_UPDATE_COMMAND_UI( ID_FILE_PRINT, OnUpdateFilePrint )
-	ON_UPDATE_COMMAND_UI( ID_FILE_PRINT_PREVIEW, OnUpdateFilePrintPreview )
+	ON_COMMAND( IDM_REFRESH, &neurosim_doc::OnRefresh )
+	ON_UPDATE_COMMAND_UI( ID_FILE_PRINT, &neurosim_doc::OnUpdateFilePrint )
+	ON_UPDATE_COMMAND_UI( ID_FILE_PRINT_PREVIEW, &neurosim_doc::OnUpdateFilePrintPreview )
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -134,11 +134,13 @@ void neurosim_doc::DrawTo( bool complete, double time )
 		while( pos != NULL ){
 			neurosim_view *pView = ( neurosim_view *)GetNextView( pos );
 			if( pView->IsKindOf( RUNTIME_CLASS( CChartView )) ) 
-				pView->DrawTo( complete, unsigned long( time/SimData->SimStep ));
-#ifdef __MECHANICS__
+				pView->DrawTo( complete, ( unsigned long )( time/SimData->SimStep ));
+#if defined (__MECHANICS_2D__)
 			else if( pView->IsKindOf( RUNTIME_CLASS( CLimbView )))
-				pView->DrawTo( complete, unsigned long( time/SimData->SimStep ));
-#endif //__MECHANICS__
+				pView->DrawTo( complete, ( unsigned long )( time/SimData->SimStep ));
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 		}
 		::ReleaseMutex( IsPlotting );
 	}

@@ -1,101 +1,24 @@
 // func_lib.cpp : Defines the class behaviors for the application.
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "precompile.h"
 
 #ifndef __CONSOLE__
 
 #include "func_lib.h"
 
-//#include "Runing_ScrolDoc.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+////#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
 
 /*===================================================================*/
-char* Remove_tab( char *str )
-{
- char buff[1024];
- int i, j;
-	for( i = 0, j = 0; str[i]; i++ ) {
-		if( str[i] == '\t' ) {
-			buff[j++] = ' ';
-			while( j%8 ) buff[j++] = ' ';
-		}
-		else
-		buff[j++] = str[i];
-	}
-	buff[j] = '\0';
-	strcpy(str, buff);
-
-	return str;
-}
-/*===================================================================*/
-double drand( void )
-{
-	double d = rand();
-	return d/RAND_MAX;
-}
-/*===================================================================*/
-BOOL Minmax(const short *x, long n, short *min, short *max)
-{
-	*min = *max	= 0;
-	if( n <= 0 ) return FALSE;
-	for(long i=0; i<n; i++) {
-		short a = x[i];
-		if ( *min > a || i==0 ) *min = a;
-		if ( *max < a || i==0 ) *max = a;
-	}
-	return TRUE;
-}
-/*===================================================================*/
-double Time_calc_from_box(double t1, double t2, RECT *r, CPoint point)
-{
- double	t,d;
-    d = r->right - r->left;
-    if(d==0) d = 1;
-    t=t1+(point.x-r->left)*(t2-t1)/d;
-
-    return t;
-}
-/*===================================================================*/
-VOID
-ErrorMessage( 
-	LPCTSTR lpOrigin	// Indicates error location
-	)
-{
-	LPTSTR msgBuffer;		// string returned from system
-	DWORD cBytes;			// length of returned string
-	DWORD dwMessageId;	// ERROR_XXX code value
-	char	msgBuffer_out[256];
-
-	dwMessageId = GetLastError();
-	cBytes = FormatMessage(
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_ALLOCATE_BUFFER,
-				NULL,
-				dwMessageId,
-				MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-				(TCHAR *)&msgBuffer,
-				500,
-				NULL );
-	if( msgBuffer ) {
-		msgBuffer[ cBytes ] = TEXT('\0');
-		sprintf( msgBuffer_out, "Error: %s -- %s MessageId %d", lpOrigin, msgBuffer, dwMessageId );
-		LocalFree( msgBuffer );
-	}
-	else {
-		sprintf( msgBuffer_out, "Error: %s FormatMessage error: MessageId %d\n", lpOrigin, GetLastError());
-	}
-
-	AfxMessageBox( msgBuffer_out );
-}
-/*-------------------------------------------------*/ 
 BOOL RdWr_INI(int &value,const char *lpszSection,const char *lpszEntry,BOOL ifread, const char * File_name_ini /*=0*/)
 {
- int	i_val;
- char	buff[256];
+	int i_val;
+	char buff[256];
 	if(ifread) {
 		CString strBuffer, lpDefault;
 		DWORD nSize = 255;
@@ -106,11 +29,11 @@ BOOL RdWr_INI(int &value,const char *lpszSection,const char *lpszEntry,BOOL ifre
 			strBuffer = AfxGetApp()->GetProfileString(lpszSection, lpszEntry);
 
 		if (strBuffer.IsEmpty()) return FALSE;
-		sscanf(strBuffer,"%d",&i_val);
+		sscanf_s(strBuffer,"%d",&i_val);
 		value=i_val;
 	} else {
 		i_val=value;
-		sprintf(buff,"%d",i_val);
+		sprintf_s(buff, 256, "%d", i_val );
 
 		if( File_name_ini ) {
 			if( ! WritePrivateProfileString(lpszSection,lpszEntry,buff, File_name_ini)) return FALSE;
@@ -170,14 +93,13 @@ BOOL RdWr_INI(int **array, int n_row, int n_col, const char *lpszSection, const 
 		if (strBuffer.IsEmpty()) return FALSE;
 
 		char	*buff, *end_buff;
-		buff = new char[ strBuffer.GetLength() +1 ];
-		strcpy( buff, ( LPCTSTR ) strBuffer );
+		buff = new char[strBuffer.GetLength()+1];
+		strcpy_s( buff, strBuffer.GetLength()+1, ( LPCTSTR ) strBuffer );
 
 		end_buff = buff;
 		for( i=0; i<n_row; i++)
-             for( j=0; j<n_col; j++)
-			      if( end_buff ) array[i][j] = (int) strtol( end_buff, &end_buff, 10 );
-
+		for( j=0; j<n_col; j++)
+			if( end_buff ) array[i][j] = (int) strtol( end_buff, &end_buff, 10 );
 		delete [] buff;
 	} else {
 		CString tmp, tmp1;
@@ -211,8 +133,8 @@ BOOL RdWr_INI(int *array, int n_array, const char *lpszSection, const char *lpsz
 		if (strBuffer.IsEmpty()) return FALSE;
 
 		char	*buff, *end_buff;
-		buff = new char[ strBuffer.GetLength() +1 ];
-		strcpy( buff, ( LPCTSTR ) strBuffer );
+		buff = new char[strBuffer.GetLength()+1];
+		strcpy_s( buff, strBuffer.GetLength()+1, ( LPCTSTR ) strBuffer );
 
 		end_buff = buff;
 		for( i=0; i<n_array; i++)
@@ -247,9 +169,9 @@ BOOL RdWr_INI(long &value,const char *lpszSection,const char *lpszEntry, BOOL if
 			strBuffer = AfxGetApp()->GetProfileString(lpszSection, lpszEntry);
 
 		if (strBuffer.IsEmpty()) return FALSE;
-		sscanf(strBuffer,"%d",&value);
+		sscanf_s(strBuffer,"%d",&value);
 	} else {
-		sprintf(buff,"%d",value);
+		sprintf_s( buff, 256, "%d", value );
 
 		if( File_name_ini ) {
 			if( ! WritePrivateProfileString(lpszSection,lpszEntry,buff, File_name_ini)) return FALSE;
@@ -272,9 +194,9 @@ BOOL RdWr_INI(float &value,const char *lpszSection,const char *lpszEntry,BOOL if
 			strBuffer = AfxGetApp()->GetProfileString(lpszSection, lpszEntry);
 
 		if (strBuffer.IsEmpty()) return FALSE;
-		sscanf(strBuffer,"%g",&value);
+		sscanf_s(strBuffer,"%g",&value);
 	} else {
-		sprintf(buff,"%g",value);
+		sprintf_s(buff, 256, "%g", value );
 
 		if( File_name_ini ) {
 			if( ! WritePrivateProfileString(lpszSection,lpszEntry,buff, File_name_ini)) return FALSE;
@@ -297,9 +219,9 @@ BOOL RdWr_INI(double &value,const char *lpszSection,const char *lpszEntry,BOOL i
 			strBuffer = AfxGetApp()->GetProfileString(lpszSection, lpszEntry);
 
 		if (strBuffer.IsEmpty()) return FALSE;
-		sscanf(strBuffer,"%lg",&value);
+		sscanf_s(strBuffer,"%lg",&value);
 	} else {
-		sprintf(buff,"%lg",value);
+		sprintf_s(buff, 256, "%lg", value );
 
 		if( File_name_ini ) {
 			if( ! WritePrivateProfileString(lpszSection,lpszEntry,buff, File_name_ini)) return FALSE;
@@ -323,11 +245,11 @@ BOOL RdWr_INI(COLORREF &value,const char *lpszSection,const char *lpszEntry,BOOL
 			strBuffer = AfxGetApp()->GetProfileString(lpszSection, lpszEntry);
 
 		if (strBuffer.IsEmpty()) return FALSE;
-		sscanf(strBuffer,"%d,%d,%d",&R,&G,&B);
+		sscanf_s(strBuffer,"%d,%d,%d",&R,&G,&B);
 		RGB_COLORREF(R,G,B,&value);
 	} else {
 		COLORREF_RGB(value,&R,&G,&B);
-		sprintf(buff,"%d,%d,%d",R,G,B);
+		sprintf_s(buff, 256, "%d,%d,%d", R, G, B );
 
 		if( File_name_ini ) {
 			if( ! WritePrivateProfileString(lpszSection,lpszEntry,buff, File_name_ini)) return FALSE;
@@ -337,7 +259,7 @@ BOOL RdWr_INI(COLORREF &value,const char *lpszSection,const char *lpszEntry,BOOL
 	return TRUE;
 }
 /*-------------------------------------------------*/ 
-BOOL RdWr_INI(char *str,const char *lpszSection,const char *lpszEntry,BOOL ifread, const char * File_name_ini)
+BOOL RdWr_INI(char *str, const char *lpszSection, const char *lpszEntry,BOOL ifread, const char * File_name_ini)
 {
 	if(ifread) {	
 		CString strBuffer, lpDefault;
@@ -349,7 +271,7 @@ BOOL RdWr_INI(char *str,const char *lpszSection,const char *lpszEntry,BOOL ifrea
 			strBuffer = AfxGetApp()->GetProfileString(lpszSection, lpszEntry);
 
 		if (strBuffer.IsEmpty()) return FALSE;
-		sprintf(str,"%s",strBuffer);
+		sprintf_s(str, 256, "%s", (LPCTSTR)strBuffer );
 	} else {
 		if( File_name_ini ) {
 			if( ! WritePrivateProfileString(lpszSection,lpszEntry,str, File_name_ini)) return FALSE;
@@ -361,8 +283,8 @@ BOOL RdWr_INI(char *str,const char *lpszSection,const char *lpszEntry,BOOL ifrea
 /*-------------------------------------------------*/ 
 BOOL RdWr_INI(CString &str,const char *lpszSection,const char *lpszEntry,BOOL ifread, const char * File_name_ini /*=0*/)
 {
- char	buff[256];
-	strcpy(buff,str);
+	char buff[256];
+	strcpy_s( buff, 256, str);
 	if(!RdWr_INI(buff,lpszSection,lpszEntry,ifread, File_name_ini)) return FALSE;
 	str=buff;
 	return TRUE;
@@ -420,57 +342,4 @@ BOOL Line_R1_R2(int x1,int y1,int x2,int y2,COLORREF color,CDC* pDC,int width)
 	pDC->SelectObject(pOldPen);
 	return TRUE;
 }
-/*-------------------------------------------------------------------------------*/
-void CRect_boundary_draw(CDC* pDC, CRect &rec, COLORREF color, int width)
-{  
-	CRgn Rgn;
-	if( ! Rgn.CreateRectRgnIndirect( ( LPCRECT ) rec ) ) return;
-
-	CBrush brush_cur;
-	if (!brush_cur.CreateSolidBrush(color)) return;
-	CBrush* pOldbrush = pDC->SelectObject(&brush_cur);
-	pDC->FrameRgn( &Rgn, &brush_cur, width, width );
-
-	pDC->SelectObject(pOldbrush);
-
-/*
-	CBrush brush_cur;
-	if (!brush_cur.CreateSolidBrush(color)) return;
-	CBrush* pOldbrush = pDC->SelectObject(&brush_cur);
-	pDC->FrameRect( &rec, &brush_cur );
-
-	pDC->SelectObject(pOldbrush);
-*/
-/*
-	Line_R1_R2( rec.left+2,		rec.top+2,		rec.right-2,	rec.top+2,		color, pDC, width);
-	Line_R1_R2( rec.right-2,	rec.top+2,		rec.right-2,	rec.bottom-2,	color, pDC, width);
-	Line_R1_R2( rec.right-2,	rec.bottom-2,	rec.left+2,		rec.bottom-2,	color, pDC, width);
-	Line_R1_R2( rec.left+2,		rec.bottom-2,	rec.left+2,		rec.top+2,		color, pDC, width);
-*/
-}
-/*-------------------------------------------------------------------------------*/
-void EllipticRect_boundary_draw(CDC* pDC, CRect &rec, COLORREF color, int width)
-{  
-/*
-	CRgn Rgn;
-	if( ! Rgn.CreateEllipticRgnIndirect( ( LPCRECT ) rec ) ) return;
-
-BOOL FrameRgn( CRgn* pRgn, CBrush* pBrush, int nWidth, int nHeight );
-	pDC->SelectObject(pOldbrush);
-*/
-    pDC->SelectStockObject( NULL_BRUSH ); // deselect hatchBrush
-	CPen pen_cur;
-	if (!pen_cur.CreatePen( PS_SOLID, 1, color )) return;
-	CPen* pOldPen = pDC->SelectObject(&pen_cur);
-
-	pDC->Ellipse( rec );
-
-	int	x = (rec.left + rec.right)/2;
-	int	y = (rec.bottom + rec.top)/2;
-
-	pDC->SelectObject(pOldPen);
-
-	Line_R1_R2(x, y, x, y +width, color, pDC, width);
-}
-
 #endif //__CONSOLE__

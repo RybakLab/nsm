@@ -36,14 +36,14 @@
 
 #ifndef __CONSOLE__
 
-#include "gridctrl.h"
+#include "GridCtrl.h"
 
 #ifndef GRIDCONTROL_NO_TITLETIPS
 
 #include "TitleTip.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
@@ -97,9 +97,9 @@ BOOL CTitleTip::Create(CWnd * pParentWnd)
 {
 	ASSERT_VALID(pParentWnd);
 
-    // Already created?
-    if (m_bCreated)
-        return TRUE;
+	// Already created?
+	if (m_bCreated){ return TRUE; }
+        
 
 	DWORD dwStyle = WS_BORDER | WS_POPUP; 
 	DWORD dwExStyle = WS_EX_TOOLWINDOW | WS_EX_TOPMOST;
@@ -109,7 +109,7 @@ BOOL CTitleTip::Create(CWnd * pParentWnd)
                           CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
 		                  NULL, NULL, NULL );
 
-    return m_bCreated;
+	return m_bCreated;
 }
 
 BOOL CTitleTip::DestroyWindow() 
@@ -136,14 +136,14 @@ void CTitleTip::Show(CRect rectTitle, LPCTSTR lpszTitleText, int xoffset /*=0*/,
 
 	ASSERT( ::IsWindow( GetSafeHwnd() ) );
 
-    if (rectTitle.IsRectEmpty())
-        return;
+    if (rectTitle.IsRectEmpty()){ return; }
+        
 
 	// If titletip is already displayed, don't do anything.
-	if( IsWindowVisible() ) 
-		return;
+	if( IsWindowVisible() ){ return; }
+		
 
-    m_rectHover = (lpHoverRect != NULL)? lpHoverRect : rectTitle;
+    m_rectHover = (lpHoverRect != NULL)? CRect(lpHoverRect) : rectTitle;
     m_rectHover.right++; m_rectHover.bottom++;
 
 	m_pParentWnd->ClientToScreen( m_rectHover );
@@ -224,12 +224,8 @@ void CTitleTip::Show(CRect rectTitle, LPCTSTR lpszTitleText, int xoffset /*=0*/,
 
 void CTitleTip::Hide()
 {
-  	if (!::IsWindow(GetSafeHwnd()))
-        return;
-
-    if (GetCapture()->GetSafeHwnd() == GetSafeHwnd())
-        ReleaseCapture();
-
+  	if (!::IsWindow(GetSafeHwnd())){ return; }
+	if (GetCapture()->GetSafeHwnd() == GetSafeHwnd()){ ReleaseCapture(); }
 	ShowWindow( SW_HIDE );
 }
 

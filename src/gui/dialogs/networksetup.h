@@ -27,6 +27,8 @@ class nn_unitSel : public CDialog{
 		nn_unitSel(CWnd* pParent = NULL);   // standard constructor
 	public:
 		int DoModal(CStringArray &unitsList );
+	private:
+		using CDialog::DoModal;
 	protected:
 		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		BOOL OnInitDialog();
@@ -39,130 +41,6 @@ class nn_unitSel : public CDialog{
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CWeightClone dialog
-class CWeightClone : public CDialog{
-		DECLARE_DYNAMIC( CWeightClone )
-		DECLARE_MESSAGE_MAP()
-	public:
-		CWeightClone( CWnd* pParent = NULL );
-virtual	~CWeightClone( void );
-
-	public:
-		enum { IDD = IDD_WEIGHT_DEP };
-	protected:
-virtual	void DoDataExchange( CDataExchange* pDX );
-		BOOL OnInitDialog( void );
-		afx_msg void OnClone( void );
-	private:
-		void ShowContent( void );
-	public:
-		vector<string> TrgNames;
-		vector<string> SrcNames;
-	public:
-		BOOL IsClone;
-		CString SelSrc;
-		CString SelTrg;
-	private:
-		CComboBox ListAllSrc;
-		CComboBox ListAllTrg;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-// CWeightSetup dialog
-class CWeightSetup : public CDialog{
-		DECLARE_MESSAGE_MAP()
-	public:
-		CWeightSetup(CWnd* pParent = NULL);   // standard constructor
-	public: // Overrides
-		int DoModal( const char *title );
-		BOOL DestroyWindow();
-	protected:
-		BOOL OnInitDialog();
-		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	protected: // Implementation
-		afx_msg void OnWeightDep();
-		afx_msg void OnUpdateEditExWeight();
-		afx_msg void OnDeltaposSpinExWeight(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnUpdateEditExWeightVar();
-		afx_msg void OnDeltaposSpinExWeightVar(NMHDR* pNMHDR, LRESULT* pResult);
-#if defined( __RESPIRATION__ )
-		afx_msg void OnUpdateEditExWeight2();
-		afx_msg void OnDeltaposSpinExWeight2(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnUpdateEditExWeightVar2();
-		afx_msg void OnDeltaposSpinExWeightVar2(NMHDR* pNMHDR, LRESULT* pResult);
-#endif // defined( __RESPIRATION__ )
-		afx_msg void OnUpdateEditInhAWeight();
-		afx_msg void OnDeltaposSpinInhAWeight(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnUpdateEditInhAWeightVar();
-		afx_msg void OnDeltaposSpinInhAWeightVar(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnUpdateEditInhBWeight();
-		afx_msg void OnDeltaposSpinInhBWeight(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnUpdateEditInhBWeightVar();
-		afx_msg void OnDeltaposSpinInhBWeightVar(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnDeltaposSpinProbability(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnUpdateEditProbability();
-		afx_msg void OnSelchangeConnectType();
-	private:
-		void Change( void );
-		void GetWeight( void );
-		void SetWeight( void );
-	public:
-		CConnectMatrix *pCM;
-		CString TrgName;
-		CString SrcName;
-#if defined( __RESPIRATION__ )
-		enum { IDD = IDD_WEIGHTS_RESP };
-#else 
-		enum { IDD = IDD_WEIGHTS };
-#endif // defined( __RESPIRATION__ )
-		CComboBox	ConnectType;
-		CEdit	EditExWeightVar;
-		CSpinButtonCtrl	SpinExWeightVar;
-		CSpinButtonCtrl	SpinExWeight;
-		CEdit	EditExWeight;
-		double	ExWeight;
-		double	ExWeightVar;
-		double	Probability;
-#if defined( __RESPIRATION__ )
-		CEdit	EditExWeightVar2;
-		CSpinButtonCtrl	SpinExWeightVar2;
-		CSpinButtonCtrl	SpinExWeight2;
-		CEdit	EditExWeight2;
-		double	ExWeight2;
-		double	ExWeightVar2;
-#endif // defined( __RESPIRATION__ )
-		CEdit	EditInhAWeightVar;
-		CSpinButtonCtrl	SpinInhAWeightVar;
-		CSpinButtonCtrl	SpinInhAWeight;
-		CEdit	EditInhAWeight;
-		double	InhAWeight;
-		double	InhAWeightVar;
-		CEdit	EditInhBWeightVar;
-		CSpinButtonCtrl	SpinInhBWeightVar;
-		CSpinButtonCtrl	SpinInhBWeight;
-		CEdit	EditInhBWeight;
-		double	InhBWeight;
-		double	InhBWeightVar;
-		CEdit	EditProbability;
-		CSpinButtonCtrl	SpinProbability;
-		CNNConnect Connect;
-		int ActiveSynapse;
-	    int ExSpec;
-#if defined( __RESPIRATION__ )
-		int Ex2Spec;
-#endif // defined( __RESPIRATION__ )
-		int Inh1Spec;
-		int Inh2Spec;
-	private:
-		CString Title;
-		int OldIndex;
-static	CString SelSrc;
-static	CString SelTrg;
-	public:
-		BOOL IsChained;
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // CNetworkParam property page
 class CNetworkParam : public CPropertyPage{
 		DECLARE_DYNCREATE(CNetworkParam)
@@ -172,19 +50,19 @@ class CNetworkParam : public CPropertyPage{
 		~CNetworkParam(void){};
 	public:
 		void SetNetwork( CHhnNetwork *network ){ Network = network; };
-virtual	BOOL OnSetActive();
-virtual	BOOL OnKillActive();
+	public:	// Implementation
+		BOOL OnSetActive();
+		BOOL OnKillActive();
+		BOOL OnInitDialog();
 	protected:
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-virtual	BOOL OnInitDialog();
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		afx_msg void OnGridClick( NMHDR *pNotifyStruct, LRESULT* pResult );
 		afx_msg void OnEndCellEdit( NMHDR *pNotifyStruct, LRESULT* pResult );
 	private:
 		void OnFlyUpdate( const string &path );
-
-		bool DisplayUnit( uni_template *unit, string &start_path, bool collapse = true );
-		bool DisplayUnitPar( uni_template *unit, string &start_path );
-		bool DisplayUnitChildren( uni_template *unit, string &start_path, bool collapse );
+		bool DisplayUnit( uni_template *unit, const string &start_path, bool collapse = true );
+		bool DisplayUnitPar( uni_template *unit, const string &start_path );
+		bool DisplayUnitChildren( uni_template *unit, const string &start_path, bool collapse );
 		void UpdateView( bool save );
 	private:
 		CGridSetup	NetParView;
@@ -263,7 +141,7 @@ class CDriveSetup : public CPropertyPage{
 		CStatic	StringSize;
 		CButton	add_drv;
 		CButton	DelDrive;
-		CListBox	ListDrive;
+		CListBox ListDrive;
 		CHhnNetwork *Network;
 	private:
 		int NewDrive;
@@ -281,23 +159,54 @@ class COutputProp : public CDialog{
 	protected: // Implementation
 		afx_msg void OnUpdateEditT1();
 		afx_msg void OnUpdateEditT2();
+		afx_msg void OnUpdateEditThreshold();
+		afx_msg void OnUpdateBias();
+		afx_msg void OnUpdateSlpA();
+		afx_msg void OnUpdatePowA();
+		afx_msg void OnUpdateSlpT();
+		afx_msg void OnUpdatePowT();
+		afx_msg void OnUpdateCap();
+
 		afx_msg void OnDeltaposSpinT1(NMHDR* pNMHDR, LRESULT* pResult);
 		afx_msg void OnDeltaposSpinT2(NMHDR* pNMHDR, LRESULT* pResult);
-		afx_msg void OnUpdateEditThreshold();
 		afx_msg void OnDeltaposSpinThreshold(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg void OnDeltaposSpinBias(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg void OnDeltaposSpinSlpA(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg void OnDeltaposSpinPowA(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg void OnDeltaposSpinSlpT(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg void OnDeltaposSpinPowT(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg void OnDeltaposSpinCap(NMHDR* pNMHDR, LRESULT* pResult);
 	public:
 		enum { IDD = IDD_OUTPUT_PROP };
-		CSpinButtonCtrl	Spin_Threshold;
-		CEdit	Edit_Threshold;
+		int Type;
+		CString	Name;
+		CEdit EditT2;
+		CEdit EditT1;
+		CEdit EditThreshold;
+		CEdit EditBias;
+		CEdit EditSlpA;
+		CEdit EditPowA;
+		CEdit EditSlpT;
+		CEdit EditPowT;
+		CEdit EditCap;
 		CSpinButtonCtrl	SpinT2;
 		CSpinButtonCtrl	SpinT1;
-		CEdit	EditT2;
-		CEdit	EditT1;
-		CString	Name;
-		double	T1;
-		double	T2;
-		double	Threshold;
-	    int Type;
+		CSpinButtonCtrl	SpinThreshold;
+		CSpinButtonCtrl SpinBias;
+		CSpinButtonCtrl SpinSlpA;
+		CSpinButtonCtrl SpinPowA;
+		CSpinButtonCtrl SpinSlpT;
+		CSpinButtonCtrl SpinPowT;
+		CSpinButtonCtrl SpinCap;
+		double T1;
+		double T2;
+		double Threshold;
+		double Bias;
+		double SlpA;
+		double PowA;
+		double SlpT;
+		double PowT;
+		double Cap;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -321,22 +230,18 @@ class COutputNetwork : public CPropertyPage{
 	private:
 		void Change( void );
 	public:	// Construction	
-#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 		enum { IDD = IDD_OUTPUT_SETUP };
-#else
-		enum { IDD = IDD_OUTPUT_SETUP };
-#endif //defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-		CButton	PropOutput;
-		CStatic	StringSize;
-		CListBox	ListOutput;
-		CButton	DelOutput;
-		CButton	add_out;
+		CButton PropOutput;
+		CStatic StringSize;
+		CListBox ListOutput;
+		CButton DelOutput;
+		CButton add_out;
 		CHhnNetwork *Network;
 	private:
 		int NewOutput;
 };
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 class t_biomech;
 /////////////////////////////////////////////////////////////////////////////
 // CFBProp dialog
@@ -371,9 +276,9 @@ class CFBProp : public CDialog{
 	public:
 		enum { IDD = IDD_FEEDBACK_PROP };
 		t_biomech *BiomT;
-		int	TypeFB;
-		CString	FBName;
-		CString	MechName;
+		int TypeFB;
+		CString FBName;
+		CString MechName;
 		CComboBox ComboType;
 		CComboBox ListFB;
 		CEdit EditKV;
@@ -435,7 +340,9 @@ class CFeedbackSetup : public CPropertyPage{
 	private:
 		int NewFeedback;
 };
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 
 /////////////////////////////////////////////////////////////////////////////
 // CNetworkSetup
@@ -444,20 +351,24 @@ class CNetworkSetup : public CPropertySheet{
 	public: // Construction
 		CNetworkSetup( UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0 );
 		CNetworkSetup( LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0 );
-virtual	~CNetworkSetup( void );
+virtual		~CNetworkSetup( void );
 	public:
-	    CHhnNetwork Network;
-#ifdef __MECHANICS__
+		CHhnNetwork Network;
+#if defined (__MECHANICS_2D__)
 		t_biomech BiomT;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	private:
 		CNetworkParam NetworkParam;
 		CPopulatSetup PopulatSetup;
 		CDriveSetup DriveSetup;
 		COutputNetwork OutputSetup;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		CFeedbackSetup FeedbackSetup;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 };
 
 /////////////////////////////////////////////////////////////////////////////

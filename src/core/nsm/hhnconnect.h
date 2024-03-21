@@ -5,47 +5,56 @@
 
 #include "hhnstat.h"
 #include "cmatrix.h"
+#include "nsmsys.h"
 
 
 /////////////////////////////////////////////////////////////////////////////
 // class CHhnConnect
-class CHhnConnect{
+class alignas( 16 ) CHhnConnect{
 	public: //--- constructor
 		CHhnConnect( void );
 		CHhnConnect( const CHhnConnect &connect );
-virtual	~CHhnConnect( void ){};
+virtual		~CHhnConnect( void ){};
 	public:
 		CHhnConnect &operator = ( const CHhnConnect &connect );
 		bool operator == ( const CHhnConnect &x ) const;
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:	//--- change of weights
 		CStat &weight( int sid ){ return Weights[sid]; };
-		bool load( istream &file );  // keep it to provide backward compatibility
+		void reset( void ){ Probability = 1.; Modulate = 0; for( size_t i = 0; i < _id_MAX_SYN; Sigma[i] = ModSigma[i] = Linear[i] = false, Weights[i] = 0.0, ++i );}
+		bool load( istream &file );	// keep it to provide backward compatibility
 	public:
 		double Probability;
+		int Modulate;
 		bool Sigma[_id_MAX_SYN];
-		bool Depression[_id_MAX_SYN];
-		bool PreInh[_id_MAX_SYN];
+		bool ModSigma[_id_MAX_SYN];
+		bool Linear[_id_MAX_SYN];
 		CStat Weights[_id_MAX_SYN];
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // class CConnect
-class CConnect{
+class alignas( 16 ) CConnect{
 	public:
 		CConnect( void ) : Connect(), Type( _id_NN_EMPTY ){};
 		CConnect( const CHhnConnect &connect, int type ): Connect( connect ), Type( type ){};
 		CConnect( const CConnect &connect ): Connect( connect.Connect ), Type( connect.Type ){};
-virtual	~CConnect( void ){};
+virtual		~CConnect( void ){};
 	public:
 		CConnect &operator = ( const CConnect &connect );
 		bool operator == ( const CConnect &x ) const;
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		bool empty( void ){ return Type == _id_NN_EMPTY; };
 		bool load( istream &file );
 		void save( ostream &file ) const;
 	public:
-		int Type;
 		CHhnConnect Connect;
+		int Type;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -54,7 +63,7 @@ class CNNConnect{
 	public:
 		CNNConnect( void ) : Connect(), ChainT( "" ), ChainS( "" ), Empty( true ){};
 		CNNConnect( const CNNConnect &connect ) : Connect( connect.Connect ), ChainT( connect.ChainT ), ChainS( connect.ChainS ), Empty( connect.Empty ){};
-virtual	~CNNConnect( void ){};
+virtual		~CNNConnect( void ){};
 	public:
 		CNNConnect &operator = ( const CNNConnect &connect );
 		const CConnect &operator []( size_t index ) const{ return Connect[index]; };
@@ -68,11 +77,11 @@ virtual	~CNNConnect( void ){};
 		bool load( istream &file );
 		void save( ostream &file ) const;
 	public:
-		bool Empty;
 		CConnect nill;
-		vector<CConnect> Connect;       // a link between pair of network elements
+		vector<CConnect> Connect;	// a link between pair of network elements
 		string ChainT;
 		string ChainS;
+		bool Empty;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -81,7 +90,7 @@ class CConnectMatrix{
 	public:
 		CConnectMatrix( void ){};
 		CConnectMatrix( const CConnectMatrix &matrix ): Target( matrix.Target ), Source( matrix.Source ), NNConnect( matrix.NNConnect ){};
-virtual	~CConnectMatrix( void ){};
+virtual		~CConnectMatrix( void ){};
 	public:
 		CNNConnect &operator()( size_t target, size_t source ){ return NNConnect( target, source ); };
 		CNNConnect &operator()( string &target, string &source ){ return NNConnect( trg_id( target ), src_id( source )); };
@@ -110,17 +119,17 @@ virtual	~CConnectMatrix( void ){};
 		bool del_src( const string &name );
 		bool del_trg( const string &name );
 
-		void chain( pair<string,string> &master, pair<string,string> &slave );
-		void modify( pair<string,string> &link );
-		void unchain( pair<string,string> &link );
+		void chain( pair<string,string> master, pair<string,string> slave );
+		void modify( pair<string,string> link );
+		void unchain( pair<string,string> link );
 	private:
 		void chain_all( list< pair<string,string> > &chain );
 		int src_id( const string &name ) const;
 		int trg_id( const string &name ) const;
 	private:
-		vector<string> Target;          // row names
-		vector<string> Source;          // column names
-		CMatrix<CNNConnect> NNConnect;  // format: rows are targets, columns are sources
+		vector<string> Target;		// row names
+		vector<string> Source;		// column names
+		CMatrix<CNNConnect> NNConnect;	// format: rows are targets, columns are sources
 };
 
 #endif // __HHN_CONNECT_H

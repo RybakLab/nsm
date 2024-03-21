@@ -20,26 +20,26 @@
 class CSimParamSetup : public CPropertyPage{
 	DECLARE_DYNCREATE(CSimParamSetup)
 	DECLARE_MESSAGE_MAP()
-	enum { IDD = IDD_NSM_SIMULATE_PARAM };
+		enum { IDD = IDD_NSM_SIMULATE_PARAM };
 	public:
 		CSimParamSetup();
 		~CSimParamSetup();
 	public:
-virtual	BOOL OnSetActive();
-virtual	BOOL OnKillActive();
+virtual		BOOL OnSetActive();
+virtual		BOOL OnKillActive();
 	protected:
-virtual	void DoDataExchange(CDataExchange* pDX);
-virtual	BOOL OnInitDialog();
+virtual		void DoDataExchange(CDataExchange* pDX);
+virtual		BOOL OnInitDialog();
 	protected:
-afx_msg	void OnUpdateEditTimeFactor();
-afx_msg	void OnUpdateEditSimNnStep();
-afx_msg	void OnUpdateEditSimTime();
-afx_msg	void OnKillfocusEditSimNnStep();
-afx_msg	void OnKillfocusEditSimTime();
-afx_msg	void OnKillfocusEditTimeFactor();
-afx_msg	void OnDeltaposSpinSimTime(NMHDR* pNMHDR, LRESULT* pResult);
-afx_msg	void OnDeltaposSpinSimNnStep(NMHDR* pNMHDR, LRESULT* pResult);
-afx_msg	void OnDeltaposSpinTimeFactor(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg	void OnUpdateEditTimeFactor();
+		afx_msg	void OnUpdateEditSimNnStep();
+		afx_msg	void OnUpdateEditSimTime();
+		afx_msg	void OnKillfocusEditSimNnStep();
+		afx_msg	void OnKillfocusEditSimTime();
+		afx_msg	void OnKillfocusEditTimeFactor();
+		afx_msg	void OnDeltaposSpinSimTime(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg	void OnDeltaposSpinSimNnStep(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg	void OnDeltaposSpinTimeFactor(NMHDR* pNMHDR, LRESULT* pResult);
 	public:
 		CSimulateData *pData;
 		double	SimTime;
@@ -62,14 +62,14 @@ class CSimViewSetup : public CPropertyPage{
 	DECLARE_DYNCREATE(CSimViewSetup)
 	DECLARE_MESSAGE_MAP()
 	public: // Construction
-enum	{ IDD = IDD_SIMULATE_VIEW };
+		enum	{ IDD = IDD_SIMULATE_VIEW };
 		CSimViewSetup();
 		~CSimViewSetup();
 	public:
-virtual	BOOL OnSetActive();
-virtual	BOOL OnKillActive();
+virtual		BOOL OnSetActive();
+virtual		BOOL OnKillActive();
 	protected:
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	public:
 		CSpinButtonCtrl	Spin_HistNorm;
 		CEdit	Edit_HistNorm;
@@ -89,7 +89,7 @@ virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		double	HistNorm;
 		CSimulateData *pData;
 	protected: // Implementation
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 		afx_msg void OnUpdateEditBeginView();
 		afx_msg void OnUpdateEditEndView();
 		afx_msg void OnDeltaposSpinBeginView(NMHDR* pNMHDR, LRESULT* pResult);
@@ -104,21 +104,21 @@ virtual	BOOL OnInitDialog();
 		afx_msg void OnDeltaposSpinHistNorm(NMHDR* pNMHDR, LRESULT* pResult);
 };
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CSimLimbSetup dialog
 class CSimLimbSetup : public CPropertyPage{
 	DECLARE_DYNCREATE(CSimLimbSetup)
 	DECLARE_MESSAGE_MAP()
 	public: // Construction
-enum	{ IDD = IDD_SIMULATE_LIMB };
+		enum	{ IDD = IDD_SIMULATE_LIMB };
 		CSimLimbSetup();
 		~CSimLimbSetup();
 	public:
-virtual	BOOL OnSetActive();
-virtual	BOOL OnKillActive();
+virtual		BOOL OnSetActive();
+virtual		BOOL OnKillActive();
 	protected:
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	public:
 		CSpinButtonCtrl	Spin_LimbScale;
 		CSpinButtonCtrl	Spin_LimbSkip;
@@ -133,13 +133,15 @@ virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		double LimbOriginY;
 		CSimulateData *pData;
 	protected:
-virtual	BOOL OnInitDialog();
-afx_msg	void OnUpdateEditLimbOriginX();
-afx_msg	void OnDeltaposSpinLimbOriginX(NMHDR *pNMHDR, LRESULT *pResult);
-afx_msg	void OnUpdateEditLimbOriginY();
-afx_msg	void OnDeltaposSpinLimbOriginY(NMHDR *pNMHDR, LRESULT *pResult);
+virtual		BOOL OnInitDialog();
+		afx_msg void OnUpdateEditLimbOriginX();
+		afx_msg void OnDeltaposSpinLimbOriginX(NMHDR *pNMHDR, LRESULT *pResult);
+		afx_msg void OnUpdateEditLimbOriginY();
+		afx_msg void OnDeltaposSpinLimbOriginY(NMHDR *pNMHDR, LRESULT *pResult);
 };
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 
 /////////////////////////////////////////////////////////////////////////////
 // CSimulateSetup
@@ -148,7 +150,7 @@ class CSimulateSetup : public CPropertySheet{
 	public: // Construction
 		CSimulateSetup( UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0 );
 		CSimulateSetup( LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0 );
-virtual	~CSimulateSetup( void );
+virtual		~CSimulateSetup( void );
 	public:
 		bool IsCheckAllView( void){return SimViewSetup.All_View != FALSE;};
 	public:
@@ -156,9 +158,11 @@ virtual	~CSimulateSetup( void );
 	private:
 		CSimParamSetup SimParamSetup;
 		CSimViewSetup SimViewSetup;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		CSimLimbSetup SimLimbSetup;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 };
 
 #endif // __CONSOLE__

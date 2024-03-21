@@ -3,34 +3,18 @@
 #include "precompile.h"
 #include "frameview.h"
 #include "simulate.h"
-
-#ifndef __CONSOLE__ 
-#include "../gui/spcord.h"
-#endif // __CONSOLE__ 
+#include "../gui/Spcord.h"
 
 #ifndef __LINUX__ 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
 /////////////////////////////////////////////////////////////////////////////
 // class CViewParam
-CViewParam &CViewParam::operator = ( const CViewParam &param )
-{
-	ParCode = param.ParCode;	
-	Ymax = param.Ymax;
-	Ymin = param.Ymin;
-	return *this;
-}
-
-bool CViewParam::is_plot( void )
-{
-	return( ParCode.UnitId == _id_NNPopulat && ParCode.Param == CViewParam::Plot );
-}
-
 bool CViewParam::load( istream &file, CSimulate *manager )
 {
 	string str;
@@ -68,28 +52,25 @@ void CViewParam::save( ostream &file, CSimulate *manager )
 /////////////////////////////////////////////////////////////////////////////
 // CFrameView class
 CFrameView::CFrameView( void )
-	: ViewName("empty"), Data( NULL ),
-	LimitView(), LimitStep(),
-#ifndef __CONSOLE__
-	ShowCmd( SW_SHOWNORMAL )
-#else
-	ShowCmd( 0 )
-#endif // __CONSOLE__
+	: ViewName("empty"), BufferManager( NULL ), LimitView(), LimitStep()
 {
+#ifndef __CONSOLE__
+	ShowCmd = SW_SHOWNORMAL;
+#else
+	ShowCmd = 0;
+#endif // __CONSOLE__
 	WindowRect.left = WindowRect.top = WindowRect.right = WindowRect.bottom = -1;
 }
 
 CFrameView::CFrameView( const CFrameView &view )
-	: ViewName( view.ViewName ), Data( view.Data ),
-	LimitView( view.LimitView ), LimitStep( view.LimitStep ),
-	ShowCmd( view.ShowCmd ), WindowRect( view.WindowRect )
+	: ShowCmd( view.ShowCmd ), WindowRect( view.WindowRect ), ViewName( view.ViewName ), BufferManager( view.BufferManager ), LimitView( view.LimitView ), LimitStep( view.LimitStep )
 {
 }
 
 CFrameView &CFrameView::operator = ( const CFrameView &view)
 {
 	ViewName = view.ViewName;
-	Data = view.Data;
+	BufferManager = view.BufferManager;
 	ShowCmd = view.ShowCmd;
 	WindowRect = view.WindowRect;
 	LimitView = view.LimitView;
@@ -115,12 +96,6 @@ bool CFrameView::validate( hhn_pair<size_t> &limits )
 	if( limits.Y > LimitStep.Y )
 		limits.Y = LimitStep.Y;
 	return true;
-}
-
-void CFrameView::init_buf( CBufferManager *data )
-{
-	Data = data;
-	set_range();
 }
 
 bool CFrameView::load_pos( istream &file )
@@ -166,13 +141,13 @@ void CFrameView::save_pos( ostream &file )
 
 void CFrameView::set_range( void )
 {
-	if( Data && Data->step() > 0.){
-		LimitStep.X = ( unsigned long )( LimitView.X/Data->step());
-		LimitStep.Y = ( unsigned long )( LimitView.Y/Data->step());
-		if( LimitStep.Y > Data->max_nsteps() )
-			LimitStep.Y = Data->max_nsteps();
-		if( LimitStep.X > Data->max_nsteps() )
-			LimitStep.X = Data->max_nsteps();
+	if( BufferManager && BufferManager->step() > 0.){
+		LimitStep.X = ( unsigned long )( LimitView.X/BufferManager->step());
+		LimitStep.Y = ( unsigned long )( LimitView.Y/BufferManager->step());
+		if( LimitStep.Y > BufferManager->max_nsteps() )
+			LimitStep.Y = BufferManager->max_nsteps();
+		if( LimitStep.X > BufferManager->max_nsteps() )
+			LimitStep.X = BufferManager->max_nsteps();
 	}
 }
 
@@ -209,6 +184,7 @@ void CFrameView::save( ostream &file, CSimulate * )
 	file << "</View>" << endl;
 }
 
+#ifndef __CONSOLE__
 bool CFrameView::create_view( CDocTemplate *tpl, CDocument* doc, CMDIChildWnd *child )
 {
 	ASSERT_VALID( tpl );
@@ -219,6 +195,7 @@ bool CFrameView::create_view( CDocTemplate *tpl, CDocument* doc, CMDIChildWnd *c
 	}
 	return false;        // command failed
 }
+#endif /*__CONSOLE__*/
 
 /////////////////////////////////////////////////////////////////////////////
 // class CChartFrameView
@@ -234,11 +211,20 @@ CChartFrameView &CChartFrameView::operator = ( CChartFrameView &view)
 void CChartFrameView::init_view( CSimulate *manager )
 {
 	CFrameView::init_buf( &manager->GetChartBuffer() );
-	if( Data ){
-		for( size_t i = 0; i < NNParam.size(); ++i )
-			if( (( CChartBuffer *)Data )->add_view( NNParam[i].ParCode ) == false ){
+	if( BufferManager ){
+		for( size_t i = 0; i < NNParam.size(); ++i ){
+			if( (( CChartBuffer *)BufferManager )->add_buffer( NNParam[i].ParCode ) == false ){
 				remove( i ); // Variable is not exist;
 			}
+		}
+	}
+}
+
+void CChartFrameView::alloc_view( void )
+{
+	if( BufferManager ){
+		CFrameView::alloc_view();
+		BufferManager->alloc_all_buffers();
 	}
 }
 
@@ -247,7 +233,7 @@ void CChartFrameView::copy_to( CFrameView **view ) const
 	*view = new CChartFrameView( *this );
 }
 
-void CChartFrameView::add_view( CViewParam &param )
+void CChartFrameView::add_view( const CViewParam &param )
 {
 	NNParam.push_back( param );
 	set_geometry( npars(), 1 ); 
@@ -349,12 +335,20 @@ void CChartFrameView::save( ostream &file, CSimulate *manager )
 	CFrameView::save( file, manager );
 }
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerFrameView class
 void CWalkerFrameView::init_view( CSimulate *manager )
 {
 	CFrameView::init_buf( &manager->GetWalkerBuffer() );
+}
+
+void CWalkerFrameView::alloc_view( void )
+{
+	if( BufferManager ){
+		CFrameView::alloc_view();
+		BufferManager->alloc_all_buffers();
+	}
 }
 
 void CWalkerFrameView::copy_to( CFrameView **view ) const
@@ -375,4 +369,6 @@ void CWalkerFrameView::save( ostream &file, CSimulate *manager )
 	file << endl << "<View Walker>" << endl;
 	CFrameView::save( file, manager );
 }
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TOD implementation for 3d model
+#endif // __MECHANICS_2D__

@@ -8,8 +8,8 @@ class CMatrix{
 typedef	typename vector<T>::size_type size_type;
 	public:
 		CMatrix( void ) : NumRow( 0 ), NumCol( 0 ){};
-		CMatrix( const CMatrix<T> &matrix ) : Matrix( matrix.Matrix ), NumRow( matrix.NumRow ), NumCol( matrix.NumCol ){};
-		CMatrix( size_t row, size_t col, T element = T() ) : Matrix( row*col, element), NumRow( row ), NumCol( col ){};
+		CMatrix( const CMatrix<T> &matrix ) : NumRow( matrix.NumRow ), NumCol( matrix.NumCol ), Matrix( matrix.Matrix ){};
+		CMatrix( size_t row, size_t col, T element = T() ) : NumRow( row ), NumCol( col ), Matrix( row*col, element){};
 		~CMatrix( void ){};
 	public:
 		T &operator()( size_t row, size_t col ){ return Matrix[row*NumCol+col]; };
@@ -196,8 +196,8 @@ typedef	typename vector<T>::size_type size_type;
 	private:
 		size_t NumRow;
 		size_t NumCol;
-		vector<T> Str;
 		vector<T> Matrix;        // format: row1[NumCol], row2[NumCol], ...
+		vector<T> Str;
 };
 
 #endif // _CMATRIX_H_

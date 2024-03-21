@@ -3,7 +3,7 @@
 //---------------------------------------------------------------------
 #include "precompile.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "mustemplate.h"
 #include "walker.h"
@@ -12,7 +12,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
@@ -58,27 +58,27 @@ struct muscle_data{
 		double Ladd;
 		double Ltr;
 		double TdL1;	// new
-		double TF1;		// new
+		double TF1;	// new
 		double TKlo;	// new
 		double TKsh;	// new
-		double CF0;		// new
+		double CF0;	// new
 		double CFtr;	// new
 		double CVtr;	// new
 };
 
 static muscle_data DD[__id_MAX_MUSCLES] = {
-//	  LT0   PT0	 Alpha LT0L0  M	  Shift  TKE   TKL  PKE   PKL     AV   Omega Fmax  RH0	Vmax   Beta Amax   F1 F2  Phi1  Phi2   A1    A2   R1   R2  Ladd  Ltr
-	{  0.0,  0.0,  0.0, 0.0,  0.0,  0.0,   0.0, 0.0,  0.0, 0.0,    0.0,  0.0,  0.0, 0.0, 0.0,    0.0, 0.0,   0,  0, 0.0,  0.0,  0.0,  0.0, 0.0, 0.0, 0.0, 0.0  },
-/*IP*/	{ 15.5, 64.5,  0.0, 0.5, 17.6,  0.0,  90.0, 0.1, 11.6, 0.0075, 3.7,  0.55, 1.8, 6.0, 0.578, 1.55, 0.47,  1,  0, 0.0,  0.0, 36.8,  5.0, 5.0, 0,   0.0, 1.0  },
-/*BFA*/	{ 17.5, 83.0, 14.0, 0.5, 28.0, -0.1,  90.0, 0.1, 11.6, 0.0075, 9.5,  0.55, 1.8, 6.0, 0.643, 1.55, 0.71, -1,  0, 141,  0.0,  8.0, 40.8, 5.0, 0,   0.0, 1.0  },
-/*SART*/{ 17.5, 35.0,  0.0, 0.1,  8.5, -0.3,  90.0, 0.1, 11.6, 0.0075, 3.7,  0.55, 1.8, 6.0, 1.491, 1.55, 0.16,  1, -1, 0.0,  0.0, 32.0, 20.1, 5.0, 5.0, 0.0, 0.57 },
-/*RF*/	{ 80.0, 77.5,  7.0, 4.0,  9.5,  0.0,  90.0, 0.1, 11.6, 0.0075, 5.0,  0.55, 1.8, 3.0, 0.288, 1.55, 0.51,  1,  1, 0.0,  145, 14.6,  7.1, 5.0, 7.1, 0.0, 5.2  },
-/*BFP*/	{ 14.0, 148.,  7.0, 0.1, 41.3,  0.0,  90.0, 0.1, 11.6, 0.0075, 9.5,  0.55, 1.8, 6.0, 0.624, 1.55, 0.27, -1, -1, 141,  0.0,  8.0, 24.9, 5.0, 5.0, 0.0, 1.02 },
-/*VA*/	{ 35.5, 435., 13.7, 2.0, 27.5, -0.1,  90.0, 0.1, 11.6, 0.0075, 2.4,  0.55, 1.8, 3.0, 0.266, 1.55, 0.32,  1,  0, 0.0,  145, 55.1,  7.1, 7.1, 0,   0.0, 2.85 },
-/*GA*/	{ 81.0, 55.0, 19.0, 6.0, 24.8, -0.15, 90.0, 0.1, 11.6, 0.0075, 2.28, 0.55, 1.8, 3.0, 0.266, 1.55, 0.89, -1, -1, 0.0, -174,  5.0, 15.0, 5.0, 5.0, 0.0, 5.2  },
-/*TA*/	{ 25.0, 36.5,  7.0, 1.0,  5.5,  0.0,  90.0, 0.1, 11.6, 0.0075, 5.9,  0.55, 1.8, 6.0, 0.813, 1.55, 0.37,  1,  0, 0.0,  0.0,  6.2,  7.4, 5.0, 0,   33., 1.53 },
-/*SOL*/	{ 21.0, 36.5,  7.0, 1.0,  3.5, -0.1,  90.0, 0.1, 11.6, 0.0075, 1.1,  0.55, 1.8, 6.0, 0.266, 1.55, 0.64, -1,  0, 0.0, -174, 36.2, 15.0, 5.0, 0,   0.0, 1.6  }
-};
+//		   LT0		PT0		Alpha		LT0L0  M	  Shift   TKE   TKL  PKE   PKL     AV       Omega Fmax  RH0	 Vmax	   Beta      Amax      F1  F2  Phi1      Phi2     A1     A2    R1    R2  Ladd  Ltr   TdL1       TF1        TKlo     TKsh     CF0  CFtr  CVtr
+		{  0.0000,  0.0000, 0.0000000,	0.00,  0.0000,  0.0,   0.0, 0.0,  0.0, 0.0000, 0.00000,  0.0,  0.0, 0.0, 0.000000, 0.000000, 0.000000,  0,  0, 0.00000,  0.00000, 0.00,  0.0,  0.0,  0.0, 0.0, 0.00, 0.0000000, 0.0000000,  0.0000, 0.00000, 0.0, 0.0,  0.0000000 },
+/*IP*/	{ 16.0000, 95.1724, 0.0000000,	0.25, 28.6255, -0.2,  50.0, 2.6, 30.0, 0.0018, 1.28205,  0.55, 1.8, 4.0, 0.547450, 0.992043, 0.205064,  1,  0, 0.00000,  0.00000, 54.9,  7.0,  5.0,  0.0, 0.0, 1.00, 0.0240013, 0.1232330, 24.3532, 4.69996, 1.0, 0.78, 0.0602195 }, /*IP*/
+/*BFA*/	{ 31.0000, 52.5963, 0.2443460,	1.00, 7.89725, -0.2,  50.0, 2.6, 30.0, 0.0018, 1.28205,  0.55, 1.8, 4.0, 0.333358, 0.464178, 0.957494, -1,  0, 2.46091,  0.00000, 10.0, 50.0,  5.0,  0.0, 0.0, 1.00, 0.0240013, 0.1232330, 24.3532, 4.69996, 1.0, 0.78, 0.0366693 }, /*BFA*/
+/*SART*/{ 29.0000, 10.0500, 0.0733038,	0.25, 5.49358, -0.2,  50.0, 2.6, 30.0, 0.0018, 1.28205,  0.55, 1.8, 4.0, 0.992253, 0.992987, 0.250156,  1, -1, 0.00000,  0.00000, 16.0, 20.0,  5.0,  6.0, 0.0, 1.00, 0.0100000, 0.0113306, 9.06752, 8.00000, 1.0, 0.78, 0.1091480 }, /*SART*/
+/*RF*/	{ 89.9972, 61.0026, 0.1221730,	4.00, 6.49875, -0.2,  50.0, 2.6, 30.0, 0.0018, 1.28205,  0.55, 1.8, 4.0, 0.214452, 0.521572, 0.661831,  1,  1, 0.00000,  2.53073, 16.0, 10.0,  5.0, 10.0, 0.0, 1.00, 0.0100000, 0.0113306, 9.06752, 8.00000, 1.0, 0.78, 0.0235897 }, /*RF*/
+/*BFP*/	{ 57.0000, 94.9003, 0.1221730,	1.00, 25.6127, -0.2,  50.0, 2.6, 30.0, 0.0018, 1.28205,  0.55, 1.8, 4.0, 0.612948, 0.770385, 0.267400, -1, -1, 2.46091,  0.00000, 10.0, 20.0,  5.0,  6.0, 0.0, 1.00, 0.0100000, 0.0113306, 9.06752, 8.00000, 1.0, 0.78, 0.0674243 }, /*BFP*/
+/*VA*/	{ 82.3831, 202.134, 0.2391100,	3.00, 26.8506, -0.2,  50.0, 2.6, 30.0, 0.0018, 1.28205,  0.55, 1.8, 4.0, 0.181208, 0.841158, 0.636886,  1,  0, 0.00000,  2.53073, 97.3, 10.0, 10.0,  0.0, 0.0, 1.00, 0.0240013, 0.1232330, 24.3532, 4.69996, 1.0, 0.78, 0.0199329 }, /*VA*/
+/*GA*/	{ 81.0000, 96.8500, 0.3316130,	3.00, 12.9974, -0.1,  50.0, 2.6, 30.0, 0.3400, 1.28205,  0.55, 1.8, 4.0, 0.259000, 0.400819, 0.211974, -1, -1, 0.00000, -3.03687,  6.0, 16.0,  6.0,  5.0, 0.0, 1.00, 0.0100000, 0.0113306, 9.06752, 8.00000, 1.0, 0.78, 0.0284900 }, /*GA*/
+/*TA*/	{ 57.0000, 40.4036, 0.1221730,	0.70, 15.5779,  0.0,  50.0, 2.6, 30.0, 0.3400, 1.28205,  0.55, 1.8, 4.0, 0.805987, 0.446370, 0.243204,  1,  0, 0.00000,  0.00000, 15.0, 15.0,  5.0,  0.0, 85., 1.00, 0.0240013, 0.1232330, 24.3532, 4.69996, 1.0, 0.78, 0.0886586 }, /*TA*/
+/*SOL*/	{ 68.9999, 10.4000, 0.1221730,	2.00, 1.69889, -0.1,  50.0, 2.6, 30.0, 0.3400, 1.28205,  0.55, 1.8, 4.0, 0.176000, 0.453350, 0.696734, -1,  0, 0.00000, -3.03687, 99.0, 16.0,  5.0,  0.0, 0.0, 1.00, 0.0240013, 0.1232330, 24.3532, 4.69996, 1.0, 0.78, 0.0193600 }  /*SOL*/
+};																					   
 
 static int get_linkid( string &name, string &scheme )
 {
@@ -123,15 +123,18 @@ t_muscle::t_muscle( uni_template *parent, const char *lscheme, int is_active )
 		MnNames( "None" ), Mn( "None" ), Amax( 1.0 ),
 		ULink( "None" ), MLink( "None" ), LLink( "None" )
 {
+//	IsShowType = true;
+	TypeName = "Muscle";
+	TypeNameS = "zMuscle";
 	// attachment scheme
-	DList.insert( make_pair( "Attachment\tCounterclockwise|clockwise upper muscle 1|-1\nF1", &F1 ));
-	DList.insert( make_pair( "Attachment\tCounterclockwise|clockwise lower muscle 1|-1\nF2", &F2 ));
-	DList.insert( make_pair( "Attachment\tAngle between upper link and direction to upper attachment point\nPhi1", &Phi1 ));
-	DList.insert( make_pair( "Attachment\tAngle between lower link and direction to lower attachment point\nPhi2", &Phi2 ));
-	DList.insert( make_pair( "Attachment\tDistance between joint and upper attachment point\nA1", &A1 ));
-	DList.insert( make_pair( "Attachment\tDistance between joint and lower attachment point\nA2", &A2 ));
-	DList.insert( make_pair( "Attachment\tRadius of upper joint block\nR1", &R1 ));
-	DList.insert( make_pair( "Attachment\tRadius of lower joint block\nR2", &R2 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tDistance\nA1", &A1 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tMinimal arm\nR1", &R1 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tAngle\nPhi1", &Phi1 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tDirection [ccwise(1)/cwise(-1)]\nF1", &F1 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tDistance\nA2", &A2 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tMinimal arm\nR2", &R2 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tAngle\nPhi2", &Phi2 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tDirection [ccwise(1)/cwise(-1)]\nF2", &F2 ));
 
 	// Muscle properties
 	DList.insert( make_pair( "Muscle properties\tLtr\nLtr", &Ltr ));
@@ -171,8 +174,6 @@ t_muscle::t_muscle( uni_template *parent, const char *lscheme, int is_active )
 #endif // __NEW_MUSCLE__
 	UnitId = __id_generic_M;
 	Name = __MuscleNames[UnitId];
-	TypeName = "Muscle";
-	TypeNameS = "zMuscle";
 	IsSchDef = false;
 	if( LScheme == "Left" || LScheme == "Right" ){
 		IsSchDef = true;
@@ -195,14 +196,14 @@ t_muscle::t_muscle( const t_muscle &m )
 #endif // __NEW_MUSCLE__
 {
 	// attachment scheme
-	DList.insert( make_pair( "Attachment\tCounterclockwise|clockwise upper muscle 1|-1\nF1", &F1 ));
-	DList.insert( make_pair( "Attachment\tCounterclockwise|clockwise lower muscle 1|-1\nF2", &F2 ));
-	DList.insert( make_pair( "Attachment\tAngle between upper link and direction to upper attachment point\nPhi1", &Phi1 ));
-	DList.insert( make_pair( "Attachment\tAngle between lower link and direction to lower attachment point\nPhi2", &Phi2 ));
-	DList.insert( make_pair( "Attachment\tDistance between joint and upper attachment point\nA1", &A1 ));
-	DList.insert( make_pair( "Attachment\tDistance between joint and lower attachment point\nA2", &A2 ));
-	DList.insert( make_pair( "Attachment\tRadius of upper joint block\nR1", &R1 ));
-	DList.insert( make_pair( "Attachment\tRadius of lower joint block\nR2", &R2 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tDistance\nA1", &A1 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tMinimal arm\nR1", &R1 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tAngle\nPhi1", &Phi1 ));
+	DList.insert( make_pair( "Attachment\tOrigin\tDirection [ccwise(1)/cwise(-1)]\nF1", &F1 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tDistance\nA2", &A2 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tMinimal arm\nR2", &R2 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tAngle\nPhi2", &Phi2 ));
+	DList.insert( make_pair( "Attachment\tInsertion\tDirection [ccwise(1)/cwise(-1)]\nF2", &F2 ));
 
 	// Muscle properties
 	DList.insert( make_pair( "Muscle properties\tLtr\nLtr", &Ltr ));
@@ -663,7 +664,7 @@ void t_muscle::save_addpar( ostream &file )
 
 void t_muscle::load_dummy( void )
 {
-	uni_template::load_dummy();
+//	uni_template::load_dummy();
 }
 
 void t_muscle::set_default_data( void )
@@ -798,7 +799,6 @@ t_bfp::t_bfp( uni_template *parent, const char *lscheme )
 void t_bfp::load_dummy( void )
 {
 	t_muscle::load_dummy();
-	set_default_data();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -877,4 +877,6 @@ void t_sol::load_dummy( void )
 	t_muscle::load_dummy();
 }
 
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__

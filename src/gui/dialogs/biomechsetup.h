@@ -6,6 +6,7 @@
 #include "../Spcord.h"
 
 #include "genericdialogs.h"
+#include "../core/nsm/hhnnetwork.h"
 #include "biomtemplate.h"
 
 #ifndef __BIOMECH_SETUP_H
@@ -15,31 +16,34 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 class CBiomechSetup : public CDialog{
-	DECLARE_MESSAGE_MAP()
+		DECLARE_MESSAGE_MAP()
 	public: // Construction
-enum		{ IDD = IDD_BIOMECH_PARAMETERS };
 		CBiomechSetup( CWnd* pParent = NULL );   // standard constructor
-	protected:
-		void DoDataExchange( CDataExchange* pDX );    // DDX/DDV support
+	public: // Dialog Data
+enum		{ IDD = IDD_BIOMECH_PARAMETERS };
+		t_biomech BiomechT;
+	public:	// Implementation
 		BOOL OnInitDialog();
 		void OnOK( void );
+	protected:
+		void DoDataExchange( CDataExchange* pDX );    // DDX/DDV support
 		afx_msg void OnGridClick( NMHDR *pNotifyStruct, LRESULT* pResult );
 		afx_msg void OnEndCellEdit( NMHDR *pNotifyStruct, LRESULT* pResult );
 	private:
 		void OnFlyUpdate( const string &path );
-		bool DisplayUnit( uni_template *unit, string &start_path, bool collapse = true );
-		bool DisplayUnitPar( uni_template *unit, string &start_path );
-		bool DisplayUnitChildren( uni_template *unit, string &start_path, bool collapse );
+		bool DisplayUnit( uni_template *unit, const string &start_path, bool collapse = true );
+		bool DisplayUnitPar( uni_template *unit, const string &start_path );
+		bool DisplayUnitChildren( uni_template *unit, const string &start_path, bool collapse );
 		void UpdateView( bool save );
 	private:
-		CGridSetup	BiomechView;
-	public: // test purpose only
-		t_biomech BiomechT;
+		CGridSetup BiomechView;
 };
 
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 #endif // __BIOMECH_SETUP_H
 #endif // __CONSOLE__

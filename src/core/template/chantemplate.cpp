@@ -7,7 +7,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif //__LINUX__
 
@@ -116,11 +116,9 @@ void t_channel::save_addpar( ostream &file )
  *  Model of generic channel template for Hodgkin-Haxley type neuron  *
  *****************************************************************/
 tgen_channel::tgen_channel( uni_template *parent, int is_active ) :
-	t_channel( parent, is_active ), Eds("0.0" ), ModI( false ), Kpump( 1.0 ),
-	Km( 1.0 ), Hvm( 0.0 ), Slpm( 1.0 ), 
-	Kh( 1.0 ), Hvh( 0.0 ), Slph( 1.0 ),
-	Tm0( 0.0 ), Hvtm( 0.0 ), Slptm( 1.0 ), PowM( 0.0 ),
-	Th0( 0.0 ), Hvth( 0.0 ), Slpth( 1.0 ), PowH( 0.0 )
+	t_channel( parent, is_active ), ModI( false ), Eds("0.0" ),
+	Km( 1.0 ), Hvm( 0.0 ), Slpm( 1.0 ), Tm0( 0.0 ), Hvtm( 0.0 ), Slptm( 1.0 ), PowM( 0.0 ),
+	Kh( 1.0 ), Hvh( 0.0 ), Slph( 1.0 ), Th0( 0.0 ), Hvth( 0.0 ), Slpth( 1.0 ), PowH( 0.0 ), Kpump( 1.0 )
 {
 	Gmax = 1.; 
 	UnitId = _id_generic_Chan; 
@@ -151,11 +149,9 @@ tgen_channel::tgen_channel( uni_template *parent, int is_active ) :
 }
 
 tgen_channel::tgen_channel( const tgen_channel &channel ) :
-	t_channel( channel ), Eds( channel.Eds ), ModI( channel.ModI ), Kpump( channel.Kpump ),
-	Km( channel.Km ), Hvm( channel.Hvm ), Slpm( channel.Slpm ), 
-	Kh( channel.Kh ), Hvh( channel.Hvh ), Slph( channel.Slph ),
-	Tm0( channel.Tm0 ), Hvtm( channel.Hvtm ), Slptm( channel.Slptm ), PowM( channel.PowM ),
-	Th0( channel.Th0 ), Hvth( channel.Hvth ), Slpth( channel.Slpth ), PowH( channel.PowH )
+	t_channel( channel ), ModI( channel.ModI ), Eds( channel.Eds ),
+	Km( channel.Km ), Hvm( channel.Hvm ), Slpm( channel.Slpm ), Tm0( channel.Tm0 ), Hvtm( channel.Hvtm ), Slptm( channel.Slptm ), PowM( channel.PowM ),
+	Kh( channel.Kh ), Hvh( channel.Hvh ), Slph( channel.Slph ), Th0( channel.Th0 ), Hvth( channel.Hvth ), Slpth( channel.Slpth ), PowH( channel.PowH ), Kpump( channel.Kpump )
 {
 	DList.insert( make_pair( "Inactivation\tInit\nH", &H ));
 	DList.insert( make_pair( "Inactivation\tMagitude\nHk", &Kh ));
@@ -406,13 +402,14 @@ void tgen_channel::save_addpar( ostream &file )
 //--- constructor
 tgna_channel::tgna_channel( uni_template *parent, int is_active ) 
 	: t_channel( parent, is_active ),
-	Hvm( -40.0 ), Slpm( -6.0 ), PowM( 1.0 ),
-	Hvh( -48.0 ), Slph(  6.0 ), PowH( 1.0 ),
-	Tm0( 0.0 ), Hvtm( -40.0 ), Slptm( -12.0 ), Slptm_1( 12.0 ),
-	Th0( 0.0 ), Hvth( -48.0 ), Slpth(  12.0 ), Slpth_1( -12.0 )
+	Hvm( -40.0 ), Slpm( -6.0 ), Tm0( 0.0 ), Hvtm( -40.0 ), Slptm( -12.0 ), Slptm_1( 12.0 ), PowM( 1.0 ),
+	Hvh( -48.0 ), Slph(  6.0 ), Th0( 0.0 ), Hvth( -48.0 ), Slpth(  12.0 ), Slpth_1( -12.0 ), PowH( 1.0 )
 {
 	M = 0.02; H = 0.3; Gmax = 2.8; 
 	Th = 1.;
+#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+	Th = 0.33; // absent in merged nsm
+#endif // __MECHANICS_2D__
 	UnitId = _id_generic_NaChan; 
 	Name = _ChannelNames[UnitId];
 	DList.insert( make_pair( "Inactivation\tInit\nH\nHna", &H ));
@@ -420,7 +417,7 @@ tgna_channel::tgna_channel( uni_template *parent, int is_active )
 	DList.insert( make_pair( "Inactivation\tHalf-voltage\nHvh\nV12h", &Hvh ));
 	DList.insert( make_pair( "Inactivation\tPower\nPowH\nH_power", &PowH ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tMagnitude\nTh", &Th )); 
-	DList.insert( make_pair( "Inactivation\tTime constant\tShift\Th0\nShiftTh", &Th0 ));
+	DList.insert( make_pair( "Inactivation\tTime constant\tShift\nTh0\nShiftTh", &Th0 ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tSlope 1\nSlpth\nKth", &Slpth ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tSlope 2\nSlpth_1\nKth_1", &Slpth_1 ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tHalf-voltage\nHvth\nV12th", &Hvth ));
@@ -438,10 +435,10 @@ tgna_channel::tgna_channel( uni_template *parent, int is_active )
 
 tgna_channel::tgna_channel( const tgna_channel &channel )
 	: t_channel( channel ),
-	Hvm( channel.Hvm ), Slpm( channel.Slpm ), PowM( channel.PowM ),
-	Hvh( channel.Hvh ), Slph( channel.Slph ), PowH( channel.PowH ),
-	Tm0( channel.Tm0 ), Hvtm( channel.Hvtm ), Slptm( channel.Slptm ), Slptm_1( channel.Slptm_1 ),
-	Th0( channel.Th0 ), Hvth( channel.Hvth ), Slpth( channel.Slpth ), Slpth_1( channel.Slpth_1 )
+	Hvm( channel.Hvm ), Slpm( channel.Slpm ), Tm0( channel.Tm0 ), Hvtm( channel.Hvtm ), 
+	Slptm( channel.Slptm ), Slptm_1( channel.Slptm_1 ), PowM( channel.PowM ),
+	Hvh( channel.Hvh ), Slph( channel.Slph ), Th0( channel.Th0 ), Hvth( channel.Hvth ), 
+	Slpth( channel.Slpth ), Slpth_1( channel.Slpth_1 ), PowH( channel.PowH )
 {
 	if( double( Slptm_1 ) == 0. )
 		Slptm_1 = -Slptm;
@@ -452,7 +449,7 @@ tgna_channel::tgna_channel( const tgna_channel &channel )
 	DList.insert( make_pair( "Inactivation\tHalf-voltage\nHvh\nV12h", &Hvh ));
 	DList.insert( make_pair( "Inactivation\tPower\nPowH\nH_power", &PowH ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tMagnitude\nTh", &Th )); 
-	DList.insert( make_pair( "Inactivation\tTime constant\tShift\Th0\nShiftTh", &Th0 ));
+	DList.insert( make_pair( "Inactivation\tTime constant\tShift\nTh0\nShiftTh", &Th0 ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tSlope 1\nSlpth\nKth", &Slpth ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tSlope 2\nSlpth_1\nKth_1", &Slpth_1 ));
 	DList.insert( make_pair( "Inactivation\tTime constant\tHalf-voltage\nHvth\nV12th", &Hvth ));
@@ -595,6 +592,9 @@ tgkdr_channel::tgkdr_channel( uni_template *parent, int is_active )
 {
 	M = 0.03; Gmax = 11.2; 
 	Th = 1.;
+#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+	Th = 0.33;  // absent in merged nsm
+#endif // __MECHANICS_2D__
 	UnitId = _id_generic_KdrChan; 
 	Name = _ChannelNames[UnitId];
 	DList.insert( make_pair( "Activation\tInit\nM\nMkdr", &M ));
@@ -662,10 +662,8 @@ void tgkdr_channel::copy_to( hhn_process **unit, hhn_process *parent )
 //--- constructor
 tgka_channel::tgka_channel( uni_template *parent, int is_active ) 
 	: t_channel( parent, is_active ),
-	Hvm( -40.0 ), Slpm( -6.0 ), PowM( 1 ),
-	Hvh( -48.0 ), Slph(  6.0 ), PowH( 1.0 ),
-	Tm0( 0.0 ), Hvtm( -40.0 ), Slptm( -12.0 ), Slptm_1( 12.0 ),
-	Th0( 0.0 ), Hvth( -48.0 ), Slpth(  12.0 ), Slpth_1( -12.0 )
+	Hvm( -40.0 ), Slpm( -6.0 ), Tm0( 0.0 ), Hvtm( -40.0 ), Slptm( -12.0 ), Slptm_1( 12.0 ), PowM( 1 ),
+	Hvh( -48.0 ), Slph(  6.0 ), Th0( 0.0 ), Hvth( -48.0 ), Slpth(  12.0 ), Slpth_1( -12.0 ), PowH( 1.0 )
 {
 	Gmax = 2.8;  M = 0.02; H = 0.3;
 	UnitId = _id_generic_KAChan; 
@@ -693,10 +691,10 @@ tgka_channel::tgka_channel( uni_template *parent, int is_active )
 
 tgka_channel::tgka_channel( const tgka_channel &channel )
 	: t_channel( channel ),
-	Hvm( channel.Hvm ), Slpm( channel.Slpm ), PowM( channel.PowM ),
-	Hvh( channel.Hvh ), Slph( channel.Slph ), PowH( channel.PowH ),
-	Tm0( channel.Tm0 ), Hvtm( channel.Hvtm ), Slptm( channel.Slptm ), Slptm_1( channel.Slptm_1 ),
-	Th0( channel.Th0 ), Hvth( channel.Hvth ), Slpth( channel.Slpth ), Slpth_1( channel.Slpth_1 )
+	Hvm( channel.Hvm ), Slpm( channel.Slpm ), Tm0( channel.Tm0 ), Hvtm( channel.Hvtm ), 
+	Slptm( channel.Slptm ), Slptm_1( channel.Slptm_1 ), PowM( channel.PowM ),
+	Hvh( channel.Hvh ), Slph( channel.Slph ), Th0( channel.Th0 ), Hvth( channel.Hvth ), 
+	Slpth( channel.Slpth ), Slpth_1( channel.Slpth_1 ), PowH( channel.PowH )
 {
 	if( double( Slptm_1 ) == 0. )
 		Slptm_1 = -Slptm;
@@ -940,6 +938,9 @@ tna_channel::tna_channel( uni_template *parent, int is_active )
 	Name = _ChannelNames[UnitId];
 #endif // __LOCOMOTION__
 	Th = 1.;
+#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+	Th = 0.33;  // absent in merged nsm
+#endif // __MECHANICS_2D__
 	DList.insert( make_pair( "Activation\tInit\nM\nMna", &M ));
 	DList.insert( make_pair( "Inactivation\tInit\nH\nHna", &H ));
 }
@@ -980,6 +981,9 @@ tk_channel::tk_channel( uni_template *parent, int is_active )
 	Gmax = 90; 
 #endif // __LOCOMOTION__
 	Tm = 1.;
+#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+	Tm = 0.33;  // absent in merged nsm
+#endif // __MECHANICS_2D__
 	UnitId = _id_KChan; 
 	Name = _ChannelNames[UnitId];
 	DList.insert( make_pair( "Activation\tInit\nM\nMk", &M ));

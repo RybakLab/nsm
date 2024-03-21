@@ -207,7 +207,7 @@ explicit    basic_parser( const _Key &keys, _CharType delim, bool case_sensitive
             };
             void tolower( _Str &x )
             {
-             use_facet<ctype<_CharType> >( _loc ).tolower( &x[0], &x[x.size()] );
+             use_facet<ctype<_CharType> >( _loc ).tolower( &x[0], &x[x.size()-1] );
             };
       protected:
             bool _case_sensitive;

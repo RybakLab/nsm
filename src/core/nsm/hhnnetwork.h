@@ -57,7 +57,7 @@ class netuni_templ{
 		map<string,__id> ChanList;		// new code 4 control
 };
 
-//--- Model of neural network based on Hodgkin-Haxley type neuron
+//--- Model of neural network based on Hodgkin-Huxley type neuron
 class CHhnNetwork : public nn_unit{
 	public:
 		CHhnNetwork( void );
@@ -90,7 +90,7 @@ class CHhnNetwork : public nn_unit{
 		bool set_out( const hhn_output &output, size_t inx );
 		bool del_out( size_t inx );
 		bool add_ctr( const hhn_control &control );
-		bool set_ctr( const hhn_control &control, unsigned int index );
+		bool set_ctr( const hhn_control &control, size_t index );
 		bool del_ctr( size_t index );
 		bool load( istream &file, CSimulate * manager );
 		void save( ostream &file, CSimulate * manager );
@@ -103,7 +103,8 @@ class CHhnNetwork : public nn_unit{
 		hhn_control *get_crtunit( const string &name );
 		CConnectMatrix &nnconnect( void ){ return NNConnect; };
 		void *select( CHhnControlled *ctrl );
-		void init( long seed, runman *man = NULL, bool rand = false );
+		void init( long seed, runman *man, bool rand = false ); // -->>> mod
+		void prerun( double step );
 	private:
 		void init_syn( void );
 		void init_ions( void );
@@ -129,7 +130,7 @@ class CHhnNetwork : public nn_unit{
 	public:
 		double Threshold;
 	public:
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		size_t size_fbk( void ) const{ return Feedback.size(); };
 		hhn_feedback &get_fbk( size_t inx ){ return Feedback[inx]; };
 		bool add_fbk( const hhn_feedback &feedback );
@@ -137,11 +138,13 @@ class CHhnNetwork : public nn_unit{
 		bool del_fbk( size_t inx );
 	private:
 		vector<hhn_feedback> Feedback; // Array of feedbacks for the network (ONLY SOURCES)
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 // temporary solution ------- begin
      public:
-		netuni_templ TUniList;		// new code 4 control
 		t_network NetParam;
+		netuni_templ TUniList;		// new code 4 control
 //--------------------------- end
 };
 

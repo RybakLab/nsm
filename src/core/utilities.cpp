@@ -29,14 +29,14 @@ bool remove_char( const char *filename, char ch )
      long file_size = ftell( file );
      fseek( file, 0, SEEK_SET );
      char *buffer = new char[file_size+1];
-     size_t sz = fread( buffer, file_size, sizeof( char ), file );
+     fread( buffer, file_size, sizeof( char ), file );
      fclose( file );
      char *end_buffer = remove( buffer, buffer+file_size, 0x0D );
      size_t new_size = end_buffer-buffer;
      file = fopen( filename, "w+b" );
      fwrite( buffer, new_size, sizeof( char ), file );
      fclose( file );
-     delete buffer;
+     delete[] buffer;
      return true;
      }
  return false;

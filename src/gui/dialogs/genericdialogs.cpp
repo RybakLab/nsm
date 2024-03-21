@@ -21,7 +21,7 @@
 CGridSetup::CGridSetup( int IDD_IMAGE_RES, char delim )
 {
 	Delim = delim;
-	m_ImageList.Create( MAKEINTRESOURCE( IDD_IMAGE_RES ), 14, 1, RGB( 255,255,255 ));
+	m_ImageList.Create( MAKEINTRESOURCE( IDD_IMAGE_RES ), 28, 1, RGB( 255,255,255 ));
 	LastRow = LastCol = 0;
 }
 
@@ -423,8 +423,6 @@ void CGridSetup::SetupBntStyle( void )
 	static CGridBtnCellBase::STRUCT_DRAWCTL scroll_up = { 0, DFCS_SCROLLUP, FALSE, CGridBtnCellBase::CTL_ALIGN_RIGHT, DFC_SCROLL };
 	static CGridBtnCellBase::STRUCT_DRAWCTL scroll_down = { 0, DFCS_SCROLLDOWN, FALSE, CGridBtnCellBase::CTL_ALIGN_RIGHT, DFC_SCROLL };
 	static CGridBtnCellBase::STRUCT_DRAWCTL combobox = { 0, DFCS_SCROLLDOWN, FALSE, CGridBtnCellBase::CTL_ALIGN_RIGHT, DFC_SCROLL };
-	static bool IsComboStyle = false;
-	static bool IsSpinStyle = false;
 
 	int width = GetSystemMetrics( SM_CXVSCROLL )+2;
 	typedef map<_Grid_Key,_Grid_Element>::iterator it;
@@ -572,7 +570,7 @@ pair<int,int> CGridSetup::InsertBranch( const string &path, const string &name, 
 	}
 	else{
 		unsigned char *tree = new unsigned char[tree_levels.size()];
-		for( unsigned int i = 0; i < tree_levels.size(); ++i )
+		for( size_t i = 0; i < tree_levels.size(); ++i )
 			tree[i] = tree_levels[i];
 		if( m_TreeColumn.InsertTreeBranch( tree, tree_levels.size(), ins_row, FALSE ) != -1 &&  AddNewName( name, type ) != -1 ){
 			LastRow = LastCol = 0;
@@ -587,10 +585,10 @@ pair<int,int> CGridSetup::InsertBranch( const string &path, const string &name, 
 				ins_row = m_TreeColumn.GetRowCount()-tree_levels.size();
 			}
 			PrintTree( path, ins_row, tree_levels );
-			delete tree;
+			delete[] tree;
 			return make_pair( ins_row+tree_levels.size()-1, AddNewName( name, type ));
 		}
-		delete tree;
+		delete[] tree;
 		return make_pair( -1, -1 );
 	} 
 }
@@ -598,16 +596,12 @@ pair<int,int> CGridSetup::InsertBranch( const string &path, const string &name, 
 bool CGridSetup::DelBranch( const string &path, const pair<int,int> &row_range )
 {
 	typedef map<_Grid_Key,_Grid_Element>::iterator it;
-	int test = 1;
-	pair<it,it> branch = make_pair( GridCells.end(), GridCells.end());
 	for( it pos = GridCells.begin(); pos != GridCells.end(); ){
 		if(( pos->first ).Path.find( path ) == 0 ){
 			GridCells.erase( pos );
 			pos = GridCells.begin();
 		}
-		else{
-			++pos;
-		}
+		else{ ++pos; }
 	}
 	m_TreeColumn.DeleteTreeBranch( row_range.first, TRUE );
 	int diff = row_range.second-row_range.first;
@@ -695,8 +689,9 @@ void CGridSetup::PrintTree( const string &path, int ins_row, const vector<unsign
 void CGridSetup::UpdateCell( int row, int col, void *data )
 {
 	CString strMsg;
-	if( row < GetFixedRowCount() || col < GetFixedColumnCount())
+	if( row < GetFixedRowCount() || col < GetFixedColumnCount() ){
 		return;
+	}
 	CGridCellBase *pGridCell = GetCell( row, col );
 	if( pGridCell ){
 		pair<_Grid_Key,_Grid_Element> cell;
@@ -706,61 +701,51 @@ void CGridSetup::UpdateCell( int row, int col, void *data )
 				case GRID_BOOL:
 				case GRID_COMBO:
 				case GRID_STRING:
-				break;
+					break;
 				case GRID_INT:
-				{
-					int idata = 0;
-					int *p_idata = &idata;
-					if( data == NULL ){
-						strMsg = pGridCell->GetText();
-						idata = atoi( LPCTSTR( strMsg ));
+					{
+						int idata = 0;
+						int *p_idata = &idata;
+						if( data == NULL ){
+							strMsg = pGridCell->GetText();
+							idata = atoi( LPCTSTR( strMsg ));
+						} else{ p_idata = ( int *)data; }
+						if(( cell.second.Type & GRID_POSITIVE ) && *p_idata <= 0 ){
+							if( cell.second.Type & GRID_EXCL_ZERO ){
+								*p_idata = 1;
+							} else{ *p_idata = 0; }
+						}
+						if(( cell.second.Type & GRID_NEGATIVE ) && *p_idata >= 0 ){
+							if( cell.second.Type & GRID_EXCL_ZERO ){
+								*p_idata = -1;
+							} else{ *p_idata = 0; }
+						}
+						strMsg.Format( "%i", *p_idata );
+						pGridCell->SetText( strMsg );
 					}
-					else{
-						p_idata = ( int *)data;
-					}
-					if(( cell.second.Type & GRID_POSITIVE ) && *p_idata <= 0 ){
-						if( cell.second.Type & GRID_EXCL_ZERO )
-							*p_idata = 1;
-						else
-							*p_idata = 0;
-					}
-					if(( cell.second.Type & GRID_NEGATIVE ) && *p_idata >= 0 ){
-						if( cell.second.Type & GRID_EXCL_ZERO )
-							*p_idata = -1;
-						else
-							*p_idata = 0;
-					}
-					strMsg.Format( "%i", *p_idata );
-					pGridCell->SetText( strMsg );
-				}
-				break;
+					break;
 				case GRID_DOUBLE:
-				{
-					double fdata = 0;
-					double *p_fdata = &fdata;
-					if( data == NULL ){
-						strMsg = pGridCell->GetText();
-						fdata = atof( LPCTSTR( strMsg ));
+					{
+						double fdata = 0;
+						double *p_fdata = &fdata;
+						if( data == NULL ){
+							strMsg = pGridCell->GetText();
+							fdata = atof( LPCTSTR( strMsg ));
+						} else{ p_fdata = ( double *)data; }
+						if(( cell.second.Type & GRID_POSITIVE ) && *p_fdata <= 0 ){
+							if( cell.second.Type & GRID_EXCL_ZERO ){
+								*p_fdata = 0.1;
+							} else{ *p_fdata = 0; }
+						}
+						if(( cell.second.Type & GRID_NEGATIVE ) && *p_fdata >= 0 ){
+							if( cell.second.Type & GRID_EXCL_ZERO ){
+								*p_fdata = -0.1;
+							} else{ *p_fdata = 0; }
+						}
+						strMsg.Format( "%g", *p_fdata );
+						pGridCell->SetText( strMsg );
 					}
-					else{
-						p_fdata = ( double *)data;
-					}
-					if(( cell.second.Type & GRID_POSITIVE ) && *p_fdata <= 0 ){
-						if( cell.second.Type & GRID_EXCL_ZERO )
-							*p_fdata = 0.1;
-						else
-							*p_fdata = 0;
-					}
-					if(( cell.second.Type & GRID_NEGATIVE ) && *p_fdata >= 0 ){
-						if( cell.second.Type & GRID_EXCL_ZERO )
-							*p_fdata = -0.1;
-						else
-							*p_fdata = 0;
-					}
-					strMsg.Format( "%g", *p_fdata );
-					pGridCell->SetText( strMsg );
-				}
-				break;
+					break;
 				default:;
 			} 
 		}
@@ -771,7 +756,6 @@ void CGridSetup::UpdateCell( int row, int col, void *data )
 
 /////////////////////////////////////////////////////////////////////////////
 // CCheckListCtrl
-
 CCheckListCtrl::CCheckListCtrl()
 {
 }
@@ -790,94 +774,87 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CCheckListCtrl public functions
 
-
 //////////////////////////////////////////////////////////////////////////
 // Function:    InitList
 //
-
 void CCheckListCtrl::InitList( vector<string> &list )
 {
-    DWORD dwRemoveStyles = LVS_OWNERDRAWFIXED | LVS_SHOWSELALWAYS;
-    DWORD dwNewStyles    = LVS_REPORT | LVS_NOCOLUMNHEADER /*| LVS_SHAREIMAGELISTS */|
-                           LVS_SINGLESEL/* | LVS_SORTASCENDING*/;
-
-    DWORD dwRemoveExStyles = 0;
-    DWORD dwNewExStyles = LVS_EX_CHECKBOXES;
-
-    ASSERT ( 0 == ( GetStyle() & LVS_OWNERDATA ));
-    ModifyStyle ( dwRemoveStyles, dwNewStyles );
-    ListView_SetExtendedListViewStyleEx ( GetSafeHwnd(),
-                                          dwRemoveExStyles | dwNewExStyles,
-                                          dwNewExStyles );
-    // Empty the control, and if there are no columns, insert a column.
-
-    DeleteAllItems();
-    LVCOLUMN rCol = { LVCF_WIDTH };
-    if( !GetColumn( 0, &rCol ) )
-        InsertColumn( 0, _T("") );
-    
-    BOOL exit_res = FALSE;
-    for( unsigned int i = 0; i < list.size(); i++ ){
-         InsertItem ( i, list[i].c_str() );
-         SetItemData ( i, i );
-         }
-    SetColumnWidth( 0, LVSCW_AUTOSIZE_USEHEADER );
+	DWORD dwRemoveStyles = LVS_OWNERDRAWFIXED | LVS_SHOWSELALWAYS;
+	DWORD dwNewStyles    = LVS_REPORT | LVS_NOCOLUMNHEADER /*| LVS_SHAREIMAGELISTS */|
+				LVS_SINGLESEL/* | LVS_SORTASCENDING*/;
+	DWORD dwRemoveExStyles = 0;
+	DWORD dwNewExStyles = LVS_EX_CHECKBOXES;
+	ASSERT ( 0 == ( GetStyle() & LVS_OWNERDATA ));
+	ModifyStyle ( dwRemoveStyles, dwNewStyles );
+	ListView_SetExtendedListViewStyleEx ( GetSafeHwnd(),
+						dwRemoveExStyles | dwNewExStyles,
+						dwNewExStyles );
+	// Empty the control, and if there are no columns, insert a column.
+	DeleteAllItems();
+	LVCOLUMN rCol = { LVCF_WIDTH };
+	if( !GetColumn( 0, &rCol ) )
+		InsertColumn( 0, _T("") );
+	for( unsigned int i = 0; i < list.size(); i++ ){
+		InsertItem ( i, list[i].c_str() );
+		SetItemData ( i, i );
+	}
+	SetColumnWidth( 0, LVSCW_AUTOSIZE_USEHEADER );
 }
 
 
 void CCheckListCtrl::Select( vector<int> &itemindex )
 {
-    for( int i = 0; i < GetItemCount(); i++ ){
+	for( int i = 0; i < GetItemCount(); i++ ){
 		if( std::find( itemindex.begin(), itemindex.end(), i ) != itemindex.end() )
-            SetCheck ( i, TRUE );
-         }
+			SetCheck ( i, TRUE );
+	}
 }
 
 void CCheckListCtrl::SelectAll(void)
 {
-    for( int i = 0; i < GetItemCount(); i++ ){
-         SetCheck ( i, TRUE );
-         }
+	for( int i = 0; i < GetItemCount(); i++ ){
+		SetCheck ( i, TRUE );
+	}
 }
 
 void CCheckListCtrl::UnselectAll(void)
 {
-    for( int i = 0; i < GetItemCount(); i++ ){
-         SetCheck ( i, FALSE );
-         }
+	for( int i = 0; i < GetItemCount(); i++ ){
+		SetCheck ( i, FALSE );
+	}
 }
 
 int CCheckListCtrl::GetNumSelectedItems( void )
 {
 	int i = 0, num_selected_items = 0;
-    for( i = 0, num_selected_items = 0; i < GetItemCount(); i++){
-         if( GetCheck( i ))
-             ++num_selected_items;
-         }
-    return num_selected_items;
-
+	for( i = 0, num_selected_items = 0; i < GetItemCount(); i++){
+		if( GetCheck( i ))
+		++num_selected_items;
+	}
+	return num_selected_items;
 }
 
 void CCheckListCtrl::GetSelectedItems( vector<int> &itemindex )
 {
-    itemindex.clear();
-    for( int i = 0, num_selected_items = 0; i < GetItemCount(); i++){
-         CString name = GetItemText( i, 0 );
-         int n = GetItemData( i );
-         if( GetCheck( i ))
-             itemindex.push_back( GetItemData( i ));
-         }
-}
+	itemindex.clear();
+	for( int i = 0; i < GetItemCount(); i++){
+		CString name = GetItemText( i, 0 );
+		if( GetCheck( i ))
+			itemindex.push_back( GetItemData( i ));
+		}
+	}
 
 // CFormatDialog dialog
 IMPLEMENT_DYNAMIC(CFormatDialog, CDialog)
 
 CFormatDialog::CFormatDialog(CWnd* pParent /*=NULL*/)
 	: CDialog(CFormatDialog::IDD, pParent)
-    , NumSelItems(0)
-    , FormatType(0)
-    , Wnd1(-1)
-    , Wnd2(-1)
+	, NumSelItems(0)
+	, FormatType(0)
+	, Wnd1(-1)
+	, Wnd2(-1)
+	, Prec_A( 0 )
+	, Prec_T( 0 )
 {
 }
 
@@ -887,22 +864,26 @@ CFormatDialog::~CFormatDialog()
 
 void CFormatDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_DATA_LIST, DataList);
-	DDX_Text(pDX, IDC_EDIT_NUMDATA, NumSelItems);
-	DDX_CBIndex(pDX, IDC_COMBO_FORMAT, FormatType);
-	DDX_Control(pDX, IDC_COMBO_FORMAT, ComboFormats);
-	DDX_Text(pDX, IDC_EDIT_DATA_WND1, Wnd1);
-	DDX_Text(pDX, IDC_EDIT_DATA_WND2, Wnd2);
+	CDialog::DoDataExchange( pDX );
+	DDX_Control( pDX, IDC_DATA_LIST, DataList );
+	DDX_Text( pDX, IDC_EDIT_NUMDATA, NumSelItems );
+	DDX_CBIndex( pDX, IDC_COMBO_FORMAT, FormatType );
+	DDX_Control( pDX, IDC_COMBO_FORMAT, ComboFormats );
+	DDX_Text( pDX, IDC_EDIT_DATA_WND1, Wnd1 );
+	DDX_Text( pDX, IDC_EDIT_DATA_WND2, Wnd2 );
+	DDX_Text( pDX, IDC_EDIT_DATA_PREC_A, Prec_A );
+	DDV_MinMaxInt( pDX, Prec_A, 0, 6 );
+	DDX_Text( pDX, IDC_EDIT_DATA_PREC_T, Prec_T );
+	DDV_MinMaxDouble(pDX, Prec_T, 0.0, 100.0);
 }
 
 
 BEGIN_MESSAGE_MAP(CFormatDialog, CDialog)
-    ON_BN_CLICKED(IDC_BUTTON_SELECTALL, OnBnClickedButtonSelectall)
-    ON_BN_CLICKED(IDC_BUTTON_UNSELECTALL, OnBnClickedButtonUnselectall)
-    ON_NOTIFY(LVN_ITEMCHANGED, IDC_DATA_LIST, OnLvnItemchangedDataList)
-    ON_BN_CLICKED(IDOK, OnBnClickedOk)
-    ON_CBN_SELCHANGE(IDC_COMBO_FORMAT, OnCbnSelchangeComboFormat)
+	ON_BN_CLICKED(IDC_BUTTON_SELECTALL, &CFormatDialog::OnBnClickedButtonSelectall)
+	ON_BN_CLICKED(IDC_BUTTON_UNSELECTALL, &CFormatDialog::OnBnClickedButtonUnselectall)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_DATA_LIST, &CFormatDialog::OnLvnItemchangedDataList)
+	ON_BN_CLICKED(IDOK, &CFormatDialog::OnBnClickedOk)
+	ON_CBN_SELCHANGE(IDC_COMBO_FORMAT, &CFormatDialog::OnCbnSelchangeComboFormat)
 END_MESSAGE_MAP()
 
 
@@ -910,50 +891,49 @@ END_MESSAGE_MAP()
 BOOL CFormatDialog::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-    ComboFormats.ResetContent();
-    for( int i = 0; i < _id_MAX_FORMAT; i++ )
-         ComboFormats.AddString( _FormatNames[i] );
-    DataList.InitList( AllNames );
-    DataList.Select( SelectedItems );
-    NumSelItems = DataList.GetNumSelectedItems();
-    UpdateData( FALSE );
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	ComboFormats.ResetContent();
+	for( int i = 0; i < _id_MAX_FORMAT; i++ ){
+		ComboFormats.AddString( _FormatNames[i] );
+	}
+	DataList.InitList( AllNames );
+	DataList.Select( SelectedItems );
+	NumSelItems = DataList.GetNumSelectedItems();
+	UpdateData( FALSE );
+	return TRUE; // return TRUE unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CFormatDialog::OnBnClickedButtonSelectall()
 {
-    DataList.SelectAll();
-    NumSelItems = DataList.GetNumSelectedItems();
-    UpdateData( FALSE );
+	DataList.SelectAll();
+	NumSelItems = DataList.GetNumSelectedItems();
+	UpdateData( FALSE );
 }
 
 void CFormatDialog::OnBnClickedButtonUnselectall()
 {
-    DataList.UnselectAll();
-    NumSelItems = DataList.GetNumSelectedItems();
-    UpdateData( FALSE );
+	DataList.UnselectAll();
+	NumSelItems = DataList.GetNumSelectedItems();
+	UpdateData( FALSE );
 }
 
 void CFormatDialog::OnLvnItemchangedDataList(NMHDR *pNMHDR, LRESULT *pResult)
 {
-    LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-    NumSelItems = DataList.GetNumSelectedItems();
-    UpdateData( FALSE );
-    *pResult = 0;
+	NumSelItems = DataList.GetNumSelectedItems();
+	UpdateData( FALSE );
+	*pResult = 0;
 }
 
 void CFormatDialog::OnBnClickedOk()
 {
-    DataList.GetSelectedItems( SelectedItems );
-    UpdateData( TRUE );
-    OnOK();
+	DataList.GetSelectedItems( SelectedItems );
+	UpdateData( TRUE );
+	OnOK();
 }
 
 void CFormatDialog::OnCbnSelchangeComboFormat()
 {
-    UpdateData( TRUE );
+	UpdateData( TRUE );
 }
 
 #endif // __CONSOLE__

@@ -4,20 +4,25 @@
 #ifndef __MUSCLE_H
 #define __MUSCLE_H
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #if _MSC_VER > 1000
 	#pragma once
 #endif // _MSC_VER > 1000
 
 #include "sptypes.h"
+#include "nsmsys.h"
 
-struct wlink{
+struct alignas( 16 ) wlink{
+	void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+	void operator delete( void * p ){ nsm_free( p ); }; 
 	int Type;
 	int In;	
 };
 
-struct wjoint{
+struct alignas( 16 ) wjoint{
+	void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+	void operator delete( void * p ){ nsm_free( p ); }; 
 	double A;
 	double dA;
 };
@@ -26,13 +31,16 @@ class hhn_output;
 class unit_code;
 /////////////////////////////////////////////////////////////////////////////
 // zelastic class
-class zelastic{
+class alignas( 16 ) zelastic{
 	public: // constructors/destructor
 		zelastic( double kl, double ke );
 		zelastic( const zelastic &ee );
 		~zelastic( void );
 	public: // operators
 		zelastic &operator = ( const zelastic &ee );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public: // methods
 		void preproc( void );
 		double force( double l )
@@ -69,13 +77,16 @@ class zelastic{
 
 /////////////////////////////////////////////////////////////////////////////
 // zcontrac class
-class zcontrac{
+class alignas( 16 ) zcontrac{
 	public: // constructors/destructor
 		zcontrac( void );
 		zcontrac( const zcontrac &ce );
 		~zcontrac( void );
 	public: // operators
 		zcontrac &operator = ( const zcontrac &ce );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public: // methods
 		void preproc( void );
 		double force( double l, double v )
@@ -162,23 +173,26 @@ class zcontrac{
 
 /////////////////////////////////////////////////////////////////////////////
 // zmuscle class
-class zmuscle{
+class alignas( 16 ) zmuscle{
 	public: // constructors/destructor
 		zmuscle( void );
 		zmuscle( const zmuscle &muscle );
-virtual	~zmuscle( void ){};
+virtual		~zmuscle( void ){};
 	public: // operators
 		zmuscle &operator = ( const zmuscle &muscle );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public: // methods
-		void init( void );
+		bool init( void );
 		double get_at( double l, double v )
 		{
 			double lt = ( L-l )/( 1.0+exp( -400.0*( L-l )));
 			double lm = sqrt( lt*lt+W2 );
 			double cos_alpha = lt/lm;
 			double vm = ( V-v )*cos_alpha;		// Fiber velocity
-			double mn = *MN*Amax;				// Activation
-			lm /= L0;							// Normalization
+			double mn = *MN*Amax;			// Activation
+			lm /= L0;				// Normalization
 			F = PT0*TE.force(( l-LT0 )/LT0 );	// total muscle force
 			double ft = F+PT0*BT*v;
 			double ff = P0*( PE.force( lm+Shift-1 )+CE.force( lm, vm )*mn+BM*vm )*cos_alpha;
@@ -198,10 +212,10 @@ virtual	~zmuscle( void ){};
 		double get_ltr( void ){ return Ltr*L0*cos( Alpha0 ); };
 		const void *select( unit_code *view )const;
 	public:
-virtual	const char *get_name( void ) const{ return NULL; };
-virtual	void preproc( double *llink );
-virtual	void proc( wjoint *joints ){};
-virtual	void add_f( double *force, wlink *link ){};
+virtual		const char *get_name( void ) const{ return NULL; };
+virtual		void preproc( double *llink );
+virtual		void proc( wjoint *joints ){};
+virtual		void add_f( double *force, wlink *link ){};
 	protected:	// attachment properties
 		double H1;		// Upper Arm
 		double X1;
@@ -301,7 +315,7 @@ static	double _MN;
 
 /////////////////////////////////////////////////////////////////////////////
 // j1scheme class
-class j1scheme{
+class alignas( 16 ) j1scheme{
 	public:
 		j1scheme( void ) : Upper( -1 ), Lower( -1 ), Joint( -1 ){};
 		j1scheme( const j1scheme &x ) : Upper( x.Upper ), Lower( x.Lower ), Joint( x.Joint ){};
@@ -314,6 +328,9 @@ virtual	~j1scheme( void ){};
 			Joint = x.Joint;
 			return *this;
 		};
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:	// i/o operations
 		int Upper;
 		int Lower;
@@ -322,7 +339,7 @@ virtual	~j1scheme( void ){};
 
 /////////////////////////////////////////////////////////////////////////////
 // j2scheme class
-class j2scheme : public j1scheme{
+class alignas( 16 ) j2scheme : public j1scheme{
 	public:
 		j2scheme( void ) : j1scheme(), Middle( -1 ), LowerJoint( -1 ){};
 		j2scheme( const j2scheme &x ) : j1scheme( x ), Middle( x.Middle ), LowerJoint( x.LowerJoint ){};
@@ -335,6 +352,9 @@ class j2scheme : public j1scheme{
 			LowerJoint = x.LowerJoint;
 			return *this;
 		};
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:	// i/o operations
 		int Middle;
 		int LowerJoint;
@@ -343,13 +363,16 @@ class j2scheme : public j1scheme{
 
 /////////////////////////////////////////////////////////////////////////////
 // j1muscle class
-class j1muscle : public zmuscle{
+class alignas( 16 ) j1muscle : public zmuscle{
 	public: // constructors/destructor
 		j1muscle( const j1scheme &link );
 		j1muscle( const j1muscle &muscle );
 		~j1muscle( void ){};
 	public: // operators
 		j1muscle &operator = ( const j1muscle &m );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public: // methods
 		const char *get_name( void ) const;
 		void preproc( double *llink );
@@ -366,13 +389,16 @@ class j1muscle : public zmuscle{
 
 /////////////////////////////////////////////////////////////////////////////
 // j2muscle class
-class j2muscle : public zmuscle{
+class alignas( 16 ) j2muscle : public zmuscle{
 	public: // constructors/destructor
 		j2muscle( const j2scheme &link );
 		j2muscle( const j2muscle &muscle );
 		~j2muscle( void ){};
 	public: // operators
 		j2muscle &operator = ( const j2muscle &m );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public: // methods
 		const char *get_name( void ) const;
 		void preproc( double *llink );
@@ -414,5 +440,7 @@ inline zmuscle *zcreate( const j2scheme &scheme )
 	return ( zmuscle * )new j2muscle( scheme );
 }
 
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 #endif // __MUSCLE_H

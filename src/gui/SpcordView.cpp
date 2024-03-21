@@ -5,17 +5,16 @@
 #ifndef __CONSOLE__
 
 #include "SpcordView.h"
-#include "Grafor.h"
+#include "grafor.h"
 #include "SpcordDoc.h"
 #include "MainFrm.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
-const int MAX_Y_LP = 5000;
 const int MARGINS_SP = 2000; // x0.01mm
 
 /////////////////////////////////////////////////////////////////////////////
@@ -32,14 +31,14 @@ class CScale{
 			MaxLog  = scale.MaxLog;
 			return *this;
 		};
-		hhn_pair< int > PHtoLP( const hhn_pair<float> &point) const
+		hhn_pair<int> PHtoLP( const hhn_pair<float> &point) const
 		{
 			hhn_pair< int > ret;
 			ret.X = int(( point.X*MaxLog )/MaxPhis );
 			ret.Y = int(( point.Y*MaxLog )/MaxPhis );
 			return ret;
 		};
-		hhn_pair< float > LPtoPH( const hhn_pair<int> &point) const
+		hhn_pair<float> LPtoPH( const hhn_pair<int> &point) const
 		{
 			hhn_pair< float > ret;
 			ret.X = float(( point.X*MaxPhis )/MaxLog );
@@ -101,9 +100,9 @@ BEGIN_MESSAGE_MAP(neurosim_view, CView)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDBLCLK()
-	ON_COMMAND(ID_FILE_PRINT, CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_DIRECT, CView::OnFilePrint)
-	ON_COMMAND(ID_FILE_PRINT_PREVIEW, CView::OnFilePrintPreview)
+	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
+	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
+	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
 END_MESSAGE_MAP()
 
 const char *neurosim_view::getViewName( void ) const
@@ -164,7 +163,7 @@ void neurosim_view::OnDraw(CDC* pDC)
 	IsUpdated = true;
 }
 
-void neurosim_view::DrawTo(bool complete, unsigned long counter)
+void neurosim_view::DrawTo(bool complete, size_t counter)
 {
 	neurosim_doc *pDoc = GetDocument(); if( !pDoc )	return;
 	if( Bitmap ){
@@ -219,7 +218,7 @@ void neurosim_view::changeViewSize( void )
 	if( !InitUpdate )
 		return;
 	WINDOWPLACEMENT wp;
-	wp.length = sizeof wp;
+	wp.length = sizeof( wp );
 	if( !GetParent()->GetWindowPlacement( &wp ))
 		return;
 	if( View ){
@@ -246,8 +245,8 @@ void neurosim_view::SaveImage( const char *filename, CSize size )
 	DrawPicture( &dc, rect );
 	dc.SelectObject( oldbitmap );
 	BITMAPINFOHEADER bih;
-	memset(&bih, 0, sizeof BITMAPINFOHEADER );
-	bih.biSize = sizeof BITMAPINFOHEADER;
+	memset(&bih, 0, sizeof( BITMAPINFOHEADER ));
+	bih.biSize = sizeof( BITMAPINFOHEADER );
 	int ret = GetDIBits(
 		dc.GetSafeHdc(),	// handle to device context
 		(HBITMAP)bitmap,	// handle to bitmap
@@ -284,13 +283,13 @@ void neurosim_view::SaveImage( const char *filename, CSize size )
 				colorsMask[2] = 0x00;
 			}
 		}
-		DWORD dwHeaderSize = bih.biSize + bih.biClrUsed*sizeof(RGBQUAD) + sizeof BITMAPFILEHEADER;
+		DWORD dwHeaderSize = bih.biSize + bih.biClrUsed*sizeof(RGBQUAD) + sizeof( BITMAPFILEHEADER );
 		if(numColorMask > 0){
-			dwHeaderSize += numColorMask*sizeof DWORD;
+			dwHeaderSize += numColorMask*sizeof( DWORD );
 		}
 		DWORD dwFileSize = dwHeaderSize + bih.biSizeImage;
 		HANDLE hFile = CreateFile(
-			filename,
+			LPCSTR( filename ),
 			GENERIC_READ | GENERIC_WRITE,
 			0,
 			NULL,
@@ -318,14 +317,14 @@ void neurosim_view::SaveImage( const char *filename, CSize size )
 				if( pbFile != NULL ){
 
 					BITMAPFILEHEADER *bfh = (BITMAPFILEHEADER *)pbFile;
-					PBYTE pbPos = pbFile + sizeof BITMAPFILEHEADER;
+					PBYTE pbPos = pbFile + sizeof( BITMAPFILEHEADER );
 					BITMAPINFO *bi = (BITMAPINFO *)pbPos;
-					memcpy(bi, &bih, sizeof BITMAPINFOHEADER);
-					pbPos += sizeof BITMAPINFOHEADER;
+					memcpy(bi, &bih, sizeof( BITMAPINFOHEADER));
+					pbPos += sizeof( BITMAPINFOHEADER );
 
 					if(numColorMask > 0){
-						memcpy(pbPos, colorsMask, numColorMask*sizeof DWORD);
-						pbPos += numColorMask*sizeof DWORD;
+						memcpy(pbPos, colorsMask, numColorMask*sizeof( DWORD ));
+						pbPos += numColorMask*sizeof( DWORD );
 					}
 					pbPos = pbFile + dwHeaderSize;
 					ret = GetDIBits(
@@ -447,8 +446,6 @@ void CChartView::SetView( void )
 
 void CChartView::DrawPicture( CDC* pDC, CRect &rect )
 {
-static LONG Lock = 0;
-
 	neurosim_doc *pDoc = GetDocument(); if( !pDoc )	return;
 	CChartFrameView *view = (CChartFrameView *)View;
 	if( !view )
@@ -457,7 +454,7 @@ static LONG Lock = 0;
 	string paramName;
 
 	sprintf( buff, "-1234567 T_in" );
-	CSize siz = pDC->GetTextExtent( buff,strlen( buff ));
+	CSize siz = pDC->GetTextExtent( LPCTSTR( buff ), (int)strlen( buff ));
 	SetRegionRect( rect, siz.cy ); // calc regions to draw graphics
 
 	gr->Init_Page( pDC , &rect, ( pDC->IsPrinting() == TRUE ), false );
@@ -472,10 +469,10 @@ static LONG Lock = 0;
 	float rx = gr->Osi_Gr( xmin, xmax, 2, 2);	// calc big oxes step
 	float ry = gr->Osi_Gr( ymin, ymax, 2, 2);
 
-	unsigned long bin = 0;
+	size_t bin = 0;
 	double norm = 0.;
 	if( pDoc->Model->GetChartBuffer().step() > 0. )
-		bin = unsigned long( pDoc->SimData->HistBin/pDoc->Model->GetChartBuffer().step());
+		bin = size_t( pDoc->SimData->HistBin/pDoc->Model->GetChartBuffer().step());
 	if( pDoc->SimData->HistBin > 0. )
 		norm = pDoc->SimData->HistNorm/pDoc->SimData->HistBin;
 	if( view->validate( limits_counter )){
@@ -487,42 +484,42 @@ static LONG Lock = 0;
 					if( view_data ){
 						if( view->get_par( i1 )->ParCode.is_stat() ){
 							::lock_data();
-							vector<lvector> *data = (vector<lvector> *)view_data;
+							nsm_vector(lvector) *data = (nsm_vector(lvector) *)view_data;
 							switch( view->get_par( i1 )->ParCode.Param ){
 								case CViewParam::Plot:
 									ymin = 0.;
 									ymax = ( float )data->size();
 									ry = gr->Osi_Gr( ymin, ymax, 2, 2 );  // calc big oxes step
 									gr->Limit_Gr( &xmin, &xmax, &ymin, &ymax );
-									sprintf( buff, "", i+1, j+1 );
-									gr->Draw_plot( pDC, pDoc->Model->GetTimeScale(), *data, limits_counter.Y, limits_counter.X );
+									sprintf( buff, "%d %d", i+1, j+1 );
+									gr->Draw_plot( pDC, pDoc->Model->GetTimeScale(), *data, (long)limits_counter.Y, (long)limits_counter.X );
 								break;
 								case CViewParam::Hist:
 									ymin = ( float )view->ymin( i1 );
 									ymax = ( float )view->ymax( i1 );
 									ry = gr->Osi_Gr( ymin, ymax, 2, 2 );  // calc big oxes step
 									gr->Limit_Gr( &xmin, &xmax, &ymin, &ymax );
-									sprintf( buff, "", i+1, j+1 );
+									sprintf( buff, "%d %d", i+1, j+1 );
 									if( bin )
-										gr->Draw_hist( pDC, pDoc->Model->GetTimeScale(), *data, limits_counter.Y, limits_counter.X, bin, float( norm ));
+										gr->Draw_hist( pDC, pDoc->Model->GetTimeScale(), *data, (long)limits_counter.Y, (long)limits_counter.X, (long)bin, float( norm ));
 									break;
 							}
 							::unlock_data();
 						}
 						else{
-							const vector<float> *data = (const vector<float> *)view_data;
+							const nsm_vector(float) *data = (const nsm_vector(float) *)view_data;
 							ymin = (float)view->ymin(i1);
 							ymax = (float)view->ymax(i1);
 							ry=gr->Osi_Gr(ymin,ymax,2,2);	// calc big oxes step
 							gr->Limit_Gr(&xmin,&xmax,&ymin,&ymax);
-							sprintf(buff,"", i+1, j+1);
-							gr->Draw_array(pDC, pDoc->Model->GetTimeScale(), *data, limits_counter.Y, limits_counter.X );
+							sprintf(buff,"%d %d", i+1, j+1);
+							gr->Draw_array(pDC, pDoc->Model->GetTimeScale(), *data, (long)limits_counter.Y, (long)limits_counter.X );
 						}
 						CViewParam *par = view->get_par(i1);
 						if( par ){
 							par->ParCode.get_fullname( pDoc->Model, paramName );
 						}
-						gr->Axes_Gr( pDC, "" ,rx , 4, ( char *)paramName.c_str(), ry, 1, 00, -1, 0, 11 );
+						gr->Axes_Gr( pDC, (char *)"" ,rx , 4, ( char *)paramName.c_str(), ry, 1, 00, -1, 0, 11 );
 					}
 				}
 			}
@@ -565,7 +562,7 @@ hhn_pair<int> CChartView::GetViewLayout( void )
 	return layout;
 }
 
-unsigned long CChartView::GetMaxCounter( void )
+size_t CChartView::GetMaxCounter( void )
 {
 	neurosim_doc *pDoc = GetDocument(); if( !pDoc )	return 0;
 	return pDoc->Model->GetChartBuffer().nsteps();
@@ -579,7 +576,7 @@ void CChartView::OnInitialUpdate()
 	SetView();
 }
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CLimbView diagnostics
 #ifdef _DEBUG
@@ -636,7 +633,7 @@ void CLimbView::DrawPicture( CDC* pDC, CRect &rect )
 			i += increment;
 		for( ; i < limits_counter.Y; i += increment ){
 			DrawWalker( pDC, pDoc->Model->GetWalkerBuffer().get_buffer(),
-					   pDoc->SimData->IsStickDiagram, i );
+					pDoc->SimData->IsStickDiagram, i );
 		}
 	}
 	DrawGround( pDC, rect );
@@ -661,46 +658,52 @@ void CLimbView::DrawGround( CDC* pDC, CRect &rect )
 	pDC->SelectObject( oldpen );
 }
 
-void CLimbView::DrawWalker( CDC* pDC, const void *buf, bool isstick, unsigned long counter )
+void CLimbView::DrawWalker( CDC* pDC, const void *buf, bool isstick, size_t counter )
 {
+	neurosim_doc *pDoc = GetDocument();	if( !pDoc )	return;
 	vector<CWalkerVertex> *data = (vector<CWalkerVertex> *)buf;
 	if( !IsSliceEmpty ){
 		if( isstick ){
-			DrawLimb( pDC, &LastSlice.Right, RightLegColor );
-			DrawLimb( pDC, &LastSlice.Left, LeftLegColor );
+			DrawLimb( pDC, LastSlice, true, RightLegColor );
+			DrawLimb( pDC, LastSlice, false, LeftLegColor );
 		}
 		else{
-			DrawLimb( pDC, &LastSlice.Right, EraseColor );
-			DrawLimb( pDC, &LastSlice.Left, EraseColor );
+			DrawLimb( pDC, LastSlice, true, EraseColor );
+			DrawLimb( pDC, LastSlice, false, EraseColor );
 		}
 	}
-	DrawLimb( pDC, &(*data)[counter].Left, WalkerColorL );
-	DrawLimb( pDC, &(*data)[counter].Right, WalkerColorR );
-	LastSlice = (*data)[counter];
+	CWalkerVertex slice = (*data)[counter];
+	slice.move_pos( 0.f, 0.f ); 
+	DrawLimb( pDC, slice, true, WalkerColorR );
+	DrawLimb( pDC, slice, false, WalkerColorL );
+	LastSlice = slice;
 	IsSliceEmpty = false;
 }
 
-void CLimbView::DrawLimb( CDC* pDC, const void *limb, COLORREF color )
+void CLimbView::DrawLimb( CDC* pDC, const CWalkerVertex &limb, bool right, COLORREF color )
 {
 	neurosim_doc *pDoc = GetDocument();	if( !pDoc || !pDoc->Model->Walker )	return;
-	vector< hhn_pair<float> > *data = (vector< hhn_pair<float> > *)limb;
-	if(( *data ).size() < 1 )
-		return;
+	size_t i_0 = 0;
+	size_t i_N = 6;
+	if( right ){
+		i_0 = 6;
+		i_N = 10;
+	}
 	CScale sc;
 	sc.MaxLog = 100.;
 	sc.MaxPhis = float( pDoc->SimData->LimbScale );
 	CPen pen(PS_SOLID, 10, color );
 	CPen *oldpen = pDC->SelectObject( &pen );
-	hhn_pair<int> point = sc.PHtoLP( (*data)[0] );
+	hhn_pair<int> point = sc.PHtoLP( limb.Walker[i_0] );
 	pDC->MoveTo( point.X, point.Y );
-	for( unsigned int i = 1; i < (*data).size(); i++){
-		point = sc.PHtoLP( (*data)[i] );
+	for( size_t i = 1+i_0; i < i_N; i++){
+		point = sc.PHtoLP( limb.Walker[i] );
 		pDC->LineTo( point.X, point.Y );
 	}
 	pDC->SelectObject( oldpen );
 }
 
-unsigned long CLimbView::GetMaxCounter( void )
+size_t CLimbView::GetMaxCounter( void )
 {
 	neurosim_doc *pDoc = GetDocument();	if( !pDoc || !pDoc->Model->Walker )	return 0;
 	return pDoc->Model->GetWalkerBuffer().nsteps();
@@ -717,6 +720,7 @@ void CLimbView::PrepareDC( CDC* pDC, CRect &rect )
 	pDC->DPtoLP(lp_rect);
 	pDC->SetWindowOrg( -int( lp_rect.Width()*pDoc->SimData->LimbOriginX ), -int( lp_rect.Height()*(1-pDoc->SimData->LimbOriginY )));
 }
-
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 #endif // __CONSOLE__

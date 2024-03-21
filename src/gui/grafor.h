@@ -1,11 +1,12 @@
 #ifndef GRAFOR_H_
 #define GRAFOR_H_
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef __CONSOLE__
 
 #include "../core/sptypes.h"
+#include "../nsmsys.h"
 
 class Grafor
 {
@@ -39,9 +40,9 @@ public:
 	void	Phy_to_Math_Gr_y(float *ym,int yp);
 	void	Phy_to_Math_Gr_x(float *xm,int xp);
 
-	void	Draw_array(CDC* pDC, const vector<float> &x, const vector<float> &y, long n, long old_n );
-    void    Draw_hist(CDC* pDC, const vector<float> &x, vector<lvector> &y, long n, long old_n, long bin, float norm = 1.0 );
-	void	Draw_plot(CDC* pDC, const vector<float> &x, vector<lvector> &y, long n, long old_n );
+	void	Draw_array(CDC* pDC, const nsm_vector(float) &x, const nsm_vector(float) &y, long n, long old_n );
+	void    Draw_hist(CDC* pDC, const nsm_vector(float) &x, nsm_vector(lvector) &y, long n, long old_n, long bin, float norm = 1.0 );
+	void	Draw_plot(CDC* pDC, const nsm_vector(float) &x, nsm_vector(lvector) &y, long n, long old_n );
 
 	float	Osi_Gr(float left,float right,int int1,int int2);
 	void	Axes_Gr(CDC* pDC,	// device context
@@ -70,7 +71,7 @@ private:
 
 	int		Region_Rec_bt,Region_Rec_rl;
 	float	Xmx_mi_Xmn,Ymx_mi_Ymn,R_rl_ov_Xmx_Xmn,R_bt_ov_Ymx_Ymn;
-	char	buff[256];
+//	char	buff[256];
 	
 	int		Num_XB(float left,float right,double xb);
 	void	Test_minmax(float *min,float *max);

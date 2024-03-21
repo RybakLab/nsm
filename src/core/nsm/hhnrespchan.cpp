@@ -13,12 +13,12 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif //__LINUX__
 
 /*****************************************************************
- *       Model of Na channel for Hodgkin-Haxley type neuron      *
+ *       Model of Na channel for Hodgkin-Huxley type neuron      *
  *****************************************************************/
 //--- constructor
 hrnaf_channel::hrnaf_channel( hhn_compart *neuron ) 
@@ -51,7 +51,7 @@ void hrnaf_channel::copy_to( hhn_channel **chan )
 
 void hrnaf_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1.+EXP( -( v+43.8 )/6. ));
 	double tm = Tm*0.9/COSH(( v+43.8 )/14. );
 	double h0 = 1./( 1.+EXP(( v+67.5 )/10.8 ));
@@ -103,7 +103,7 @@ void hrnap_channel::copy_to( hhn_channel **chan )
 
 void hrnap_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1/( 1.+EXP( -( v+47.1 )/3.1 ));
 	double tm = Tm*0.9/COSH( -( v+47.1 )/6.2 );
 	double h0 = 1./( 1.+EXP(( v+57. )/4. ));
@@ -131,7 +131,7 @@ hrkdr_channel::hrkdr_channel( hhn_compart *neuron )
 	if( _ChannelNames[ChannelId] )
 		Name = _ChannelNames[ChannelId];
 	Gmax = 90;
-	Tm = 1.0;
+	Tm = 4.0; // Tm = 1.0 in merged nsm
 	H = 1;
 	init_channel( 0.03 );
 }
@@ -153,7 +153,10 @@ void hrkdr_channel::copy_to( hhn_channel **chan )
 
 void hrkdr_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
+	double m0 = 1/( 1.+EXP( -( v+44.5 )/5 ));
+	double tm = Tm/COSH(( v+44.5 )/10 );
+/* in merged nsm
 	double shift = -1.;
 	double k0 = v+45+shift; 
 	double k1 = 0.01*k0/( 1-EXP( -k0/5. ));
@@ -161,6 +164,7 @@ void hrkdr_channel::calc_g( double step )
 	double k3 = 1./( k1+k2 );
 	double tm = Tm*k3;
 	double m0 = k1*k3;
+*/
 	double m = EXP_EULER( M, m0, step, tm );
 	double g = *pKGmax*Gmax*POW_4( m );
 	double e = *pKIonsE*Hhn->KIons->Eds;
@@ -203,7 +207,7 @@ void hrka_channel::copy_to( hhn_channel **chan )
 
 void hrka_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0ka1 = 1./( 1+EXP( -( v+56.83 )/13.8 ));
 	double tm1 = 5.5*EXP( -( v+65. )*( v+65. )*0.000484 )+1.;
 	double h0ka1 = 1./( 1+EXP(( v+78. )/4.7 ));
@@ -262,7 +266,7 @@ void hrcal_channel::copy_to( hhn_channel **chan )
 
 void hrcal_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1+EXP( -( v+27.4 )/5.7 ));
 	double h0 = 1./( 1+EXP(( v+52.4 )/5.2 ));
 	double tm = Tm;
@@ -311,7 +315,7 @@ void hrcat_channel::copy_to( hhn_channel **chan )
 
 void hrcat_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1.+EXP( -( v+58.91 )/2.38 ));
 	double tm = Tm;
 	double h0 = 1./( 1.+EXP(( v+82. )/5.34 ));
@@ -362,7 +366,7 @@ void hrkca_channel::copy_to( hhn_channel **chan )
 
 void hrkca_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double cacnc = Hhn->CaIons->In;
 	double k1 = 125000000.*cacnc*cacnc;
 	double m0 = k1/(k1+2.5);
@@ -444,7 +448,7 @@ void hrleak_channel::calc_g( double step )
 {
 	if( Adjustable )
 		calc_eds();
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*Gmax;
 	double e = *pKIonsE*Eleak;
 	G = g;

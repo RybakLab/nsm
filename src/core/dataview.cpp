@@ -8,75 +8,72 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
 /////////////////////////////////////////////////////////////////////////////
 // hhn_viewbuffer class
-hhn_viewbuffer::hhn_viewbuffer( void )
-	: hhn_process(), ParCode(), ViewValue(), StatValue(), 
-	ReservedSize( 0 ), CurrData( NULL )
-{
-}
-
-hhn_viewbuffer::hhn_viewbuffer( const hhn_viewbuffer &buffer )
-	: hhn_process( buffer ), ParCode( buffer.ParCode ), ViewValue( buffer.ViewValue ), StatValue( buffer.StatValue ),
-	ReservedSize( buffer.ReservedSize ), CurrData( buffer.CurrData )
-{
-}
-
-hhn_viewbuffer::~hhn_viewbuffer( void )
-{
-	free();
-}
-
 hhn_viewbuffer &hhn_viewbuffer::operator = ( const hhn_viewbuffer &buffer )
 {
+	free_buffer();
 	hhn_process::operator = ( buffer );
 	ReservedSize = buffer.ReservedSize;
 	CurrData = buffer.CurrData;
 	ParCode = buffer.ParCode;
 	ViewValue = buffer.ViewValue;
 	StatValue = buffer.StatValue;
+	NumSteps = buffer.NumSteps;
 	return *this;
 }
 
-void hhn_viewbuffer::alloc( void *currdata, const unit_code &code, size_t numsteps, double step )
+void hhn_viewbuffer::set_buffer( void *currdata, const unit_code &code, size_t size )
 {
-	free();
 	CurrData = currdata;
 	ParCode = code;
+	NumSteps = size;
+}
+
+void hhn_viewbuffer::alloc_buffer( void )
+{
 	if( ParCode.is_stat() ){
-		vector<int> *data = ( vector<int> *)CurrData;
-		for( size_t i = 0; i < data->size(); i++ )
-			StatValue.push_back( lvector() );
+		for( size_t i = 0; i < StatValue.size(); StatValue[i].clear(), ++i );
+		StatValue.clear();
+		if( CurrData && ReservedSize > 0 ){
+			StatValue.reserve((( lvector *)CurrData )->size() );
+			std::generate_n( std::back_inserter( StatValue ), (( lvector *)CurrData )->size(), []{ return lvector(); });
+			for( size_t i = 0; i < StatValue.size(); ++i ){
+				StatValue[i].reserve( ReservedSize );
+			}
+		}
 	}
 	else{
-		ViewValue.resize( numsteps, 0 );
+		ViewValue.clear();
+		if( NumSteps > 0 ){
+			ViewValue.reserve( NumSteps );
+			std::generate_n(std::back_inserter( ViewValue ), NumSteps, []{ return 0.f; });
+		}
 	}
 }
 
-void hhn_viewbuffer::reserve( size_t size )
-{
-	ReservedSize = size;
-	for( size_t i = 0; i < StatValue.size(); i++ ){
-		StatValue[i].reserve( ReservedSize );
-	}
-}
-
-void hhn_viewbuffer::free( void )
+void hhn_viewbuffer::free_buffer( void )
 {
 	ParCode = unit_code();
 	CurrData = NULL;
+	NumSteps = 0;
+	nsm_vector(float) chart_tmp;
+	nsm_vector(lvector) stat_tmp;
 	ViewValue.clear();
+	for( size_t i = 0; i < StatValue.size(); StatValue[i].clear(), ++i );
 	StatValue.clear();
+	ViewValue.swap( chart_tmp );
+	StatValue.swap( stat_tmp );
 }
 
-void hhn_viewbuffer::save( ostream &file, const hhn_pair<int> &wnd, double step, size_t precstep, CSimulate *manager )
+void hhn_viewbuffer::save( ostream &file, const hhn_pair<int> &wnd, double step, size_t prec_t, size_t prec_a, CSimulate *manager )
 {
-	size_t x = size_t( wnd.X/step ); 
-	size_t y = size_t( wnd.Y/step );
+	size_t x = size_t( wnd.X/step ); x = ( x >= ViewValue.size())? ViewValue.size()-1: x;
+	size_t y = size_t( wnd.Y/step ); y = ( y >= ViewValue.size())? ViewValue.size()-1: y;
 	if( ParCode.is_stat() ){
 		string name = manager->Network.get_nnunit( ParCode )->get_name();
 		file << "<Spikes " << name << ">" << endl;
@@ -85,7 +82,7 @@ void hhn_viewbuffer::save( ostream &file, const hhn_pair<int> &wnd, double step,
 			ios_base::fmtflags old_flags = file.flags( ios::fixed );
 			for( size_t j = 0; j < StatValue[i].size(); j++ ){
 				if( StatValue[i][j] >= x && StatValue[i][j] <= y ){
-					file << setprecision( 1 ) << float( StatValue[i][j]*step ) << endl;
+					file << setprecision( prec_t ) << float( StatValue[i][j]*step ) << endl;
 				}
 			}
 			file.flags( old_flags );
@@ -94,14 +91,14 @@ void hhn_viewbuffer::save( ostream &file, const hhn_pair<int> &wnd, double step,
 		file << "</Spikes>" << endl;
 	}
 	else{
-		x = ( x >= ViewValue.size())? ViewValue.size()-1: x;
-		y = ( y >= ViewValue.size())? ViewValue.size()-1: y;
 		string name;
 		ParCode.get_fullname( manager, name );
 		file << "<Wave form " << name << ">" << endl;
 		ios_base::fmtflags old_flags = file.flags( ios::fixed );
+		// TODO the parameter prec_t can effect the total number of points stored in the file, 
+		// currently every point stores, but the loop may be implemented as for( size_t j = x; j < y; j += prec_t ){ /*...*/ }
 		for( size_t j = x; j < y; j++ ){
-			file <<  float( ViewValue[j] ) << endl;
+			file << setprecision( prec_a ) << float( ViewValue[j] ) << endl;
 		}
 		file.flags( old_flags );
 		file << "</Wave form>" << endl;
@@ -168,32 +165,12 @@ void hhn_viewbuffer::storedata_stat( size_t currstep, double step )
 
 void hhn_viewbuffer::storedata_chart( size_t currstep, double step )
 {
-	if( currstep < ViewValue.size() ){
-		double curr_value = *(( double *)CurrData );
-		ViewValue[currstep] = float( curr_value );
-	}
+	assert( currstep < ViewValue.size() );
+	ViewValue[currstep] = float((( double * )CurrData )[0] );
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // CChartBuffer class
-CChartBuffer::CChartBuffer( CSimulate *manager )
-	: CBufferManager( manager )
-{
-	ReservedSize = 0;
-}
-
-CChartBuffer::CChartBuffer( const CChartBuffer &buffer )
-	: CBufferManager( buffer ), ParBuffer( buffer.ParBuffer ), TimeScale( buffer.TimeScale )
-{
-	ReservedSize = buffer.ReservedSize;
-}
-
-CChartBuffer::~CChartBuffer( void )
-{
-	TimeScale.clear();
-	ParBuffer.clear();
-}
-
 CChartBuffer &CChartBuffer::operator = ( const CChartBuffer &buffer )
 {
 	CBufferManager::operator = ( buffer );
@@ -222,28 +199,36 @@ void CChartBuffer::next_step( size_t currstep )
 	CBufferManager::next_step( currstep );
 }
 
-void CChartBuffer::init_views( double step, size_t numsteps, double freq )
+void CChartBuffer::init_all_buffers( double step, size_t numsteps, double freq )
 {
-	CBufferManager::init_views( step, numsteps, freq );
-	TimeScale.reserve( numsteps+1 );
-	for( size_t i = 0; i < numsteps+1; i++ )
-		TimeScale.push_back( float( ViewStep*i ));
-	ReservedSize = 2*size_t( freq*step*( numsteps+1 ));
+	if( numsteps > 0 ){
+		CBufferManager::init_all_buffers( step, numsteps, freq );
+		TimeScale.reserve( numsteps );
+		size_t i = 0; std::generate_n( std::back_inserter( TimeScale) , numsteps, [&i,&step]{ return float( step*i++ ); });
+		ReservedSize = 2*size_t( freq*step*( numsteps ));
+	}
 }
 
-void CChartBuffer::release_views( void )
+void CChartBuffer::release_all_buffers( void )
 {
-	CBufferManager::release_views();
 	ParBuffer.clear();
-	vector<hhn_viewbuffer> par_tmp;
-	ParBuffer.swap( par_tmp );
-
 	TimeScale.clear();
-	vector<float> scale_tmp;
+	nsm_vector(hhn_viewbuffer) par_tmp;
+	nsm_vector(float) scale_tmp;
+	ParBuffer.swap( par_tmp );
 	TimeScale.swap( scale_tmp );
+	CBufferManager::release_all_buffers();
 }
 
-bool CChartBuffer::add_view( const unit_code &code )
+void CChartBuffer::alloc_all_buffers( void )
+{
+	CBufferManager::alloc_all_buffers();
+	for( size_t i = 0; i < ParBuffer.size(); ++i ){
+		ParBuffer[i].alloc_buffer();
+	}
+}
+
+bool CChartBuffer::add_buffer( const unit_code &code )
 {
 	if( get_buffer( code ) == NULL ){
 		void *data = NULL;
@@ -254,22 +239,25 @@ bool CChartBuffer::add_view( const unit_code &code )
 			hhn_control *control = Manager->Network.get_crtunit( code );
 			if( control )
 				data = ( void *)( control->select(( unit_code *)&code ));
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 			else
 				data = ( void *)Manager->Walker->select(( unit_code *)&code );
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+			// TODO select the variables and parameters of 3d model
+#endif // __MECHANICS_2D__
 		}
 		if( !data )	return false;
 		ParBuffer.push_back( hhn_viewbuffer());
-		ParBuffer[ParBuffer.size()-1].alloc( data, code, max_nsteps(), ViewStep );
+		ParBuffer.back().set_buffer( data, code, max_nsteps() );
 	}
 	return true;
 }
 
-void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pair<int> wnd, double prec, int format )
+void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pair<int> wnd, double prec_t, int prec_a , int format )
 {
 	if( ViewStep ){
-		size_t prec_bin = ( size_t )( prec > ViewStep? prec/ViewStep : 1 );
+		size_t prec_bin = ( size_t )( prec_t > ViewStep? ceil( prec_t/ViewStep ): 1 );
+		size_t prec_num = ( size_t )( prec_a <= 0 )? 6: prec_a;
 		switch( format ){
 			case _id_ASCII_GEN: // ASCII (generic)
 			{
@@ -283,13 +271,13 @@ void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pa
 				file << "Saved window = [" << wnd.X << "," << wnd.Y << "] msec" << endl;
 				file << "Duration = " << wnd.Y-wnd.X << " msec" << endl;
 				if( prec_bin > 1 )
-					file << "Precision = " << prec << " msec" << endl;
+					file << "Precision = " << prec_t << " msec" << endl;
 				else
 					file << "Precision = " << ViewStep << " msec" << endl;
 				for( size_t j = 0; j < ParBuffer.size(); j++ ){
 					for( size_t i = 0; i < buffers.size(); i++ ){
 						if( ParBuffer[j] == buffers[i] ){
-							ParBuffer[j].save( file, wnd, ViewStep, prec_bin, Manager );
+							ParBuffer[j].save( file, wnd, ViewStep, prec_bin, prec_num, Manager );
 							break;
 						}
 					}
@@ -303,7 +291,7 @@ void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pa
 				file << "Generated by " << _ProjectName << endl;
 				file << "Duration = " << ( TimeScale.size()-1 )*ViewStep << " msec" << endl;
 				if( prec_bin > 1 )
-					file << "Precision = " << prec << " msec" << endl;
+					file << "Precision = " << prec_t << " msec" << endl;
 				else
 					file << "Precision = " << ViewStep << " msec" << endl;
 				vector<double> calibr;
@@ -338,90 +326,70 @@ void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pa
 	}
 }
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerVertex class
 CWalkerVertex::CWalkerVertex( void )
-	: Left( 6, hhn_pair<float>() ), Right( 4, hhn_pair<float>() )
 {
 }
 
 CWalkerVertex::CWalkerVertex( const CWalkerVertex &buffer )
-	: Left( buffer.Left ), Right( buffer.Right )
 {
+	memcpy( Walker, buffer.Walker, sizeof( hhn_pair<float> )*10 );
 }
 
 CWalkerVertex &CWalkerVertex::operator = ( const CWalkerVertex &buffer )
 {
-	Left = buffer.Left;
-	Right = buffer.Right;
+	memcpy( Walker, buffer.Walker, sizeof( hhn_pair<float> )*10 );
 	return *this;
 }
 
 CWalkerVertex &CWalkerVertex::operator = ( const vertex *ver )
 {
- // Trunk
-	Left[0].X = ( float )ver[TRUNK_H].X;
-	Left[0].Y = ( float )ver[TRUNK_H].Y;
- // Loins
-	Left[1].X = ( float )ver[LOINS].X;
-	Left[1].Y = ( float )ver[LOINS].Y;
- // Pelvis
-	Left[2].X = ( float )ver[HIP].X;
-	Left[2].Y = ( float )ver[HIP].Y;
- // Left Thigh
-	Left[3].X = ( float )ver[KNEE_L].X;
-	Left[3].Y = ( float )ver[KNEE_L].Y;
- // Left Shank
-	Left[4].X = ( float )ver[ANKLE_L].X;
-	Left[4].Y = ( float )ver[ANKLE_L].Y;
- // Left Foot
-	Left[5].X = ( float )ver[TOE__L].X;
-	Left[5].Y = ( float )ver[TOE__L].Y;
- // Right Thigh
-	Right[0].X = ( float )ver[HIP].X;
-	Right[0].Y = ( float )ver[HIP].Y;
- // Right Knee
-	Right[1].X = ( float )ver[KNEE_R].X;
-	Right[1].Y = ( float )ver[KNEE_R].Y;
- // Right Shank
-	Right[2].X = ( float )ver[ANKLE_R].X;
-	Right[2].Y = ( float )ver[ANKLE_R].Y;
- // Right Foot
-	Right[3].X = ( float )ver[TOE__R].X;
-	Right[3].Y = ( float )ver[TOE__R].Y;
+	// Trunk
+	Walker[0].X = (float)ver[TRUNK_H].X;
+	Walker[0].Y = (float)ver[TRUNK_H].Y;
+	// Loins
+	Walker[1].X = (float)ver[LOINS].X;
+	Walker[1].Y = (float)ver[LOINS].Y;
+	// Pelvis
+	Walker[2].X = (float)ver[HIP].X;
+	Walker[2].Y = (float)ver[HIP].Y;
+	// Left Thigh
+	Walker[3].X = (float)ver[KNEE_L].X;
+	Walker[3].Y = (float)ver[KNEE_L].Y;
+	// Left Shank
+	Walker[4].X = (float)ver[ANKLE_L].X;
+	Walker[4].Y = (float)ver[ANKLE_L].Y;
+	// Left Foot
+	Walker[5].X = (float)ver[TOE__L].X;
+	Walker[5].Y = (float)ver[TOE__L].Y;
+	// Right Thigh
+	Walker[6].X = (float)ver[HIP].X;
+	Walker[6].Y = (float)ver[HIP].Y;
+	// Right Knee
+	Walker[7].X = (float)ver[KNEE_R].X;
+	Walker[7].Y = (float)ver[KNEE_R].Y;
+	// Right Shank
+	Walker[8].X = (float)ver[ANKLE_R].X;
+	Walker[8].Y = (float)ver[ANKLE_R].Y;
+	// Right Foot
+	Walker[9].X = (float)ver[TOE__R].X;
+	Walker[9].Y = (float)ver[TOE__R].Y;
 	return *this;
 }
 
 void CWalkerVertex::move_pos( float x, float y )
 {
-	for( size_t i = 0; i < Left.size(); ++i ){
-		Left[i].X += x;
-		Left[i].Y += y;
-	}
-	for( size_t i = 0; i < Right.size(); ++i ){
-		Right[i].X += x;
-		Right[i].Y += y;
+	for (size_t i = 0; i < 10; ++i) {
+		Walker[i].X += x;
+		Walker[i].Y += y;
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerBuffer class
-CWalkerBuffer::CWalkerBuffer( CSimulate *manager )
-	: CBufferManager( manager )
-{
-	CurrData = NULL;
-}
 
-CWalkerBuffer::CWalkerBuffer( const CWalkerBuffer &buffer )
-	: CBufferManager( buffer ), Buffer( buffer.Buffer )
-{
-	CurrData = buffer.CurrData;
-}
-
-CWalkerBuffer::~CWalkerBuffer( void )
-{
-}
 
 CWalkerBuffer &CWalkerBuffer::operator = ( const CWalkerBuffer &buffer )
 {
@@ -431,11 +399,6 @@ CWalkerBuffer &CWalkerBuffer::operator = ( const CWalkerBuffer &buffer )
 	return *this;
 }
 
-size_t CWalkerBuffer::max_nsteps( void ) const
-{
-	return ( size_t )Buffer.size();
-}
-
 const void *CWalkerBuffer::get_buffer( void ) const
 {
 	return &Buffer;
@@ -443,28 +406,33 @@ const void *CWalkerBuffer::get_buffer( void ) const
 
 void CWalkerBuffer::next_step( size_t currstep )
 {
-	static CWalkerVertex curr_value;
 	if( currstep < Buffer.size()){
 		CBufferManager::next_step( currstep );
-		curr_value = ( vertex *)CurrData;
-//		curr_value.move_pos( -400., 0. );
-		Buffer[currstep] = curr_value;
+		Buffer[currstep] = ( vertex *)CurrData;
 	}
 }
 
-void CWalkerBuffer::init_views( double step, size_t numsteps, double freq )
+void CWalkerBuffer::init_all_buffers( double step, size_t numsteps, double freq )
 {
-	CBufferManager::init_views( step, numsteps, freq );
-	CurrData = ( void *)Manager->Walker->select();
-	Buffer.resize( numsteps );
+	CBufferManager::init_all_buffers( step, numsteps, freq );
+	Buffer.reserve( numsteps );
+	CurrData = (void *)Manager->Walker->select();
+	CWalkerVertex curr_value; curr_value = ( vertex *)CurrData;
+	std::generate_n( std::back_inserter( Buffer ), numsteps, [&curr_value]{ return curr_value; });
 }
 
-void CWalkerBuffer::release_views( void )
+void CWalkerBuffer::alloc_all_buffers( void )
 {
-	CBufferManager::release_views();
+	CBufferManager::alloc_all_buffers();
+}
+
+void CWalkerBuffer::release_all_buffers( void )
+{
 	CurrData = NULL;
 	Buffer.clear();
-	vector<CWalkerVertex> buff_tmp;
+	nsm_vector(CWalkerVertex) buff_tmp;
 	Buffer.swap( buff_tmp );
+	CBufferManager::release_all_buffers();
 }
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+#endif // __MECHANICS_2D__

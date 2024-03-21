@@ -70,63 +70,60 @@ virtual    ~CGridSetup( void );
             CTreeColumn m_TreeColumn;   // grid with tree column
             CBtnDataBase EnableBtnDataBase; // grid with some cells with buttons/controls
             CBtnDataBase DisableBtnDataBase; // grid with some cells with buttons/controls
-      };
+};
 
-class CCheckListCtrl : public CListCtrl
-{
+class CCheckListCtrl : public CListCtrl{
 	DECLARE_MESSAGE_MAP()
 
-public:
-	CCheckListCtrl();
-    virtual ~CCheckListCtrl();
+        public:
+	        CCheckListCtrl();
+virtual         ~CCheckListCtrl();
 
-public:
-    void InitList( vector<string> &list );
+        public:
+            void InitList( vector<string> &list );
 
-    void Select( vector<int> &itemindex );
-    void SelectAll( void );
-    void UnselectAll( void );
-    int GetNumSelectedItems( void );
-    void GetSelectedItems( vector<int> &itemindex );
+            void Select( vector<int> &itemindex );
+            void SelectAll( void );
+            void UnselectAll( void );
+            int GetNumSelectedItems( void );
+            void GetSelectedItems( vector<int> &itemindex );
 };
 
 // CFormatDialog dialog
 
-class CFormatDialog : public CDialog
-{
-	DECLARE_DYNAMIC(CFormatDialog)
+class CFormatDialog : public CDialog{
+        DECLARE_DYNAMIC(CFormatDialog)
+        public:
+                CFormatDialog(CWnd* pParent = NULL);   // standard constructor
+virtual          ~CFormatDialog();
 
-public:
-	CFormatDialog(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CFormatDialog();
+        // Dialog Data
+        enum { IDD = IDD_SAVE_RESULTS };
+        protected:
+                virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+                virtual BOOL OnInitDialog();
 
-// Dialog Data
-	enum { IDD = IDD_SAVE_RESULTS };
-
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnInitDialog();
-
-	DECLARE_MESSAGE_MAP()
-public:
-    CCheckListCtrl DataList;
-    CComboBox ComboFormats;
-    int NumSelItems;
-    int FormatType;
-    vector<string> AllNames;
-    vector<int> SelectedItems;
-    
-public:
-    afx_msg void OnBnClickedButtonSelectall();
-    afx_msg void OnBnClickedButtonUnselectall();
-    afx_msg void OnLvnItemchangedDataList(NMHDR *pNMHDR, LRESULT *pResult);
-    afx_msg void OnBnClickedOk();
-    afx_msg void OnCbnSelchangeComboFormat();
-    float Wnd1;
-    float Wnd2;
+                DECLARE_MESSAGE_MAP()
+        public:
+                CCheckListCtrl DataList;
+                CComboBox ComboFormats;
+                int NumSelItems;
+                int FormatType;
+                vector<string> AllNames;
+                vector<int> SelectedItems;
+                float Wnd1;
+                float Wnd2;
+                int Prec_A;
+                double Prec_T;
+   
+        public:
+                afx_msg void OnBnClickedButtonSelectall();
+                afx_msg void OnBnClickedButtonUnselectall();
+                afx_msg void OnLvnItemchangedDataList(NMHDR *pNMHDR, LRESULT *pResult);
+                afx_msg void OnBnClickedOk();
+                afx_msg void OnCbnSelchangeComboFormat();
 };
 
 #endif // _GENERIC_DIALOGS_H_
 
 #endif // __CONSOLE__
-

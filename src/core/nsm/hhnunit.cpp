@@ -9,11 +9,11 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
-const char *vw_name( string &name, unit_code &code )
+const char *vw_name( std::string &name, unit_code &code )
 {
 	name = "";
 	switch( code.UnitId ){
@@ -54,10 +54,9 @@ const char *vw_name( string &name, unit_code &code )
 				case CViewParam::Inactivation:
 					name = "Inactivation";
 					break;
-				default:;
 				}
-			break;
-#ifdef __MECHANICS__
+			return name.c_str();
+#if defined (__MECHANICS_2D__)
 		case _id_Vertex:
 			switch( code.Param ){
 				case _id_Coordinate_X:
@@ -71,9 +70,9 @@ const char *vw_name( string &name, unit_code &code )
 					break;
 				case _id_Velocity_Y:
 					name = "Velocity Y";
-				default:;
+					break;
 				}
-			break;
+			return name.c_str();
 		case _id_Link:
 		case _id_Joint:
 			switch( code.Param ){
@@ -83,9 +82,8 @@ const char *vw_name( string &name, unit_code &code )
 				case _id_Angle_Velocity:
 					name = "Angle velocity";
 					break;
-				default:;
 				}
-			break;
+			return name.c_str();
 		case _id_Muscle:
 			switch( code.Param ){
 				case _id_MuscleForce:
@@ -106,9 +104,8 @@ const char *vw_name( string &name, unit_code &code )
 				case _id_TendonLength:
 					name = "Tendon Length";
 					break;
-				default:;
 				}
-			break;
+			return name.c_str();
 		case _id_Ground:
 			switch( code.Param ){
 				case _id_GroundForce_X:
@@ -117,16 +114,16 @@ const char *vw_name( string &name, unit_code &code )
 				case _id_GroundForce_Y:
 					name = "Force Y";
 					break;
-				default:;
 				}
-			break;
-#endif // __MECHANICS__
-		default:;
-		}
+			return name.c_str();
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
+	}
 	return name.c_str();
 }
 
-const char *cr_name( string &name, unit_code &code )
+const char *cr_name( std::string &name, unit_code &code )
 {
 	name = "";
 	if( code.UnitId == _id_NNFeedback ||
@@ -170,17 +167,7 @@ unit_code::unit_code( void )
 
 unit_code::unit_code( DWORD code )
 {
-	Param = int( code&0x3F )-1;
-	code >>= 6;
-	ChanIndex = int( code&0x1F )-1;
-	code >>= 5;
-	PartIndex = int( code&0x07 )-1;
-	code >>= 3;
-	HhnIndex = int( code&0x3F )-1;
-	code >>= 6;
-	NNIndex = int( code&0xFF )-1;
-	code >>= 8;
-	UnitId = int( code&0x0F )-1;
+	decode( code );
 }
 
 unit_code::unit_code( const unit_code &code )
@@ -215,20 +202,35 @@ bool unit_code::is_stat( void ) const
  return false;
 }
 
+void unit_code::decode( DWORD code )
+{
+	Param = int( code&0x3F )-1;	// bits <0:5>
+	code >>= 6;
+	ChanIndex = int( code&0x3F )-1;	// bits <6:11>
+	code >>= 6;
+	PartIndex = int( code&0x03 )-1;	// bits <12:13>
+	code >>= 2;
+	HhnIndex = int( code&0x3F )-1;	// bits <14:19>
+	code >>= 6;
+	NNIndex = int( code&0xFF )-1;	// bits <20:27>
+	code >>= 8;
+	UnitId = int( code&0x0F )-1;	// bits <28:31>
+}
+
 DWORD unit_code::encode( void ) const
 {
 	DWORD code = 0;
-	code = ( UnitId+1 )&0x0F;		// 4 bits to encode UnitID (16 types of network units)
+	code = ( UnitId+1 )&0x0F;	// 4 bits to encode UnitID (16 types of network units)
 	code <<= 8;
-	code |= ( NNIndex+1 )&0xFF;		// 8 bits to encode NNIndex (256 populations/drives ets)
+	code |= ( NNIndex+1 )&0xFF;	// 8 bits to encode NNIndex (256 populations/drives ets)
 	code <<= 6;
 	code |= ( HhnIndex+1 )&0x3F;	// 6 bits to encode HnnIndex (64 neurons to view)
-	code <<= 3;
-	code |= ( PartIndex+1 )&0x07;	// 3 bits to encode compartment number (8 compartments)
-	code <<= 5;
-	code |= ( ChanIndex+1 )&0x1F;	// 5 bits to encode channel index
+	code <<= 2;
+	code |= ( PartIndex+1 )&0x03;	// 2 bits to encode compartment number (8 compartments)
 	code <<= 6;
-	code |= ( Param+1 )&0x3F;		// 6 bits to ecode additional parameter
+	code |= ( ChanIndex+1 )&0x3F;	// 6 bits to encode channel index
+	code <<= 6;
+	code |= ( Param+1 )&0x3F;	// 6 bits to ecode additional parameter
 	return code;
 }
 
@@ -242,8 +244,8 @@ bool unit_code::load( istream &file, CSimulate *manager )
 			file >> ws;
 			getline(file, name, '\n');
 			hhn_pair<int> unit = manager->get_uid( name );
-			UnitId = unit.X;
-			NNIndex = unit.Y;
+			UnitId = DWORD( unit.X );
+			NNIndex = DWORD( unit.Y );
 		}
 		else if( str == "HhnIndex"){
 			file >> str >> HhnIndex;
@@ -314,10 +316,10 @@ void unit_code::save( ostream &file, CSimulate *manager )
 	file << "</Code>\n";
 }
 
-bool unit_code::get_fullname( CSimulate *manager, string &str )
+bool unit_code::get_fullname( CSimulate *manager, std::string &str )
 {
-	ostringstream s;
-	string name = manager->GetUnitName( *this );
+	std::ostringstream s;
+	std::string name = manager->GetUnitName( *this );
 	if( name.empty() )
 		return false;
 	s << name;
@@ -412,13 +414,12 @@ void hhn_input::calc_g( double step )
 ///////////////////////////////////////////////////////////////////////////////
 // class nn_unit
 nn_unit::nn_unit( void )
-	: ConnectType(), Name( "" ), UnitId( 1 ), NNIndex( -1 )
+	: Name( "" ), UnitId( 1 ), NNIndex( -1 ), ConnectType()
 {
 }
 
 nn_unit::nn_unit( const nn_unit &unit )
-	: ConnectType( unit.ConnectType ), 
-	Name( unit.Name ), UnitId( unit.UnitId ), NNIndex( unit.NNIndex ), Inputs( unit.Inputs )
+	:  Name( unit.Name ), UnitId( unit.UnitId ), NNIndex( unit.NNIndex ), ConnectType( unit.ConnectType ), Inputs( unit.Inputs )
 {
 }
 

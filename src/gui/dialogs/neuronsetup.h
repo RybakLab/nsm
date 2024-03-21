@@ -24,11 +24,11 @@ class CPopulatProperties : public CDialog{
 		enum { IDD = IDD_POPULAT_PROPERTIES };
 		t_populat PopulateTemplate;
 	protected: // Overrides
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	public:	// Implementation
 		afx_msg void OnBnClickedOk();
+		BOOL OnInitDialog();
 	protected:	// Implementation
-virtual	BOOL OnInitDialog();
 		afx_msg void OnGridClick( NMHDR *pNotifyStruct, LRESULT* pResult );
 		afx_msg void OnGridDblClick( NMHDR *pNotifyStruct, LRESULT* pResult );
 		afx_msg void OnEndCellEdit( NMHDR *pNotifyStruct, LRESULT* pResult );
@@ -38,15 +38,14 @@ virtual	BOOL OnInitDialog();
 		void OnFlyUpdate( const string &path );
 		void add_unit( const CPoint &point );
 		void del_unit( void );
-		void RefreshUnusedUnits( const char *path );
-		bool DisplayUnit( uni_template *unit, string &start_path, bool collapse = true );
-		bool DisplayUnitPar( uni_template *unit, string &start_path );
-		bool DisplayUnitChildren( uni_template *unit, string &start_path, bool collapse );
+		bool DisplayUnit( uni_template *unit, const string &start_path, bool collapse = true );
+		bool DisplayUnitPar( uni_template *unit, const string &start_path );
+		bool DisplayUnitChildren( uni_template *unit, const string &start_path, bool collapse );
 	private:
-		vector<string> UnitNames;
-		CGridSetup	NeuronView;
 		vector<string> DelPaths;
 		string ParentPath;
+	private:
+		CGridSetup	NeuronView;
 };
 
 #endif // __NEURONSETUP_H

@@ -11,21 +11,25 @@ class CSimulate;
 
 /////////////////////////////////////////////////////////////////////////////
 // hhn_viewbuffer class
-class hhn_viewbuffer : public hhn_process{
+class  alignas( 16 ) hhn_viewbuffer : public hhn_process{
 	public:
-		hhn_viewbuffer( void );
-		hhn_viewbuffer( const hhn_viewbuffer &buffer );
-		~hhn_viewbuffer( void );
+		hhn_viewbuffer( void ) : hhn_process(), CurrData( NULL ),  NumSteps( 0 ), ReservedSize( 0 ),
+				ParCode(), ViewValue(), StatValue() {};
+		hhn_viewbuffer( const hhn_viewbuffer &buffer ) : hhn_process( buffer ), CurrData( buffer.CurrData ), NumSteps( buffer.NumSteps ), ReservedSize( buffer.ReservedSize ), 
+				ParCode( buffer.ParCode ), ViewValue( buffer.ViewValue ), StatValue( buffer.StatValue ){};
+		~hhn_viewbuffer( void ){ free_buffer(); };
 	public:
 		hhn_viewbuffer &operator = ( const hhn_viewbuffer &buffer );
 	public:
-		void reg_unit( runman *man = NULL );
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
+	public:
+		void reg_unit( runman *man );
 	private:
 		void storedata_stat( size_t currstep, double step );
 		void storedata_chart( size_t currstep, double step );
-static	void storedata_stat( size_t currstep, double step, hhn_process **start );
-static	void storedata_chart( size_t currstep, double step, hhn_process **start );
-
+static		void storedata_stat( size_t currstep, double step, hhn_process **start );
+static		void storedata_chart( size_t currstep, double step, hhn_process **start );
 	public:
 		float operator[]( size_t time )
 		{
@@ -45,33 +49,34 @@ static	void storedata_chart( size_t currstep, double step, hhn_process **start )
 		{
 			return ( ParCode.is_stat() )? ( const void *)&StatValue: ( const void *)&ViewValue;
 		}
-		void alloc( void *currdata, const unit_code &code, size_t numsteps, double step );
-		void reserve( size_t size );
 		long save_header( ostream &file, CSimulate *manager, long num, double *calibr );
-		void save( ostream &file, const hhn_pair<int> &wnd, double step, size_t precstep, CSimulate *manager );
+		void save( ostream &file, const hhn_pair<int> &wnd, double step, size_t prec_t, size_t prec_a, CSimulate *manager );
+		void set_buffer( void *currdata, const unit_code &code, size_t size );
+		void alloc_buffer( void );
 	private:
-		void free( void );
+		void free_buffer( void );
 	private:
 		void *CurrData;
-		unit_code ParCode;
+		size_t NumSteps;
 		size_t ReservedSize;
-		vector<float> ViewValue;
-		vector<lvector>StatValue;
+		unit_code ParCode;
+		nsm_vector(float) ViewValue;
+		nsm_vector(lvector)StatValue;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // CBufferManager class
 class CBufferManager{
 	public:
-		CBufferManager( CSimulate *manager ) : Manager( manager ), ViewStep( 0 ), NumSteps( 0 ){};
-		CBufferManager( const CBufferManager &buffer ) : Manager( buffer.Manager ), ViewStep( buffer.ViewStep ), NumSteps( buffer.NumSteps ){};
-virtual	~CBufferManager( void ){};
+		CBufferManager( CSimulate *manager ) : Manager( manager ), ViewStep( 0 ), CurrStep( 0 ){};
+		CBufferManager( const CBufferManager &buffer ) : Manager( buffer.Manager ), ViewStep( buffer.ViewStep ), CurrStep( buffer.CurrStep ){};
+virtual		~CBufferManager( void ){};
 	public:
 		CBufferManager &operator = ( const CBufferManager &buffer )
 		{
 			Manager = buffer.Manager;
 			ViewStep = buffer.ViewStep;
-			NumSteps = buffer.NumSteps;
+			CurrStep = buffer.CurrStep;
 			return *this;
 		};
 	public:
@@ -81,38 +86,39 @@ virtual	~CBufferManager( void ){};
 		};
 		size_t nsteps( void ) const
 		{
-			return NumSteps;
+			return CurrStep;
 		};
 	public:
-virtual	void next_step( size_t currstep )
+virtual		void next_step( size_t currstep )
 		{
-			NumSteps = currstep+1;
+			CurrStep = currstep+1;
 		};
-virtual	void init_views( double step, size_t numsteps, double freq )
+virtual		void init_all_buffers( double step, size_t numsteps, double freq )
 		{
-			release_views();
+			release_all_buffers();
 			ViewStep = step;
 		};
-virtual	void release_views( void )
+virtual		void alloc_all_buffers( void ){};
+virtual		void release_all_buffers( void )
 		{
 			ViewStep = 0;
-			NumSteps = 0;
+			CurrStep = 0;
 		};
-virtual	size_t max_nsteps( void ) const = 0;
-virtual	void reg_unit( runman *man = NULL ){};
+virtual		size_t max_nsteps( void ) const = 0;
+virtual		void reg_unit( runman *man ){};
 	protected:
-		double ViewStep;
-		size_t NumSteps;
 		CSimulate *Manager;
+		double ViewStep;
+		size_t CurrStep;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // CChartBuffer class
 class CChartBuffer : public CBufferManager{
 	public:
-		CChartBuffer( CSimulate *manager );
-		CChartBuffer( const CChartBuffer &buffer );
-virtual	~CChartBuffer( void );
+		CChartBuffer( CSimulate *manager ) : CBufferManager( manager ), ReservedSize( 0 ){};
+		CChartBuffer( const CChartBuffer &buffer ) : CBufferManager( buffer ), ReservedSize( buffer.ReservedSize ), TimeScale( buffer.TimeScale ), ParBuffer( buffer.ParBuffer ){};
+virtual		~CChartBuffer( void ){	release_all_buffers(); };
 	public:
 		CChartBuffer &operator = ( const CChartBuffer &buffer );
 		hhn_viewbuffer &operator[]( size_t index )
@@ -128,35 +134,31 @@ virtual	~CChartBuffer( void );
 		{
 			return ( size_t )ParBuffer.size();
 		};
-		const vector<float> &timescale( void ) const
+		const nsm_vector(float) &timescale( void ) const
 		{
 			return TimeScale;
 		};
-		void reserve( void )
-		{
-			for( size_t i = 0; i < ParBuffer.size(); i++ )
-				ParBuffer[i].reserve( ReservedSize );
-		};
-		bool add_view( const unit_code &code );
 		const void *get_buffer( const unit_code &code ) const;
+		bool add_buffer( const unit_code &code );
 	public:	// overrided
-		void init_views( double step, size_t numsteps, double freq );
+		void init_all_buffers( double step, size_t numsteps, double freq );
+		void alloc_all_buffers( void );
+		void release_all_buffers( void );
 		size_t max_nsteps( void ) const
 		{
 			return ( size_t )TimeScale.size();
 		};
-		void reg_unit( runman *man = NULL );
+		void reg_unit( runman *man );
 		void next_step( size_t currstep );
-		void release_views( void );
 	public:
-		void save( ostream &file, const vector<unit_code> &buffers, hhn_pair<int> wnd, double prec, int format );
+		void save( ostream &file, const vector<unit_code> &buffers, hhn_pair<int> wnd, double prec_t, int prec_a , int format );
 	private:
 		size_t ReservedSize;
-		vector<float> TimeScale;
-		vector<hhn_viewbuffer> ParBuffer;
+		nsm_vector(float) TimeScale;
+		nsm_vector(hhn_viewbuffer) ParBuffer;
 };
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerVertex class
 class CWalkerVertex{
@@ -170,30 +172,34 @@ class CWalkerVertex{
 	public:
 		void move_pos( float x, float y );
 	public:
-		vector<hhn_pair<float> > Left;
-		vector<hhn_pair<float> > Right;
+		hhn_pair<float> Walker[10];
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerBuffer class
 class CWalkerBuffer : public CBufferManager{
 	public:
-		CWalkerBuffer( CSimulate *manager );
-		CWalkerBuffer( const CWalkerBuffer &buffer );
-virtual	~CWalkerBuffer( void );
+		CWalkerBuffer( CSimulate* manager ) : CBufferManager( manager ), CurrData( NULL ){};
+		CWalkerBuffer( const CWalkerBuffer& buffer ) : CBufferManager( buffer ), Buffer( buffer.Buffer ), CurrData( buffer.CurrData ){};;
+virtual		~CWalkerBuffer( void ){};
 	public:
 		CWalkerBuffer &operator = ( const CWalkerBuffer &buffer );
 	public:
 		const void *get_buffer( void ) const; 
 	public:	// overrided
-		void init_views( double step, size_t numsteps, double = 0.);
-		size_t max_nsteps( void ) const;
+		void init_all_buffers( double step, size_t numsteps, double = 0.);
+		void alloc_all_buffers( void );
+		void release_all_buffers( void );
+		size_t max_nsteps( void ) const
+		{
+			return Buffer.size();
+		};
 		void next_step( size_t currstep );
-
-		void release_views( void );
 	private:
 		void *CurrData;
-		vector<CWalkerVertex> Buffer;
+		nsm_vector(CWalkerVertex) Buffer;
 };
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation for 3d model
+#endif // __MECHANICS_2D__
 #endif // __DATA_VIEW_H

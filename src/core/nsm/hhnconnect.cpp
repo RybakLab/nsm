@@ -9,11 +9,10 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
-using std::bind2nd;
 using std::find_if;
 using std::stringstream;
 
@@ -21,21 +20,22 @@ using std::stringstream;
 // class CHhnConnect
 //--- constructor
 CHhnConnect::CHhnConnect( void )
-	: Probability( 1. )
+	: Probability( 1. ), Modulate( 0 )
 {
-	for( size_t i = 0; i < _id_MAX_SYN; Sigma[i] = PreInh[i] = Depression[i] = false, Weights[i] = 0.0, ++i );
+	reset();
 }
 
 CHhnConnect::CHhnConnect( const CHhnConnect &connect )
-	: Probability( connect.Probability )
+	: Probability( connect.Probability ), Modulate( connect.Modulate )
 {
-	for( size_t i = 0; i < _id_MAX_SYN; Sigma[i] = connect.Sigma[i], PreInh[i] = connect.PreInh[i], Depression[i] = connect.Depression[i], Weights[i] = connect.Weights[i], ++i );
+	for( size_t i = 0; i < _id_MAX_SYN; Sigma[i] = connect.Sigma[i], ModSigma[i] = connect.ModSigma[i], Linear[i] = connect.Linear[i], Weights[i] = connect.Weights[i], ++i );
 }
 
 CHhnConnect &CHhnConnect::operator = ( const CHhnConnect &connect )
 {
 	Probability = connect.Probability;
-	for( size_t i = 0; i < _id_MAX_SYN; Sigma[i] = connect.Sigma[i], PreInh[i] = connect.PreInh[i], Depression[i] = connect.Depression[i], Weights[i] = connect.Weights[i], ++i );
+	Modulate = connect.Modulate;
+	for( size_t i = 0; i < _id_MAX_SYN; Sigma[i] = connect.Sigma[i], ModSigma[i] = connect.ModSigma[i], Linear[i] = connect.Linear[i], Weights[i] = connect.Weights[i], ++i );
 	return *this;
 }
 
@@ -44,40 +44,31 @@ bool CHhnConnect::operator == ( const CHhnConnect &x ) const
 	bool res = true;
 	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
 		res &= ( Sigma[i] == x.Sigma[i] );
-		res &= ( PreInh[i] == x.PreInh[i] );
-		res &= ( Depression[i] == x.Depression[i] );
+		res &= ( ModSigma[i] == x.ModSigma[i] );
+		res &= ( Linear[i] == x.Linear[i] );
 		res &= ( Weights[i] == x.Weights[i] );
 	}
 	return res;
 }
 
-bool CHhnConnect::load( istream &file )
+bool CHhnConnect::load( istream &file ) // keep it to provide backward compatibility
 {
 	string str;
 	while( file >> str){
-		if( str == "Ex"){
-			file >> str >> Weights[_id_ExSyn];
-		}
-#if defined( __RESPIRATION__ )
-		else if( str == "Ex2"){
-			file >> str >> Weights[_id_ExBSyn];
-		}
-#endif // defined( __RESPIRATION__ )
-		else if( str == "InhI"){
-			file >> str >> Weights[_id_InhASyn];
-		}
-		else if( str == "InhII"){
-			file >> str >> Weights[_id_InhBSyn];
-		}
-		else if( str == "Probability"){
-			file >> str >> Probability;
-		}
-		else if( str == "</Target>"){
-			return true;
-		}
-		else{
-			unknown_string( file, str);
-		}
+		auto get_synid = [](auto s ){
+			if( s == "Ex" ) return _id_ExSyn;
+			if( s == "Ex2" ) return _id_ExBSyn;
+			if( s == "InhI" ) return _id_InhASyn;
+			if( s == "InhII" ) return _id_InhBSyn;
+			if( s == "Syn1" ) return _id_Syn1;
+			if( s == "Syn2" ) return _id_Syn2;
+			if( s == "Syn3" ) return _id_Syn3;
+			if( s == "Syn4" ) return _id_Syn4;
+			return _id_MAX_SYN;
+		};
+		size_t id = get_synid( str );
+		if( id < _id_MAX_SYN ){ file >> str >> Weights[id]; }
+		else{ unknown_string( file, str); }
 	}
 	message( "Missing tag </Target>!", "Warning!" );
 	return false;
@@ -103,124 +94,42 @@ bool CConnect::operator == ( const CConnect &x ) const
 bool CConnect::load( istream &file )
 {
 	string str;
+	Connect.reset();
 	while( file >> str){
 		if( str == "Type" ){
 			file >> str >> Type;
-		}
-		else if( str == "Ex"){
-			getline( file, str );
-			stringstream line;
-			line << str;
-			line >> str >> Connect.Weights[_id_ExSyn] >> str;
-			if( str == "*" ){
-				Connect.Sigma[_id_ExSyn] = false;
-				Connect.PreInh[_id_ExSyn] = false;
-				Connect.Depression[_id_ExSyn] = true;
-			}
-			else if( str == "s" ){
-				Connect.Depression[_id_ExSyn] = false;
-				Connect.PreInh[_id_ExSyn] = false;
-				Connect.Sigma[_id_ExSyn] = true;
-			}
-			else if( str == "&" ){
-				Connect.Sigma[_id_ExSyn] = false;
-				Connect.Depression[_id_ExSyn] = false;
-				Connect.PreInh[_id_ExSyn] = true;
-			}
-			else{
-				Connect.Sigma[_id_ExSyn] = false;
-				Connect.Depression[_id_ExSyn] = false;
-				Connect.PreInh[_id_ExSyn] = false;
-			}
-		}
-#if defined( __RESPIRATION__ )
-		else if( str == "Ex2"){
-			getline( file, str );
-			stringstream line;
-			line << str;
-			line >> str >> Connect.Weights[_id_ExBSyn] >> str;
-			if( str == "*" ){
-				Connect.Sigma[_id_ExBSyn] = false;
-				Connect.PreInh[_id_ExBSyn] = false;
-				Connect.Depression[_id_ExBSyn] = true;
-			}
-			else if( str == "s" ){
-				Connect.PreInh[_id_ExBSyn] = false;
-				Connect.Depression[_id_ExBSyn] = false;
-				Connect.Sigma[_id_ExBSyn] = true;
-			}
-			else if( str == "&" ){
-				Connect.Sigma[_id_ExBSyn] = false;
-				Connect.Depression[_id_ExBSyn] = false;
-				Connect.PreInh[_id_ExBSyn] = true;
-			}
-			else{
-				Connect.Sigma[_id_ExBSyn] = false;
-				Connect.Depression[_id_ExBSyn] = false;
-				Connect.PreInh[_id_ExBSyn] = false;
-			}
-		}
-#endif // defined( __RESPIRATION__ )
-		else if( str == "InhI"){
-			getline( file, str );
-			stringstream line;
-			line << str;
-			line >> str >> Connect.Weights[_id_InhASyn] >> str;
-			if( str == "*" ){
-				Connect.Sigma[_id_InhASyn] = false;
-				Connect.PreInh[_id_InhASyn] = false;
-				Connect.Depression[_id_InhASyn] = true;
-			}
-			else if( str == "s" ){
-				Connect.PreInh[_id_InhASyn] = false;
-				Connect.Depression[_id_InhASyn] = false;
-				Connect.Sigma[_id_InhASyn] = true;
-			}
-			else if( str == "&" ){
-				Connect.Sigma[_id_InhASyn] = false;
-				Connect.Depression[_id_InhASyn] = false;
-				Connect.PreInh[_id_InhASyn] = true;
-			}
-			else{
-				Connect.Sigma[_id_InhASyn] = false;
-				Connect.Depression[_id_InhASyn] = false;
-				Connect.PreInh[_id_InhASyn] = false;
-			}
-		}
-		else if( str == "InhII"){
-			getline( file, str );
-			stringstream line;
-			line << str;
-			line >> str >> Connect.Weights[_id_InhBSyn] >> str;
-			if( str == "*" ){
-				Connect.Sigma[_id_InhBSyn] = false;
-				Connect.PreInh[_id_InhBSyn] = false;
-				Connect.Depression[_id_InhBSyn] = true;
-			}
-			else if( str == "s" ){
-				Connect.PreInh[_id_InhBSyn] = false;
-				Connect.Depression[_id_InhBSyn] = false;
-				Connect.Sigma[_id_InhBSyn] = true;
-			}
-			else if( str == "&" ){
-				Connect.Sigma[_id_InhBSyn] = false;
-				Connect.Depression[_id_InhBSyn] = false;
-				Connect.PreInh[_id_InhBSyn] = true;
-			}
-			else{
-				Connect.Sigma[_id_InhBSyn] = false;
-				Connect.Depression[_id_InhBSyn] = false;
-				Connect.PreInh[_id_InhBSyn] = false;
-			}
-		}
-		else if( str == "Probability"){
+		} else if( str == "Probability"){
 			file >> str >> Connect.Probability;
-		}
-		else if( str == "</Connect>"){
+		} else if( str == "Modulate"){
+			file >> str >> Connect.Modulate;
+		} else if( str == "</Connect>"){
 			return true;
-		}
-		else{
-			unknown_string( file, str);
+		} else{
+			auto get_synid = [](auto s ){
+				if( s == "Ex" ) return _id_ExSyn;
+				if( s == "Ex2" ) return _id_ExBSyn;
+				if( s == "InhI" ) return _id_InhASyn;
+				if( s == "InhII" ) return _id_InhBSyn;
+				if( s == "Syn1" ) return _id_Syn1;
+				if( s == "Syn2" ) return _id_Syn2;
+				if( s == "Syn3" ) return _id_Syn3;
+				if( s == "Syn4" ) return _id_Syn4;
+				return _id_MAX_SYN;
+			};
+			size_t id = get_synid( str );
+			if( id < _id_MAX_SYN ){
+				getline( file, str );
+				stringstream line;
+				line << str;
+				line >> str >> Connect.Weights[id] >> str;
+				if( str.find( 's' ) != string::npos ){ // sigma
+					Connect.Sigma[id] = true;
+				} else if( str.find( 'm' ) != string::npos ){ // modified sigma
+					Connect.ModSigma[id] = true;
+				} else if( str.find( 'l' ) != string::npos ){ // linear
+					Connect.Linear[id] = true;
+				}
+			} else{ unknown_string( file, str); }
 		}
 	}
 	message( "Missing tag </Connect>!", "Warning!" );
@@ -230,13 +139,23 @@ bool CConnect::load( istream &file )
 void CConnect::save( ostream &file ) const
 {
 	file << "Type = " << Type << endl;
-	file << "Ex = " << Connect.Weights[_id_ExSyn] <<  ( Connect.Sigma[_id_ExSyn] ? "s":"" ) << ( Connect.Depression[_id_ExSyn] ? "*":"" ) << ( Connect.PreInh[_id_ExSyn] ? "&":"" ) << endl;
-#if defined( __RESPIRATION__ )
-	file << "Ex2 = " << Connect.Weights[_id_ExBSyn] << ( Connect.Sigma[_id_ExBSyn] ? "s":"" ) << ( Connect.Depression[_id_ExBSyn] ? "*":"" ) << ( Connect.PreInh[_id_ExBSyn] ? "&":"" ) << endl;
-#endif // defined( __RESPIRATION__ )
-	file << "InhI = " << Connect.Weights[_id_InhASyn] << ( Connect.Sigma[_id_InhASyn] ? "s":"" ) << ( Connect.Depression[_id_InhASyn] ? "*":"" ) << ( Connect.PreInh[_id_InhASyn] ? "&":"" ) << endl;
-	file << "InhII = " << Connect.Weights[_id_InhBSyn] << ( Connect.Sigma[_id_InhBSyn] ? "s":"" ) << ( Connect.Depression[_id_InhBSyn] ? "*":"" ) << ( Connect.PreInh[_id_InhBSyn] ? "&":"" ) << endl;
+	for( int i = 0; i < _id_MAX_SYN; ++i ){
+		if( Connect.Weights[i] != 0. ){
+			switch( i ){
+				case _id_ExSyn: file << "Ex = "; break;
+				case _id_ExBSyn: file << "Ex2 = "; break;
+				case _id_InhASyn: file << "InhI = "; break;
+				case _id_InhBSyn: file << "InhII = "; break;
+				case _id_Syn1: file << "Syn1 = "; break;
+				case _id_Syn2: file << "Syn2 = "; break;
+				case _id_Syn3: file << "Syn3 = "; break;
+				case _id_Syn4: file << "Syn4 = "; break;
+			}
+			file << Connect.Weights[i] << ( Connect.Sigma[i]? "s":   Connect.ModSigma[i]? "m": Connect.Linear[i]? "l": "" ) << endl;
+		}
+	}
 	file << "Probability = " << Connect.Probability << endl;
+	file << "Modulate = " << Connect.Modulate << endl;
 	file << "</Connect>" << endl;
 }
 
@@ -296,29 +215,23 @@ bool CNNConnect::load( istream &file )
 	string str;
 	if( _FileVersion >= 2 ){
 		while( file >> str){
-			if( str == "<Connect>"){
+			if( str == "<Connect>" ){
 				CConnect connect;
-				if( connect.load( file ))
+				if( connect.load( file )){
 					add_connect( connect );
-			}
-			else if( str == "ChainT"){
+				}
+			} else if( str == "ChainT" ){
 				file >> str; file >> ws;
 				getline( file, ChainT );
-			}
-			else if( str == "ChainS"){
+			} else if( str == "ChainS"){
 				file >> str; file >> ws;
 				getline( file, ChainS );
-			}
-			else if( str == "</Target>"){
+			} else if( str == "</Target>"){
 				return true;
-			}
-			else{
-				unknown_string( file, str);
-			}
+			} else{ unknown_string( file, str ); }
 		}
 		message( "Missing tag </Target>!", "Warning!" );
-	}
-	else{
+	} else{
 		CHhnConnect connect;
 		if( connect.load( file )){
 			add_connect( CConnect( connect, _id_NN_SOMA ));
@@ -365,10 +278,7 @@ class _add_chain{
 				_it pos = find_if( chain.begin(), chain.end(), _link_eq( link ));
 				if( pos == chain.end() ){
 					chain.push_back( link );
-				}
-				else{
-					break;
-				}
+				} else{ break; }
 				link = make_pair( m( link.first, link.second ).ChainT, m( link.first, link.second ).ChainS );
 			}
 		};
@@ -380,10 +290,7 @@ class _add_chain{
 					if( link != exclude ){
 						chain.push_back( link );
 					}
-				}
-				else{
-					break;
-				}
+				} else{ break; }
 				link = make_pair( m( link.first, link.second ).ChainT, m( link.first, link.second ).ChainS );
 			}
 		};
@@ -422,7 +329,7 @@ bool CConnectMatrix::add_trg( const string &name )
 	return false;
 }
 
-void CConnectMatrix::chain( _link &master, _link &slave )
+void CConnectMatrix::chain( _link master, _link slave )
 {
 	if( master != slave ){
 		// to copy the properties of 'master' link to 'slave' link
@@ -438,7 +345,7 @@ void CConnectMatrix::chain( _link &master, _link &slave )
 	}
 }
 
-void CConnectMatrix::modify( _link &link )
+void CConnectMatrix::modify( _link link )
 {
 	if( !( link.first.empty() || link.second.empty())){
 		typedef pair<string,string> _link;
@@ -449,15 +356,12 @@ void CConnectMatrix::modify( _link &link )
 			if( !( link.first.empty() || link.second.empty())){
 				operator()( link.first, link.second ).Empty = connect.Empty;
 				operator()( link.first, link.second ).Connect = connect.Connect;
-			}
-			else{
-				break;
-			}
+			} else{ break; }
 		} while( link != head );
 	}
 }
 
-void CConnectMatrix::unchain( _link &link )
+void CConnectMatrix::unchain( _link link )
 {
 	if( !( link.first.empty() || link.second.empty())){
 		// to chain all but 'link'
@@ -479,8 +383,7 @@ void CConnectMatrix::chain_all( list<_link> &chain )
 		if( next == chain.end()){
 			operator()( pos->first, pos->second ).ChainT = head->first;
 			operator()( pos->first, pos->second ).ChainS = head->second;
-		}
-		else{
+		} else{
 			operator()( pos->first, pos->second ).ChainT = next->first;
 			operator()( pos->first, pos->second ).ChainS = next->second;
 		}

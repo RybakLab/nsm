@@ -7,26 +7,27 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
 ///////////////////////////////////////////////////////////////////////////////
 // class uni_template
 uni_template::uni_template( uni_template *parent, int is_active, char **names, int size, bool showtype )
-	: Parent( parent ), IsActive( is_active ), PossibleNames( names, size ), 
-	IsShowType( showtype ),	UnitId( -1 )
+	: IsShowType( showtype ), IsActive( is_active ), UnitId( -1 ), Parent( parent ), PossibleNames( names, size )
+	
 {
+//	set_default();
 }
 
 uni_template::uni_template( const uni_template &unit )
-		: Parent( unit.Parent ),
-		Name( unit.Name ), 
-		TypeName( unit.TypeName ),
-		TypeNameS( unit.TypeNameS ),
-		TypeSynonym( unit.TypeSynonym ),
-		PossibleNames( unit.PossibleNames ),
-		DefaultChildren( unit.DefaultChildren )
+	: Parent( unit.Parent ),
+	Name( unit.Name ), 
+	TypeName( unit.TypeName ),
+	TypeNameS( unit.TypeNameS ),
+	TypeSynonym( unit.TypeSynonym ),
+	DefaultChildren( unit.DefaultChildren ),
+	PossibleNames( unit.PossibleNames )
 {
 	UnitId = unit.UnitId;
 	IsActive = unit.IsActive;
@@ -376,6 +377,7 @@ void uni_template::clear( void )
 
 bool uni_template::get_unusednames( const char *full_path, vector<string> &names )
 {
+	uni_template *unit = get_unit( full_path );
 	if( get_allunusednames( full_path, names )){
 		extract_unusednames( full_path, names );
 		return true;
@@ -386,11 +388,11 @@ bool uni_template::get_unusednames( const char *full_path, vector<string> &names
 void uni_template::extract_unusednames( const char *full_path, vector<string> &names )
 {
 	string last_path;
-	for( unsigned int i = 0; i < Children.size(); ++i ){
-		for( unsigned int ii = 0; ii < names.size(); ++ii ){
+	for( size_t i = 0; i < Children.size(); ++i ){
+		for( size_t ii = 0; ii < names.size(); ++ii ){
 			if( names[ii] == Children[i]->Name ){
 				names.erase( names.begin()+ii );
-				ii = 0;                       
+				ii = 0;
 			}
 		}
 	}
@@ -568,6 +570,7 @@ bool uni_template::load( istream &file )
 		endtag.push_back( str );
 	}
 	clear();
+	set_default();
 	t_data *tmpVar;
 	while( file >> str){
 		if(( tmpVar = get_data( str.c_str(), '\n' )) != NULL ){

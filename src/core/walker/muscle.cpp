@@ -3,7 +3,7 @@
 //---------------------------------------------------------------------
 #include "precompile.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "hhnoutput.h"
 #include "walker.h"
@@ -12,7 +12,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
@@ -191,7 +191,7 @@ void zmuscle::preproc( double *llink )
 	W2 = W*W;
 }
 
-void zmuscle::init( void )
+bool zmuscle::init( void )
 {
 #ifdef __NEW_MUSCLE__
 	VMp = Wnet = 0.0;
@@ -214,6 +214,7 @@ void zmuscle::init( void )
 			x1 = LT;
 		}
 	}
+	return true;
 }
 
 const void *zmuscle::select( unit_code *view )const
@@ -265,7 +266,7 @@ j1muscle &j1muscle ::operator = ( const j1muscle &muscle )
 const char *j1muscle::get_name( void ) const
 {
 	if( Link.Upper == PELVIS_ && Link.Lower == THIGH_L ){		// Left hip muscles
-		if( F1 == 1 ){					// IP
+		if( F1 == 1 ){				// IP
 			return "IP (L)";
 		}
 		else if( F1 == -1 ){			// BFA
@@ -273,7 +274,7 @@ const char *j1muscle::get_name( void ) const
 		}
 	}
 	else if( Link.Upper == PELVIS_ && Link.Lower == THIGH_R ){	// Right hip muscles
-		if( F1 == 1 ){					// IP
+		if( F1 == 1 ){				// IP
 			return "IP (R)";
 		}
 		else if( F1 == -1 ){			// BFA
@@ -281,7 +282,7 @@ const char *j1muscle::get_name( void ) const
 		}
 	}
 	else if( Link.Upper == SHANK_L && Link.Lower == FOOT_L ){	// Left ankle muscles
-		if( F1 == 1 ){					// TA
+		if( F1 == 1 ){				// TA
 			return "TA (L)";
 		}
 		else if( F1 == -1 ){			// SOL
@@ -289,7 +290,7 @@ const char *j1muscle::get_name( void ) const
 		}
 	}
 	else if( Link.Upper == SHANK_R && Link.Lower == FOOT_R ){	// Right ankle muscles
-		if( F1 == 1 ){					// TA
+		if( F1 == 1 ){				// TA
 			return "TA (R)";
 		}
 		else if( F1 == -1 ){			// SOL
@@ -297,12 +298,12 @@ const char *j1muscle::get_name( void ) const
 		}
 	}
 	else if( Link.Upper == THIGH_L && Link.Lower == SHANK_L ){	// Left knee muscle (VA only)
-		if( F1 == 1 ){					// VA
+		if( F1 == 1 ){				// VA
 			return "VA (L)";
 		}
 	}
 	else if( Link.Upper == THIGH_R && Link.Lower == SHANK_R ){	// Right knee muscle (VA only)
-		if( F1 == 1 ){					// VA
+		if( F1 == 1 ){				// VA
 			return "VA (R)";
 		}
 	}
@@ -370,39 +371,35 @@ j2muscle & j2muscle ::operator = ( const j2muscle & muscle )
 //---- methods
 const char *j2muscle::get_name( void ) const
 {
-	if( Link.Upper == PELVIS_ && Link.Middle == THIGH_L && Link.Lower == SHANK_L ){	
-																// Left hip/knee muscles
+	if( Link.Upper == PELVIS_ && Link.Middle == THIGH_L && Link.Lower == SHANK_L ){ // Left hip/knee muscles
 		if( F1 == 1 && F2 == 1){		// RF
 			return "RF (L)";
 		}
-		else if( F1 == -1 && F2 == -1){	// BFP
+		else if( F1 == -1 && F2 == -1){		// BFP
 			return "BFP (L)";
 		}
-		else if( F1 == 1 && F2 == -1){	// SART
+		else if( F1 == 1 && F2 == -1){		// SART
 			return "SART (L)";
 		}
 	}
-	else if( Link.Upper == PELVIS_ && Link.Middle == THIGH_R && Link.Lower == SHANK_R ){	
-																// Right hip/knee muscles
+	else if( Link.Upper == PELVIS_ && Link.Middle == THIGH_R && Link.Lower == SHANK_R ){ // Right hip/knee muscles
 		if( F1 == 1 && F2 == 1){		// RF
 			return "RF (R)";
 		}
-		else if( F1 == -1 && F2 == -1){	// BFP
+		else if( F1 == -1 && F2 == -1){		// BFP
 			return "BFP (R)";
 		}
-		else if( F1 == 1 && F2 == -1){	// SART
+		else if( F1 == 1 && F2 == -1){		// SART
 			return "SART (R)";
 		}
 	}
-	if( Link.Upper == THIGH_L && Link.Middle == SHANK_L && Link.Lower == FOOT_L ){
-																// Left knee/ankle muscles (GA only)
-		if( F1 == -1 && F2 == -1){	// GA
+	if( Link.Upper == THIGH_L && Link.Middle == SHANK_L && Link.Lower == FOOT_L ){ // Left knee/ankle muscles (GA only)
+		if( F1 == -1 && F2 == -1){		// GA
 			return "GA (L)";
 		}
 	}
-	else if( Link.Upper == THIGH_R && Link.Middle == SHANK_R && Link.Lower == FOOT_R ){	
-																// Right knee/ankle muscles (GA only)
-		if( F1 == -1 && F2 == -1){	// GA
+	else if( Link.Upper == THIGH_R && Link.Middle == SHANK_R && Link.Lower == FOOT_R ){ // Right knee/ankle muscles (GA only)
+		if( F1 == -1 && F2 == -1){		// GA
 			return "GA (R)";
 		}
 	}
@@ -469,7 +466,7 @@ void j2muscle::proc( wjoint *joints )
 		L = z+X1+R1*( fabs( delta1 )-Beta1-beta );
 		H1 = R1*sign( delta1 );
 		H2 = ( lm_a2_sin2-R1A2*sin( phi ))/z;
-		if( __IS_BLOCK( t, H2, R2, delta2 )){			// two blocks
+		if( __IS_BLOCK( t, H2, R2, delta2 )){	// two blocks
 			H2 = R2*sign( delta2 );		
 			L = X1+X2+R1*( fabs( gamma1 )-Beta1 )+R2*( fabs( gamma2 )-Beta2 );
 			L += ( H1*H2 > 0 )? ZP: ZM;
@@ -500,4 +497,6 @@ void j2muscle::proc( wjoint *joints )
 	V = H1*dalpha1+H2*dalpha2;
 }
 #undef __IS_BLOCK
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__

@@ -1,6 +1,6 @@
 /*****************************************************************
  ****              (C)  1997 - 2005                           ****
- **           Model of Hodgkin-Haxley type neuron               **
+ **           Model of Hodgkin-Huxley type neuron               **
  **         Developed by Ilia Rybak and Sergey Markin           **
  ****                   Ions (module)                         ****
  *****************************************************************/
@@ -15,7 +15,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
@@ -68,13 +68,14 @@ void hhn_ions::init( double in, double out )
 	init();
 }
 
-void hhn_ions::init( void )
+bool hhn_ions::init( void )
 {
-	Alpha /= T;
+//	Alpha /= T; merged code
 	I = Ipump = 0.0;
 #ifdef __RK__
 	InK1 = 0.0;
 #endif 
+	return true;
 }
 
 void hhn_ions::calc_eds( void )
@@ -169,7 +170,7 @@ hca_ions &hca_ions::operator = (  const hca_ions &ions )
 #ifndef __LOCOMOTION__
 	B = ions.B;
 	K = ions.K;
-#endif __LOCOMOTION__
+#endif /*__LOCOMOTION__*/
 	return *this;
 }
 
@@ -178,12 +179,12 @@ void hca_ions::copy_to( hhn_ions **ions )
 	*ions = new hca_ions( *this );
 }
 
-void hca_ions::init( void )
+bool hca_ions::init( void )
 {
 #if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	Alpha = T;
 #endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-	hhn_ions::init();
+	return hhn_ions::init();
 }
 
 void hca_ions::init( double in, double out )

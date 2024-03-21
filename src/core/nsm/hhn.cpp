@@ -10,29 +10,30 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
 /////////////////////////////////////////////////////////////////////////////
 // class hhn_compart
 hhn_compart::hhn_compart( hhn_neuron *neuron )
-	: CompartId( -1 ), Neuron( neuron ), Populat( NULL ), NeuronT( NULL ),
+	: CompartId( -1 ), Ipumps( 0.0 ), Iinj( 0.0 ), Vm( -60. ), 
 	NaIons( NULL ), KIons( NULL ), CaIons( NULL ), ClIons( NULL ),
-	Ipumps( 0.0 ), Iinj( 0.0 )
+	Populat( NULL ), Neuron( neuron ), NeuronT( NULL )
 {
-	Vm[0] = Vm[1] = -60.;
-	Area = 1;
+#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+	Area = 0.0025;
+#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 }
 
 hhn_compart::hhn_compart( const hhn_compart &compartment )
-	: hhn_process( compartment ), Name( compartment.Name ),
-	CompartId( compartment.CompartId ), Neuron( compartment.Neuron ), Populat( NULL ), NeuronT( NULL ),
-	NaIons( NULL ), KIons( NULL ), CaIons( NULL ), ClIons( NULL ),
-	Ipumps( compartment.Ipumps ), Iinj( compartment.Iinj )
+	: hhn_process( compartment ), CompartId( compartment.CompartId ), Ipumps( compartment.Ipumps ), 
+	Iinj( compartment.Iinj ), Vm( compartment.Vm ), NaIons( NULL ), KIons( NULL ), CaIons( NULL ), ClIons( NULL ),
+	Populat( NULL ), Name( compartment.Name ), Neuron( compartment.Neuron ), NeuronT( NULL )
 {
-	Vm[0] = Vm[1] = compartment.Vm[0];
+#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	Area = compartment.Area;
+#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	create( compartment.NeuronT, compartment.Populat  );
 }
 
@@ -49,6 +50,7 @@ hhn_compart &hhn_compart::operator = ( const hhn_compart &compartment )
 	Neuron = compartment.Neuron;
 	Ipumps = compartment.Ipumps;
 	Iinj = compartment.Iinj;
+	Vm = compartment.Vm;
 	create( compartment.NeuronT, compartment.Populat  );
 	return *this;
 }
@@ -73,10 +75,13 @@ bool hhn_compart::init( void )
 		clear_all();
 		P = (( t_hhn *)( NeuronT->get_parent() ))->GetP();
 		Cm = (( t_hhn *)( NeuronT->get_parent() ))->GetCm();
-		Vm[0] = Vm[1] = NeuronT->Vm;
+		Vm = NeuronT->Vm;
 		Iinj = NeuronT->Iinj;
-		Ipumps = 0.0; 
+		Ipumps = 0.0;
+		G = GE = Ipumps = 0;
+#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 		Area = NeuronT->GetArea();
+#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 		create_ions( NeuronT );
 		create_syn();
 		create_chan( NeuronT );
@@ -84,10 +89,9 @@ bool hhn_compart::init( void )
 	 }
 	return false;
 }
-            
+
 void hhn_compart::reg_unit( runman *man )
 {
-	::reg_unit( this, hhn_compart::reset, _id_PASS_RESET, -1, man ); 
 	::reg_unit( this, hhn_compart::calc_vm, _id_PASS_VM, -1, man ); 
 	for( size_t i = 0; i < Chan.size(); ++i ){
 		Chan[i]->reg_unit( man );
@@ -105,18 +109,11 @@ void hhn_compart::reg_unit( runman *man )
 
 void hhn_compart::create_syn( void )
 {
-	Syn.push_back( new hexa_synapse( this ));
-#if defined( __RESPIRATION__ )
-	Syn.push_back( new hexb_synapse( this ));
-#endif // defined( __RESPIRATION__ )
-	Syn.push_back( new hinha_synapse( this ));
-	Syn.push_back( new hinhb_synapse( this ));
+	for( int i = 0; i < _id_MAX_SYN; ++i ){
+		Syn.push_back( new hhn_synapse( this ));
+	}
 	for( size_t id = 0; id < Syn.size(); ++id ){
-		DSyn.push_back( new base_dsynapse()); 
-		SSyn.push_back( new base_ssynapse()); 
 		Syn[id]->set_synapse( Populat->Synapses[id] );
-		*DSyn[id] = Populat->SynapsesD[id];
-		*SSyn[id] = Populat->SynapsesS[id];
 	}
 }
 
@@ -156,8 +153,6 @@ void hhn_compart::clear_all( void )
 {
 	for( size_t i = 0; i < Syn.size(); ++i ){
 		delete Syn[i];
-		delete DSyn[i];
-		delete SSyn[i];
 	}
 	for( size_t i = 0; i < Chan.size(); ++i ){
 		delete Chan[i];
@@ -169,29 +164,19 @@ void hhn_compart::clear_all( void )
 		delete Pumps[i];
 	}
 	Syn.clear();
-	DSyn.clear();
-	SSyn.clear();
 	Ions.clear();
 	Pumps.clear();
 	Chan.clear();
 }
 
-void hhn_compart::reset( void )
-{
-	Vm[0] = Vm[1];
-	G = GE = Ipumps = 0;
-}
-
 void hhn_compart::calc_vm( double step, double thresh )
 {
-	double v, vpre, g, v0, t;
-	g = G;
-	v = vpre = Vm[0];
+	double v = Vm, g = G;
 	if( g > EPS ){
-		v0 = ( GE+Ipumps+Iinj )/g; t = Cm/g;
-		v = EXP_EULER( v, v0, step, t );
+		double v0 = ( GE+Ipumps+Iinj )/g, t = Cm/g;
+		Vm = EXP_EULER( v, v0, step, t );
 	}
-	Vm[1] = v;
+	G = GE = Ipumps = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -207,7 +192,7 @@ hhn_soma::hhn_soma( const hhn_soma &soma )
 	: hhn_compart( soma )
 {
 }
-           
+
 hhn_soma::~hhn_soma( void )
 {
 }
@@ -229,7 +214,6 @@ void hhn_soma::create_chan( t_compart *tcomp )
 
 void hhn_soma::reg_unit( runman *man )
 {
-	::reg_unit( this, hhn_compart::reset, _id_PASS_RESET, -1, man ); 
 	::reg_unit( this, hhn_soma::calc_vm, _id_PASS_SOMA_VM, -1, man ); 
 	for( size_t i = 0; i < Chan.size(); ++i ){
 		Chan[i]->reg_unit( man );
@@ -247,15 +231,13 @@ void hhn_soma::reg_unit( runman *man )
 
 void hhn_soma::calc_vm( double step, double thresh )
 {
-	double v, vpre, g, v0, t;
-	g = G;
-	v = vpre = Vm[0];
+	double v = Vm, g = G;
 	if( g > EPS ){
-		v0 = ( GE+Ipumps+Iinj )/g; t = Cm/g;
-		v = v = EXP_EULER( v, v0, step, t );
-		( v > thresh && vpre <= thresh )? ( *( Neuron->Spike ) = 1 ): 0;
+		double v0 = ( GE+Ipumps+Iinj )/g, t = Cm/g;
+		Vm = EXP_EULER( v, v0, step, t );
+		*( Neuron->Spike ) = int( Vm > thresh && v <= thresh ); // detect the spike
 	}
-	Vm[1] = v;
+	G = GE = Ipumps = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -293,18 +275,31 @@ void hhn_dendr::create_chan( t_compart *tcomp )
 
 /////////////////////////////////////////////////////////////////////////////
 // class hhn_neuron
+alignas( 16 ) double hhn_neuron::EXPT[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::VS[_id_MAX_SYN] = {0.};
+
+alignas( 16 ) double hhn_neuron::HV[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::SLP[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::THR[_id_MAX_SYN] = {0.};
+
+alignas( 16 ) double hhn_neuron::MODHV[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::MODSLP[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::MODTHR[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::MODSCALE[_id_MAX_SYN] = {0.};
+
+alignas( 16 ) double hhn_neuron::Lvm[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::Hvm[_id_MAX_SYN] = {0.};
+alignas( 16 ) double hhn_neuron::LINSLOPE[_id_MAX_SYN] = {0.};
+
 //--- constructor
 hhn_neuron::hhn_neuron( hhn_populat *populat )
-	: Populat( populat )
-
+	: Populat( populat ), IsH( false ), Kd( 0. ), Td( 0. )
 {
-	for( size_t i = 0; i < _id_MAX_SYN; Y[i] = 0, H[i] = 1., IsY[i] = IsS[i] = IsH[i] = false, ++i );
 }
 
-hhn_neuron::hhn_neuron( const hhn_neuron &hhn )
-	: hhn_process( hhn ), Populat( hhn.Populat )
+hhn_neuron::hhn_neuron( const hhn_neuron &hhn )	: hhn_process( hhn ), 
+	Populat( hhn.Populat ), IsH( hhn.IsH ), Kd( hhn.Kd ), Td( hhn.Td )
 {
-	for( size_t i = 0; i < _id_MAX_SYN; Y[i] = hhn.Y[i], H[i] = 1., IsY[i] = hhn.IsY[i], IsS[i] = hhn.IsS[i], IsH[i] = hhn.IsH[i], ++i );
 }
 
 hhn_neuron::~hhn_neuron( void )
@@ -318,38 +313,29 @@ hhn_neuron &hhn_neuron::operator = ( const hhn_neuron &hhn )
 {
 	hhn_process::operator =( hhn );
 	Populat = hhn.Populat;
-	for( size_t i = 0; i < _id_MAX_SYN; Y[i] = hhn.Y[i], H[i] = 1., IsY[i] = hhn.IsY[i], IsS[i] = hhn.IsS[i], IsH[i] = hhn.IsH[i], ++i );
+	Kd = hhn.Kd; Td = hhn.Td; IsH = hhn.IsH;
 	return *this;
 }
 
 //--- public functions
-void hhn_neuron::init( void )
-{
-	create_comp();
-	for( size_t i = 0; i < Compart.size(); Compart[i]->init(), ++i );
-	t_hhn *neuron = Populat->get_neuronT();
-	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		Y[i] = neuron->get_y( i );
-		H[i] = 1.; IsY[i] = IsH[i] = false;
-		Output[i] = Y[i]; OutputD[i] = Y[i]*H[i];
-	}
-}
-
 void hhn_neuron::copy_to( hhn_neuron **neuron )
 {
 	*neuron = new hhn_neuron( *this );
 }
 
-void hhn_neuron::retrace( int yid, int sid, int hid )
+bool hhn_neuron::init( void )
 {
-	if( yid >= 0 && yid < _id_MAX_SYN )
-		IsY[yid] = true;
-	if( sid >= 0 && sid < _id_MAX_SYN ){
-		IsS[sid] = true;
-		IsY[sid] = false;
+	create_comp();
+	for( size_t i = 0; i < Compart.size(); Compart[i]->init(), ++i );
+	t_hhn *tneuron = Populat->get_neuronT();
+	for( size_t i = 0; i < _id_MAX_SYN*presyn_max; ++i ){
+		Y[i] = tneuron->get_y( i%_id_MAX_SYN );
+		H[i] = 1.;
+		Output[i] = Y[i]*H[i];
+		SynProc[i] = presyn_no;
 	}
-	if( hid >= 0 && hid < _id_MAX_SYN )
-		IsH[hid] = true;
+	IsH = ( Kd == 0. || Td == 0.f )? false: true;
+	return true;
 }
 
 void hhn_neuron::create_comp( void )
@@ -369,67 +355,65 @@ void hhn_neuron::create_comp( void )
 void hhn_neuron::reg_unit( int index, runman *man )
 {
 	Spike = &Populat->Spikes[index];
-	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		if( IsY[i] ){
-			::reg_unit( this, hhn_neuron::pre_y, _id_PASS_PREYS, -1, man );
-			::reg_unit( this, hhn_neuron::post_y, _id_PASS_POSTY, -1, man );
-			break;
-		}
-	}
-	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		if( IsS[i] ){
-			::reg_unit( this, hhn_neuron::pre_s, _id_PASS_PREYS, -1, man );
-			break;
-		}
-	}
-	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		if( IsH[i] ){
-			::reg_unit( this, hhn_neuron::pre_h, _id_PASS_PREH, -1, man );
-			break;
-		}
-	}
+	::reg_unit( this, hhn_neuron::pre_y, _id_PASS_PREY, -1, man );
 	for( size_t i = 0; i < Compart.size(); Compart[i]->reg_unit( man ), ++i );
 }
 
-void hhn_neuron::pre_y( double step, double vs[_id_MAX_SYN] )
+void hhn_neuron::prerun( double step )
 {
 	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		double y = Y[i];
-		y += *Spike*vs[i];
-		Output[i] = Y[i] = y;
+		hhn_neuron::EXPT[i] = EXP( -step/( Populat->Synapses[i]->Ts ) );
+		hhn_neuron::VS[i] = Populat->Synapses[i]->Vs;
+
+		hhn_neuron::HV[i] = Populat->SynapsesS[i].Hv;
+		hhn_neuron::SLP[i] = Populat->SynapsesS[i].Slp;
+		hhn_neuron::THR[i] = Populat->SynapsesS[i].Thr;
+
+		hhn_neuron::MODHV[i] = Populat->SynapsesMS[i].Hv;
+		hhn_neuron::MODSLP[i] = Populat->SynapsesMS[i].Slp;
+		hhn_neuron::MODTHR[i] = Populat->SynapsesMS[i].Thr;
+		hhn_neuron::MODSCALE[i] = SIGMOID( hhn_neuron::MODTHR[i], hhn_neuron::MODHV[i], hhn_neuron::MODSLP[i] );
+
+		hhn_neuron::Lvm[i] = Populat->SynapsesL[i].Lvm;
+		hhn_neuron::Hvm[i] = Populat->SynapsesL[i].Hvm;
+		hhn_neuron::LINSLOPE[i] = hhn_neuron::Hvm[i]-hhn_neuron::Lvm[i];
 	}
 }
 
-void hhn_neuron::pre_s( double step, double thresh,	double hv[_id_MAX_SYN],	double sl[_id_MAX_SYN] )
+int hhn_neuron::retrace( int synid, bool sigma, bool modsigma, bool linear )
 {
-	double v = Compart[_id_HHN_SOMA]->Vm[1];
-	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		if( IsS[i] ){
-			double y = ( v < thresh )? 0.: GENERIC_G( v, hv[i], sl[i] );
-			Y[i] = Output[i] = y;
+	if( synid >= 0 && synid < _id_MAX_SYN ){
+		int procid = sigma? presyn_sigma: modsigma? presyn_modsigma: linear? presyn_lin: presyn_spike;
+		SynProc[synid+procid*_id_MAX_SYN] = procid;
+		return synid+procid*_id_MAX_SYN;
+	}
+	return -1;
+}
+
+void hhn_neuron::pre_y( double step )
+{
+	int spike = *Spike;
+	double v = Compart[_id_HHN_SOMA]->get_vm();
+	for( size_t i = 0; i < _id_MAX_SYN*presyn_max; ++i ){
+		int synid = i%_id_MAX_SYN;
+		switch( SynProc[i] ){
+			case presyn_spike:
+				Y[i] = Y[i]*hhn_neuron::EXPT[synid]+spike*hhn_neuron::VS[synid];
+			break;
+			case presyn_sigma:
+				Y[i] = ( v < hhn_neuron::THR[synid] )? 0.: SIGMOID(v, hhn_neuron::HV[synid], hhn_neuron::SLP[synid]);
+			break;
+			case presyn_modsigma:
+				Y[i] = (( v >= hhn_neuron::THR[synid] )? ( SIGMOID(v, hhn_neuron::HV[synid], hhn_neuron::SLP[synid])-hhn_neuron::MODSCALE[synid] )/( 1.-hhn_neuron::MODSCALE[synid] ): 0. ); // transformed output
+			break;
+			case presyn_lin:
+				Y[i] = ( v < hhn_neuron::Lvm[synid] )? 0: ( v < hhn_neuron::Hvm[synid] )? (v-hhn_neuron::Lvm[synid])/(hhn_neuron::LINSLOPE[synid]): 1;
+			break;
 		}
-	}
-}
-
-void hhn_neuron::pre_h( double step, double kd[_id_MAX_SYN], double td[_id_MAX_SYN] )
-{
-	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		if( IsH[i] ){
-			double y = Y[i];
-			double h = H[i];
-			double alpha = 1./( 1+kd[i]*y );
-			h = EXP_EULER( h, alpha, step, td[i]*alpha );
-			OutputD[i] = y*h;
-			H[i] = h;
+		if( IsH ){
+			double alpha = 1./( 1+Kd*Y[i] );
+			H[i] = EXP_EULER( H[i], alpha, step, Td*alpha );
 		}
-	}
-}
-
-void hhn_neuron::post_y( double step, double expt[_id_MAX_SYN] )
-{
-	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
-		double y = Y[i];
-		y *= expt[i];
-		Output[i] = Y[i] = y;
+		Output[i] = Y[i]*H[i];
 	}
 }

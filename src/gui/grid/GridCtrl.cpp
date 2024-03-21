@@ -181,7 +181,7 @@
 #include <afxconv.h>           // For LPTSTR -> LPSTR macros
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
@@ -570,8 +570,8 @@ BEGIN_MESSAGE_MAP(CGridCtrl, CWnd)
     ON_WM_CHAR()
     ON_WM_LBUTTONDBLCLK()
     ON_WM_ERASEBKGND()
-    ON_UPDATE_COMMAND_UI(ID_EDIT_SELECT_ALL, OnUpdateEditSelectAll)
-    ON_COMMAND(ID_EDIT_SELECT_ALL, OnEditSelectAll)
+    ON_UPDATE_COMMAND_UI(ID_EDIT_SELECT_ALL, &CGridCtrl::OnUpdateEditSelectAll)
+    ON_COMMAND(ID_EDIT_SELECT_ALL, &CGridCtrl::OnEditSelectAll)
     ON_WM_SYSKEYDOWN()
 //}}AFX_MSG_MAP
 #ifndef _WIN32_WCE_NO_CURSOR
@@ -583,12 +583,12 @@ BEGIN_MESSAGE_MAP(CGridCtrl, CWnd)
     ON_WM_CAPTURECHANGED()
 #endif
 #ifndef GRIDCONTROL_NO_CLIPBOARD
-    ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
-    ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdateEditCopy)
-    ON_COMMAND(ID_EDIT_CUT, OnEditCut)
-    ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
-    ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
-    ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdateEditPaste)
+    ON_COMMAND(ID_EDIT_COPY, &CGridCtrl::OnEditCopy)
+    ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, &CGridCtrl::OnUpdateEditCopy)
+    ON_COMMAND(ID_EDIT_CUT, &CGridCtrl::OnEditCut)
+    ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, &CGridCtrl::OnUpdateEditCut)
+    ON_COMMAND(ID_EDIT_PASTE, &CGridCtrl::OnEditPaste)
+    ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, &CGridCtrl::OnUpdateEditPaste)
 #endif
 #if (_WIN32_WCE >= 210)
     ON_WM_SETTINGCHANGE()
@@ -596,9 +596,9 @@ BEGIN_MESSAGE_MAP(CGridCtrl, CWnd)
 #if !defined(_WIN32_WCE) && (_MFC_VER >= 0x0421)
     ON_WM_MOUSEWHEEL()
 #endif
-    ON_MESSAGE(WM_SETFONT, OnSetFont)
-    ON_MESSAGE(WM_GETFONT, OnGetFont)
-    ON_NOTIFY(GVN_ENDLABELEDIT, IDC_INPLACE_CONTROL, OnEndInPlaceEdit)
+    ON_MESSAGE(WM_SETFONT, &CGridCtrl::OnSetFont)
+    ON_MESSAGE(WM_GETFONT, &CGridCtrl::OnGetFont)
+    ON_NOTIFY(GVN_ENDLABELEDIT, IDC_INPLACE_CONTROL, &CGridCtrl::OnEndInPlaceEdit)
 END_MESSAGE_MAP()
 
 
@@ -2241,7 +2241,7 @@ void CGridCtrl::CutSelectedText()
     if (!IsValid(Selection))
         return;
 
-	ClearCells(Selection);
+    ClearCells(Selection);
 }
 
 // Copies text from the selected cells to the clipboard
@@ -2337,7 +2337,7 @@ BOOL CGridCtrl::PasteTextToGrid(CCellID cell, COleDataObject* pDataObject)
     // Now store in generic TCHAR form so we no longer have to deal with
     // ANSI/UNICODE problems
     CString strText = szBuffer;
-    delete szBuffer;
+    delete[] szBuffer;
 
     // Parse text data and set in cells...
     strText.LockBuffer();
@@ -3268,23 +3268,20 @@ BOOL CGridCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 BOOL CGridCtrl::SetFixedRowCount(int nFixedRows)
 {
-    if (m_nFixedRows == nFixedRows)
-        return TRUE;
+        if (m_nFixedRows == nFixedRows)
+                return TRUE;
 
-    ASSERT(nFixedRows >= 0);
-
-    ResetSelectedRange();
-
-    // Force recalculation
-    m_idTopLeftCell.col = -1;
-
-    if (nFixedRows > GetRowCount())
-        if (!SetRowCount(nFixedRows))
-            return FALSE;
-        
-        if (m_idCurrentCell.row < nFixedRows)
-            SetFocusCell(-1, - 1);
-        
+        ASSERT(nFixedRows >= 0);
+        ResetSelectedRange();
+        // Force recalculation
+        m_idTopLeftCell.col = -1;
+        if( nFixedRows > GetRowCount() ){
+                if (!SetRowCount(nFixedRows))
+                        return FALSE;
+        }
+        if( m_idCurrentCell.row < nFixedRows ){
+                SetFocusCell(-1, - 1);
+        }
         if (!GetVirtualMode())
         {
             if (nFixedRows > m_nFixedRows)
@@ -4110,7 +4107,7 @@ BOOL CGridCtrl::SortItems(PFNLVCOMPARE pfnCompare, int nCol, BOOL bAscending,
 
 int CALLBACK CGridCtrl::pfnCellTextCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	UNUSED_ALWAYS(lParamSort);
+//	UNUSED_ALWAYS(lParamSort);
 
 	CGridCellBase* pCell1 = (CGridCellBase*) lParam1;
 	CGridCellBase* pCell2 = (CGridCellBase*) lParam2;
@@ -4121,7 +4118,7 @@ int CALLBACK CGridCtrl::pfnCellTextCompare(LPARAM lParam1, LPARAM lParam2, LPARA
 
 int CALLBACK CGridCtrl::pfnCellNumericCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	UNUSED_ALWAYS(lParamSort);
+//	UNUSED_ALWAYS(lParamSort);
 
 	CGridCellBase* pCell1 = (CGridCellBase*) lParam1;
 	CGridCellBase* pCell2 = (CGridCellBase*) lParam2;
@@ -4142,20 +4139,20 @@ int CALLBACK CGridCtrl::pfnCellNumericCompare(LPARAM lParam1, LPARAM lParam2, LP
 BOOL CGridCtrl::SortItems(PFNLVCOMPARE pfnCompare, int nCol, BOOL bAscending, LPARAM data,
                           int low, int high)
 {
-    if (nCol >= GetColumnCount())
-        return FALSE;
+        if (nCol >= GetColumnCount()){ return FALSE; }
+        
 
-    if (high == -1)
-        high = GetRowCount() - 1;
+        if (high == -1){ high = GetRowCount() - 1; }
+        
 
-    int lo = low;
-    int hi = high;
+        int lo = low;
+        int hi = high;
     
-    if (hi <= lo)
-        return FALSE;
+        if (hi <= lo){ return FALSE; }
+        
     
     //LPARAM midItem = GetItemData((lo + hi)/2, nCol);
-	LPARAM pMidCell = (LPARAM) GetCell((lo + hi)/2, nCol);
+        LPARAM pMidCell = (LPARAM) GetCell((lo + hi)/2, nCol);
     
     // loop through the list until indices cross
     while (lo <= hi)

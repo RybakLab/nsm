@@ -21,7 +21,7 @@ class CViewParam{
 			Condc				=  5,
 			Curr				=  6,
 			Activation			=  7,
-			Inactivation			=  8,              
+			Inactivation			=  8,
 			NaConc				=  9,
 		};
 	public:
@@ -30,9 +30,15 @@ class CViewParam{
 		CViewParam( const CViewParam &param ) : ParCode( param.ParCode ), Ymax( param.Ymax ), Ymin( param.Ymin ){};
 		~CViewParam(){};
 	public:
-		CViewParam &operator = ( const CViewParam &param );
+		CViewParam &operator = ( const CViewParam &param )
+		{
+			ParCode = param.ParCode; Ymax = param.Ymax; Ymin = param.Ymin; return *this;
+		};
 	public:
-		bool is_plot( void );
+		bool is_plot( void )
+		{
+			return( ParCode.UnitId == _id_NNPopulat && ParCode.Param == CViewParam::Plot );
+		};
 		bool load( istream &file, CSimulate *manager );
 		void save( ostream &file, CSimulate *manager );
 	public:
@@ -47,36 +53,36 @@ class CFrameView{
 	public:
 		CFrameView( void );
 		CFrameView( const CFrameView &view );
-virtual	~CFrameView( void ){};
+virtual		~CFrameView( void ){};
 	public:
 		CFrameView &operator = ( const CFrameView &view);
 	public:
-		const char *get_name( void ) const { return ViewName.c_str(); };
+		const char *get_name( void ) const{ return ViewName.c_str(); };
 		void set_name( const char *name ){ ViewName = name; };
 		hhn_pair<double> get_xrange( void ){ return LimitView; };
 		size_t get_1step( void ){ return LimitStep.X; };
-		size_t nsteps( void ) const{ return ( Data )? Data->nsteps(): 0; };
-		bool is_resize( void ) const { return !( WindowRect.left == -1 && WindowRect.top == -1 && WindowRect.right == -1 && WindowRect.bottom == -1 ); };
+		size_t nsteps( void ) const{ return ( BufferManager )? BufferManager->nsteps(): 0; };
+		bool is_resize( void ) const{ return !( WindowRect.left == -1 && WindowRect.top == -1 && WindowRect.right == -1 && WindowRect.bottom == -1 ); };
 		bool validate( hhn_pair<size_t> &limits );
 		void set_xrange( double begin, double end );
-
 	public:
-virtual	const char *prefix( void ) const { return ""; };
-virtual	CViewParam *get_par( size_t inx ){ return NULL; };
-virtual	size_t npars( void ) const { return 0; };
-virtual	void add_view( CViewParam &param ){};
-virtual	void del_view( unit_code &code ){};
-virtual	void init_view( CSimulate *manager ){};
-virtual	void copy_to( CFrameView **view ) const{};
-virtual	bool load( istream &file, CSimulate *manager );
-virtual	void save( ostream &file, CSimulate *manager );
+virtual		const char *prefix( void ) const { return ""; };
+virtual		CViewParam *get_par( size_t inx ){ return NULL; };
+virtual		size_t npars( void ) const { return 0; };
+virtual		void add_view( const CViewParam &param ){};
+virtual		void del_view( unit_code &code ){};
+virtual		void init_view( CSimulate *manager ){};
+virtual		void alloc_view( void ){};
+virtual		void copy_to( CFrameView **view ) const{};
+virtual		bool load( istream &file, CSimulate *manager );
+virtual		void save( ostream &file, CSimulate *manager );
 #ifndef __CONSOLE__
-virtual	bool create_view( CDocument* pDoc, CMDIChildWnd *pChild ){ return false; };
+virtual		bool create_view( CDocument* pDoc, CMDIChildWnd *pChild ){ return false; };
 	protected:
 		bool create_view( CDocTemplate *tpl, CDocument* doc, CMDIChildWnd *child );
 #endif //__CONSOLE__
 	protected:
-		void init_buf( CBufferManager *views );
+		void init_buf( CBufferManager *man ){	BufferManager = man; set_range(); };
 		bool load_pos( istream &file );
 		void save_pos( ostream &file );
 		void set_range( void );
@@ -85,7 +91,7 @@ virtual	bool create_view( CDocument* pDoc, CMDIChildWnd *pChild ){ return false;
 		__rect WindowRect;
 	protected:
 		string ViewName;
-		CBufferManager *Data;
+		CBufferManager *BufferManager;
 		hhn_pair<double> LimitView;		// x - begin_view, y - end_view /*msec*/
 		hhn_pair<size_t> LimitStep;	// x - begin_step, y - end_step
 };
@@ -95,12 +101,15 @@ virtual	bool create_view( CDocument* pDoc, CMDIChildWnd *pChild ){ return false;
 class CChartFrameView : public CFrameView{
 	public:
 		CChartFrameView( void ) : CFrameView(), NumRow( 0 ), NumCol( 0 ){};
-		CChartFrameView( const CChartFrameView &view ) : CFrameView( view ), NNParam( view.NNParam ), NumRow( view.NumRow ), NumCol( view.NumCol ){};
+		CChartFrameView( const CChartFrameView &view ) : CFrameView( view ), NumRow( view.NumRow ), NumCol( view.NumCol ), NNParam( view.NNParam ){};
 		~CChartFrameView( void ){};
 	public:
 		CChartFrameView &operator = ( CChartFrameView &view);
 	public:
-		const void *get_data( size_t inx ) const{ return ( Data && inx < NNParam.size())? (( CChartBuffer *)Data )->get_buffer( NNParam[inx].ParCode ): NULL; };
+		const void *get_data( size_t inx ) const
+		{ 
+			return ( BufferManager && inx < NNParam.size())? (( CChartBuffer *)BufferManager )->get_buffer( NNParam[inx].ParCode ): NULL; 
+		};
 		size_t nrow( void ) const{ return NumRow; };
 		size_t ncol( void ) const{ return NumCol; };
 		void set_geometry( size_t row, size_t col ){ NumRow = row; NumCol = col; };
@@ -109,11 +118,18 @@ class CChartFrameView : public CFrameView{
 		void swap( size_t inx1, size_t inx2 );
 	public:	// overrided
 		const char *prefix( void ) const{ return "Chart"; };
-		CViewParam *get_par( size_t inx ){ return ( inx < NNParam.size())? &NNParam[inx]: NULL; };
-		size_t npars( void ) const{ return NNParam.size(); };
-		void add_view( CViewParam &param );
+		CViewParam *get_par( size_t inx )
+		{ 
+			return ( inx < NNParam.size())? &NNParam[inx]: NULL; 
+		};
+		size_t npars( void ) const
+		{ 
+			return NNParam.size(); 
+		};
+		void add_view( const CViewParam &param ) final;
 		void del_view( unit_code &code );
 		void init_view( CSimulate *manager );
+		void alloc_view( void );
 		void copy_to( CFrameView **view ) const;
 		bool load( istream &file, CSimulate *manager );
 		void save( ostream &file, CSimulate *manager );
@@ -129,7 +145,7 @@ class CChartFrameView : public CFrameView{
 		vector<CViewParam> NNParam;
 };
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerFrameView class
 class CWalkerFrameView : public CFrameView{
@@ -140,12 +156,14 @@ class CWalkerFrameView : public CFrameView{
 	public:	// overrided
 		const char *prefix( void ) const { return "Limb"; };
 		void init_view( CSimulate *manager );
+		void alloc_view( void );
 		void copy_to( CFrameView **view ) const;
 		void save( ostream &file, CSimulate *manager );
 #ifndef __CONSOLE__
 		bool create_view( CDocument* pDoc, CMDIChildWnd *pChild );
 #endif // __CONSOLE__
 };
-
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation for 3d model
+#endif // __MECHANICS_2D__
 #endif // __FRAME_VIEW_H

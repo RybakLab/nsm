@@ -12,7 +12,7 @@ class t_output : public uni_template{
 	public: //--- constructor
 		t_output( uni_template *parent, int is_active = GRID_ADD_ROW );
 		t_output( const t_output &output );
-virtual	~t_output( void ){};
+virtual		~t_output( void ){};
 	public:
 		t_output &operator = ( const t_output &output );
 	protected:

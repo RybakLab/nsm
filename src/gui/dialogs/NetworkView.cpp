@@ -10,7 +10,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
@@ -35,8 +35,8 @@ void CGeomView::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CGeomView, CDialog)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_ROW, OnDeltaposSpinRow)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_COL, OnDeltaposSpinCol)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_ROW, &CGeomView::OnDeltaposSpinRow)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_COL, &CGeomView::OnDeltaposSpinCol)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,24 +44,24 @@ END_MESSAGE_MAP()
 BOOL CGeomView::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-    NumParam = NumRow*NumCol;
- 	SpinRow.SetRange(1,NumParam);
-    SpinRow.SetPos(NumRow);
- 	SpinCol.SetRange(1,NumParam);
-    SpinCol.SetPos(NumCol);
+	NumParam = NumRow*NumCol;
+	SpinRow.SetRange(1,NumParam);
+	SpinRow.SetPos(NumRow);
+	SpinCol.SetRange(1,NumParam);
+	SpinCol.SetPos(NumCol);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CGeomView::OnDeltaposSpinRow(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+//	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 	*pResult = 0;
 }
 
 void CGeomView::OnDeltaposSpinCol(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+//	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 	*pResult = 0;
 }
 
@@ -86,10 +86,10 @@ void CScaleView::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CScaleView, CDialog)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_YMAX, OnDeltaposSpinYmax)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_YMIN, OnDeltaposSpinYmin)
-	ON_EN_UPDATE(IDC_EDIT_YMAX, OnUpdateEditYmax)
-	ON_EN_UPDATE(IDC_EDIT_YMIN, OnUpdateEditYmin)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_YMAX, &CScaleView::OnDeltaposSpinYmax)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_YMIN, &CScaleView::OnDeltaposSpinYmin)
+	ON_EN_UPDATE(IDC_EDIT_YMAX, &CScaleView::OnUpdateEditYmax)
+	ON_EN_UPDATE(IDC_EDIT_YMIN, &CScaleView::OnUpdateEditYmin)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -162,13 +162,13 @@ void CNetworkView::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CNetworkView, CDialog)
-	ON_BN_CLICKED(IDC_ADD_VIEW, OnAddView)
-	ON_BN_CLICKED(IDC_REMOVE_VIEW, OnRemoveView)
-	ON_BN_CLICKED(IDC_SCALE_VIEW, OnScaleView)
-	ON_BN_CLICKED(IDC_GEOMETRY_VIEW, OnGeometryView)
-	ON_NOTIFY(NM_DBLCLK, IDC_LIST_VIEW, OnDblclkListView)
-	ON_BN_CLICKED(IDC_MOVE_UP, OnMoveUp)
-	ON_BN_CLICKED(IDC_MOVE_DOWN, OnMoveDown)
+	ON_BN_CLICKED(IDC_ADD_VIEW, &CNetworkView::OnAddView)
+	ON_BN_CLICKED(IDC_REMOVE_VIEW, &CNetworkView::OnRemoveView)
+	ON_BN_CLICKED(IDC_SCALE_VIEW, &CNetworkView::OnScaleView)
+	ON_BN_CLICKED(IDC_GEOMETRY_VIEW, &CNetworkView::OnGeometryView)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST_VIEW, &CNetworkView::OnDblclkListView)
+	ON_BN_CLICKED(IDC_MOVE_UP, &CNetworkView::OnMoveUp)
+	ON_BN_CLICKED(IDC_MOVE_DOWN, &CNetworkView::OnMoveDown)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -193,21 +193,25 @@ BOOL CNetworkView::OnInitDialog()
 	int OUTPUT = 3;
 	int CONTROL = 4;
 	int MAXITEM = 5;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	int FEEDBACK = 5;
 	int BODY = 6;
 	MAXITEM = 7;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	vector<HTREEITEM>mainItems( MAXITEM );
 	mainItems[NETWORK] = ViewTree.InsertItem(Manager->Network.get_name().c_str(), 0, TVI_ROOT);
 	mainItems[POPULAT] = ViewTree.InsertItem("Population", mainItems[NETWORK], mainItems[NETWORK]);
 	mainItems[DRIVE] = ViewTree.InsertItem("External Drive", mainItems[NETWORK], mainItems[POPULAT]);
 	mainItems[OUTPUT] = ViewTree.InsertItem("Output", mainItems[NETWORK], mainItems[DRIVE]);
 	mainItems[CONTROL] = ViewTree.InsertItem("Control", mainItems[NETWORK], mainItems[OUTPUT]);
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	mainItems[FEEDBACK] = ViewTree.InsertItem("Feedback", mainItems[NETWORK], mainItems[CONTROL]);
 	mainItems[BODY] = ViewTree.InsertItem("Body", 0, TVI_ROOT);
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	unit_code code;
 	code.UnitId = _id_Network;
 	ViewTree.SetItemData(mainItems[NETWORK], code.encode());
@@ -219,19 +223,23 @@ BOOL CNetworkView::OnInitDialog()
 	ViewTree.SetItemData(mainItems[OUTPUT], code.encode());
 	code.UnitId = _id_NNControl;
 	ViewTree.SetItemData(mainItems[CONTROL], code.encode());
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	code.UnitId = _id_NNFeedback;
 	ViewTree.SetItemData(mainItems[FEEDBACK], code.encode());
 	code.UnitId = _id_Body;
 	ViewTree.SetItemData(mainItems[BODY], code.encode());
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	vector<HTREEITEM> populatItems( Manager->Network.size_pop() );
 	vector<HTREEITEM> driveItems( Manager->Network.size_drv() );
 	vector<HTREEITEM> outputItems( Manager->Network.size_out() );
 	vector<HTREEITEM> controlItems( Manager->Network.size_ctr() );
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	vector<HTREEITEM> feedbackItems( Manager->Network.size_fbk() );
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	if( Manager->Network.size_pop() ){ // Populations
 		populatItems[0] = ViewTree.InsertItem(Manager->Network.get_pop(0).get_name().c_str(),mainItems[POPULAT],mainItems[POPULAT]);
 		code = unit_code();
@@ -334,7 +342,7 @@ BOOL CNetworkView::OnInitDialog()
 			}
 		}
 	}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	if( Manager->Network.size_fbk() ){
 		code = unit_code();
 		code.UnitId = _id_NNFeedback;
@@ -348,7 +356,9 @@ BOOL CNetworkView::OnInitDialog()
 			ViewTree.SetItemData(feedbackItems[i], code.encode()); 
 		}
 	}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	if( Manager->Network.size_drv() ){
 		code = unit_code();
 		code.UnitId = _id_NNDrive;
@@ -389,7 +399,7 @@ BOOL CNetworkView::OnInitDialog()
 		}
 	}
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	// Body
 	vector<HTREEITEM> bodyItems( 5) ; 
 	code = unit_code();
@@ -539,7 +549,9 @@ BOOL CNetworkView::OnInitDialog()
 		parameterItems[1] = ViewTree.InsertItem("Force Y",typeItems[i],parameterItems[0]);
 		ViewTree.SetItemData(parameterItems[1], code.encode());
 	}
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 	ListView.InsertColumn( 0, "");
 	ShowView();
 	Activate();

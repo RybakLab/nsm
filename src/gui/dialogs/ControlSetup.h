@@ -22,16 +22,16 @@ class CControlledSetup : public CPropertyPage{
 		CControlledSetup();
 		~CControlledSetup();
 	protected:
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-virtual	BOOL OnInitDialog();
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		BOOL OnInitDialog();
 		afx_msg void OnAddParam();
 		afx_msg void OnRemoveParam();
 	private:
 		void ShowListBox( void );
 	public:
 		enum { IDD = IDD_CONTROLLED_SETUP };
-		CListCtrl	List_Controlled;
-		CTreeCtrl	Tree_Controlled;
+		CListCtrl List_Controlled;
+		CTreeCtrl Tree_Controlled;
 		CButton	Button_RemoveParam;
 		CButton	Button_AddParam;
 		hhn_control *pControl;
@@ -51,7 +51,7 @@ class CControlFunction : public CPropertyPage{
 		CEdit	EditNameCtrl;
 		CButton	SaveButton;
 		CButton	PropPoint;
-		CListBox	ListPoints;
+		CListBox ListPoints;
 		CButton	DelPoint;
 		CButton	AddPoint;
 		CString	NameCtrl;
@@ -60,22 +60,22 @@ class CControlFunction : public CPropertyPage{
 	public:
 		hhn_control *pControl;
 	public:	// Overrides
-virtual	BOOL OnSetActive();
-virtual	BOOL OnKillActive();
+virtual		BOOL OnSetActive();
+virtual		BOOL OnKillActive();
 	protected:
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	private:
 		void Change( void );
 	protected:	// Implementation
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 		afx_msg void OnAddPoint();
 		afx_msg void OnDelPoint();
 		afx_msg void OnDblclkListPoints();
 		afx_msg void OnLoad();
 		afx_msg void OnPropPoint();
 		afx_msg void OnSave();
-public:
-	int IsStep;
+	public:
+		int IsStep;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -88,14 +88,14 @@ class CPropPoint : public CDialog{
 		enum { IDD = IDD_PROP_POINT };
 		CSpinButtonCtrl	SpinMul;
 		CSpinButtonCtrl	SpinTime;
-		CEdit	EditMul;
-		CEdit	EditTime;
-		double	Time;
-		double	Mul;
+		CEdit EditMul;
+		CEdit EditTime;
+		double Time;
+		double Mul;
 	protected:	// Overrides
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	protected:	// Implementation
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 		afx_msg void OnUpdateEditMul();
 		afx_msg void OnDeltaposSpinMul(NMHDR* pNMHDR, LRESULT* pResult);
 		afx_msg void OnUpdateEditTime();
@@ -109,12 +109,14 @@ class CControlProperties : public CPropertySheet{
 	public:	// Construction
 		CControlProperties(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 		CControlProperties(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-virtual	~CControlProperties();
+virtual		~CControlProperties();
 	public:	// Attributes
 		hhn_control *Control;
 	public:	// Overrides
-virtual	int DoModal(CHhnNetwork * pnetwork, const hhn_control &control );
-	private:	// Generated message map functions
+virtual		int DoModal(CHhnNetwork * pnetwork, const hhn_control &control );
+	private:
+		using CPropertySheet::DoModal;
+	private: 
 		CControlledSetup ControlledSetup;
 		CControlFunction ControlFunction;
 };
@@ -133,10 +135,10 @@ class CNetworkControl : public CDialog{
 		CButton	PropControl;
 		CListBox ListControl;
 		CHhnNetwork Network;
-	protected:	// Overrides
-virtual	void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	protected: // Overrides
+virtual		void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	protected:	// Implementation
-virtual	BOOL OnInitDialog();
+virtual		BOOL OnInitDialog();
 		afx_msg void OnAddControl();
 		afx_msg void OnDelControl();
 		afx_msg void OnPropControl();

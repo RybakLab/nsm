@@ -76,7 +76,7 @@ class uni_template{
 	public:
 		uni_template( uni_template *parent, int is_active, char **names = NULL, int size = 0, bool showtype = false );
 		uni_template( const uni_template &unit );
-virtual	~uni_template( void );
+virtual		~uni_template( void );
 	public:
 		uni_template &operator = ( const uni_template &unit );
 	public:
@@ -101,36 +101,37 @@ virtual	~uni_template( void );
 		bool update( const char *full_path, const char *name, string &element, bool save );
 		bool load( istream &file );
 		void save( ostream &file );
-virtual	size_t size( void ) const{ return Children.size(); };
-virtual	bool get_unusednames( const char *full_path, vector<string> &names );
-virtual	bool process( const char *path ){ return false; };
-virtual	void copy_to( uni_template **unit, uni_template * parent ){};
-virtual void copy_to( hhn_process **unit, hhn_process *parent ){};
-virtual	t_data *find_data( const char *path );
+virtual		size_t size( void ) const{ return Children.size(); };
+virtual		bool get_unusednames( const char *full_path, vector<string> &names );
+virtual		t_data *find_data( const char *path );
+virtual		bool process( const char *path ){ return false; };
+virtual		void copy_to( uni_template **unit, uni_template * parent ){};
+virtual		void copy_to( hhn_process **unit, hhn_process *parent ){};
 	public: // to provide the backward compatibility with oldformat files
 		bool load_data( string &str, istream &file ); 
 		uni_template *get_child( const char *type, const char *name );
-virtual	uni_template *get_template( const char *type, const char *name )
+virtual		uni_template *get_template( const char *type, const char *name )
 		{
 			if( Parent ){
 				return Parent->get_template( type, name );
 			}
 			return NULL;
 		};
-virtual	bool load_child( string &str, istream &file ){ return false; }
-virtual	bool pre_add( void ){ return false; };
-virtual	bool pre_del( void ){ return false; };
+virtual		bool load_child( string &str, istream &file ){ return false; }
+virtual		bool pre_add( void ){ return false; };
+virtual		bool pre_del( void ){ return false; };
 	protected:
-virtual void collect_garbage( vector<string> &del_children ){};
-virtual void reconfig( vector<string> &add_paths, vector<string> &del_paths ){};
-virtual	bool add_child( const char *path ){	return false; };
-virtual	int get_datattr( const char *path ){ return GRID_NONE; };
-virtual	bool get_addparlist( vector<string> &parlist ){	return false; };
-virtual	bool get_addpar( const char *path, string &name, string &element, int &type ){ return false; };
-virtual	bool upd_addpar( const char *path, const char *name, string &element, bool save ){ return false; };
-virtual	bool load_addpar( string str, istream &file ){	return false; };
-virtual	void save_addpar( ostream &file ){};
-virtual	void load_dummy( void ){};
+virtual		void set_default( void ){}; // set default content during loading the template
+virtual		void collect_garbage( vector<string> &del_children ){};
+virtual		void reconfig( vector<string> &add_paths, vector<string> &del_paths ){};
+virtual		bool add_child( const char *path ){ return false; };
+virtual		int get_datattr( const char *path ){ return GRID_NONE; };
+virtual		bool get_addparlist( vector<string> &parlist ){	return false; };
+virtual		bool get_addpar( const char *path, string &name, string &element, int &type ){ return false; };
+virtual		bool upd_addpar( const char *path, const char *name, string &element, bool save ){ return false; };
+virtual		bool load_addpar( string str, istream &file ){	return false; };
+virtual		void save_addpar( ostream &file ){};
+virtual		void load_dummy( void ){};
 		bool add_child( uni_template *unit );
 		bool add_child( uni_template *unit, bool showtype );
 		uni_template *get_child( const char *name );
@@ -149,11 +150,11 @@ virtual	void load_dummy( void ){};
 	protected:
 		int IsActive;
 		int UnitId;
+		uni_template *Parent;
 		string Name;
 		string TypeName;
 		string TypeNameS;
 		vector <string> TypeSynonym;
-		uni_template *Parent;
 		vector <uni_template *>Children;
 		vector <uni_template *>DefaultChildren;
 		_all_names PossibleNames;

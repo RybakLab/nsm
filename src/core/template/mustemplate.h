@@ -100,7 +100,7 @@
 
 #include "sptypes.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "unitemplate.h"
 #include "muscle.h"
@@ -128,31 +128,30 @@ class t_muscle : public uni_template{
 	public:
 		t_muscle( uni_template *parent, const char *lscheme = "None", int is_active = GRID_COLLAPSE );
 		t_muscle( const t_muscle &m );
-virtual	~t_muscle( void ); 
+virtual		~t_muscle( void ); 
 	public:
 		t_muscle &operator = ( const t_muscle &m );
 	public:
 		void upd_outlist( vector<string> &out_list );
 	public:
-virtual	void copy_to( uni_template **unit, uni_template *parent );
+virtual		void copy_to( uni_template **unit, uni_template *parent );
 		void copy_to( zmuscle **m );
       protected:
-virtual	int get_datattr( const char *path );
-virtual	bool get_addparlist( vector<string> &parlist );
-virtual	bool get_addpar( const char *path, string &name, string &element, int &type );
-virtual	bool upd_addpar( const char *path, const char *name, string &element, bool save );
+virtual		int get_datattr( const char *path );
+virtual		bool get_addparlist( vector<string> &parlist );
+virtual		bool get_addpar( const char *path, string &name, string &element, int &type );
+virtual		bool upd_addpar( const char *path, const char *name, string &element, bool save );
       //--- Load/save parameters 
-virtual	bool load_addpar( string str, istream &file );
-virtual	void save_addpar( ostream &file );
-virtual	void load_dummy( void );
+virtual		bool load_addpar( string str, istream &file );
+virtual		void save_addpar( ostream &file );
+virtual		void load_dummy( void );
 	private:
 		void add_substr( string &str, const char *name );
 		void front( string &str, const char *name );
 		void del_substr( string &str, const char *name, string::size_type pos );
 		void make_linkcombo( string &name, string &element );
-		void make_jointcombo( string &name, string &element );
 	public:
-		string MnNames;	// motoneurons
+		string MnNames;		// motoneurons
 		string Mn;		// motoneurons
 	protected:
 		void set_default_data( void );
@@ -160,15 +159,15 @@ virtual	void load_dummy( void );
 		// attachment scheme
 		string LScheme;
 		string JScheme;
-		string ULink;	// upper link
-		string MLink;	// middle link (2-j)
-		string LLink;	// lower link
+		string ULink;		// upper link
+		string MLink;		// middle link (2-j)
+		string LLink;		// lower link
 
-		t_data Amax;	// maximal activation
+		t_data Amax;		// maximal activation
 		t_data F1;		// 1-j
 		t_data F2;		// 2-j
-		t_data Phi1;	// 1-j
-		t_data Phi2;	// 1-j
+		t_data Phi1;		// 1-j
+		t_data Phi2;		// 1-j
 		t_data A1;		// 1-j
 		t_data A2;		// 1-j
 		t_data R1;		// 1-j
@@ -812,5 +811,7 @@ class t_sol : public t_muscle{
 		void load_dummy( void );
 };
 
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 #endif //__MUSCLE_TEMPLATE_H

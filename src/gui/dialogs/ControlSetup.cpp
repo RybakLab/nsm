@@ -6,12 +6,12 @@
 
 #include "ControlSetup.h"
 #include "networksetup.h"
-#include "../spcord.h"
+#include "../Spcord.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
@@ -38,8 +38,8 @@ void CControlledSetup::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP( CControlledSetup, CDialog )
-	ON_BN_CLICKED( IDC_ADD_PARAM, OnAddParam )
-	ON_BN_CLICKED( IDC_REMOVE_PARAM, OnRemoveParam )
+	ON_BN_CLICKED( IDC_ADD_PARAM, &CControlledSetup::OnAddParam )
+	ON_BN_CLICKED( IDC_REMOVE_PARAM, &CControlledSetup::OnRemoveParam )
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ BOOL CControlledSetup::OnInitDialog()
 	code.Param = -1;
 	paramItem[1] = Tree_Controlled.InsertItem( "Synaptic conductances", mainItems[0], mainItems[0] );
 	Tree_Controlled.SetItemData( paramItem[1], code.encode() );
-	for( size_t i = _id_ExSyn; i < _id_MAX_SYN; ++i ){
+	for( size_t i = 0; i < _id_MAX_SYN; ++i ){
 		code.Param = _id_MAX_CHAN+i;
 		paramItem[i+2] = Tree_Controlled.InsertItem( _SynapseNames[i], paramItem[1], paramItem[i+1] );
 		Tree_Controlled.SetItemData( paramItem[i+2], code.encode() );
@@ -81,14 +81,16 @@ BOOL CControlledSetup::OnInitDialog()
 	code.UnitId = _id_NNOutput;
 	mainItems[3] = Tree_Controlled.InsertItem("Outputs", 0, TVI_ROOT);
 	Tree_Controlled.SetItemData(mainItems[3], code.encode() );
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	// Feedbacks
 	code = unit_code();
 	code.UnitId = _id_NNFeedback;
 	code.NNIndex = 0;
 	mainItems[4] = Tree_Controlled.InsertItem("Feedbacks", 0, TVI_ROOT);
 	Tree_Controlled.SetItemData(mainItems[4], code.encode() );
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	// Populations
 	if( pNetwork->size_pop() ){
 		HTREEITEM *items = new HTREEITEM[pNetwork->size_pop()];
@@ -109,10 +111,10 @@ BOOL CControlledSetup::OnInitDialog()
 			pitems[0] = Tree_Controlled.InsertItem( "Synaptic conductances", items[i], items[i] );
 			Tree_Controlled.SetItemData( pitems[0], code.encode() );
 
-			code.Param = _id_MAX_CHAN+_id_ExSyn;
-			paramItem[1] = Tree_Controlled.InsertItem( _SynapseNames[_id_ExSyn], pitems[0], pitems[0] );
+			code.Param = _id_MAX_CHAN;
+			paramItem[1] = Tree_Controlled.InsertItem( _SynapseNames[0], pitems[0], pitems[0] );
 			Tree_Controlled.SetItemData( paramItem[1], code.encode());
-			for( size_t j = _id_ExSyn+1; j < _id_MAX_SYN; ++j ){
+			for( size_t j = 1; j < _id_MAX_SYN; ++j ){
 				code.Param = _id_MAX_CHAN+j;
 				paramItem[j+1] = Tree_Controlled.InsertItem( _SynapseNames[j], pitems[0], paramItem[j] );
 				Tree_Controlled.SetItemData( paramItem[j+1], code.encode() );
@@ -208,7 +210,7 @@ BOOL CControlledSetup::OnInitDialog()
 		delete []items;
 
 	}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	// Feedbacks
 	if( pNetwork->size_fbk() ){
 		HTREEITEM *items = new HTREEITEM[pNetwork->size_fbk()];
@@ -222,7 +224,9 @@ BOOL CControlledSetup::OnInitDialog()
 		}
 		delete []items;
 	}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	List_Controlled.InsertColumn( 0, "");
 	ShowListBox();
 	return TRUE; 
@@ -254,7 +258,7 @@ void CControlledSetup::OnRemoveParam()
 		for( int i = numSelected-1; i >= 0; i-- ){
 			unit_code code( List_Controlled.GetItemData( SelectedItems[i] ));
 			CHhnControlled ctrld( code );
-			nn_unit *object = pNetwork->get_nnunit( code );
+//			nn_unit *object = pNetwork->get_nnunit( code );
 			pControl->del_unit( ctrld );
 		}
 	}
@@ -278,7 +282,7 @@ void CControlledSetup::ShowListBox()
 		str = object->get_name().c_str();
 		string name;
 		str += " / ";
-		str += cr_name( name, pControl->ctrl_unit(i).get_par());
+		str += cr_name( name, pControl->ctrl_unit( i ).get_par());
 		item.iItem = i;
 		item.mask = LVIF_TEXT | LVIF_PARAM;
 		item.lParam = pControl->ctrl_unit(i).get_par().encode(); 
@@ -323,12 +327,12 @@ void CControlFunction::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP( CControlFunction, CPropertyPage )
-	ON_BN_CLICKED( IDC_ADD_POINT, OnAddPoint )
-	ON_BN_CLICKED( IDC_DEL_POINT, OnDelPoint )
-	ON_LBN_DBLCLK( IDC_LIST_POINTS, OnDblclkListPoints )
-	ON_BN_CLICKED( IDC_LOAD, OnLoad )
-	ON_BN_CLICKED( IDC_PROP_POINT, OnPropPoint )
-	ON_BN_CLICKED( IDC_SAVE, OnSave )
+	ON_BN_CLICKED( IDC_ADD_POINT, &CControlFunction::OnAddPoint )
+	ON_BN_CLICKED( IDC_DEL_POINT, &CControlFunction::OnDelPoint )
+	ON_LBN_DBLCLK( IDC_LIST_POINTS, &CControlFunction::OnDblclkListPoints )
+	ON_BN_CLICKED( IDC_LOAD, &CControlFunction::OnLoad )
+	ON_BN_CLICKED( IDC_PROP_POINT, &CControlFunction::OnPropPoint )
+	ON_BN_CLICKED( IDC_SAVE, &CControlFunction::OnSave )
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -343,9 +347,7 @@ BOOL CControlFunction::OnInitDialog()
 	if( NoiseLevel <= 0 ){
 		IsNoiseAdded = FALSE;
 		NoiseLevel = 0;
-	}
-	else
-		IsNoiseAdded = TRUE;
+	} else{ IsNoiseAdded = TRUE; }
 	Change();
 	return TRUE;
 }
@@ -373,8 +375,8 @@ void CControlFunction::OnAddPoint()
 
 void CControlFunction::OnDelPoint() 
 {
-    unsigned int i = ListPoints.GetCurSel();
-    if( i != -1 ){
+	unsigned int i = ListPoints.GetCurSel();
+	if( i != -1 ){
 		pControl->del_tab( i );
 		Change();
 	}
@@ -434,7 +436,7 @@ void CControlFunction::OnSave()
 	saveDialog.m_ofn.lpstrTitle = title;
 	if( saveDialog.DoModal() == IDOK ){
 		ofstream file(( LPCSTR )saveDialog.GetPathName(), ios_base::trunc);
-      	pControl->save_tab( file );
+      		pControl->save_tab( file );
 	}	
 }
 
@@ -479,10 +481,10 @@ void CPropPoint::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPropPoint, CDialog)
-	ON_EN_UPDATE(IDC_EDIT_TIME, OnUpdateEditTime)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_TIME, OnDeltaposSpinTime)
-	ON_EN_UPDATE(IDC_EDIT_MUL, OnUpdateEditMul)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_MUL, OnDeltaposSpinMul)
+	ON_EN_UPDATE(IDC_EDIT_TIME, &CPropPoint::OnUpdateEditTime)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_TIME, &CPropPoint::OnDeltaposSpinTime)
+	ON_EN_UPDATE(IDC_EDIT_MUL, &CPropPoint::OnUpdateEditMul)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_MUL, &CPropPoint::OnDeltaposSpinMul)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -594,10 +596,10 @@ void CNetworkControl::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CNetworkControl, CDialog)
-	ON_BN_CLICKED(IDC_ADD_CONTROL, OnAddControl)
-	ON_BN_CLICKED(IDC_DEL_CONTROL, OnDelControl)
-	ON_BN_CLICKED(IDC_PROP_CONTROL, OnPropControl)
-	ON_LBN_DBLCLK(IDC_LIST_CONTROL, OnDblclkListControl)
+	ON_BN_CLICKED(IDC_ADD_CONTROL, &CNetworkControl::OnAddControl)
+	ON_BN_CLICKED(IDC_DEL_CONTROL, &CNetworkControl::OnDelControl)
+	ON_BN_CLICKED(IDC_PROP_CONTROL, &CNetworkControl::OnPropControl)
+	ON_LBN_DBLCLK(IDC_LIST_CONTROL, &CNetworkControl::OnDblclkListControl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

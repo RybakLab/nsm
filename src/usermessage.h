@@ -1,7 +1,7 @@
 #ifndef _USER_MESSAGE_H_
 #define _USER_MESSAGE_H_
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef __CONSOLE__
 

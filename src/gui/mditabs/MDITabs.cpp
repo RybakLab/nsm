@@ -11,13 +11,13 @@ Hinweis: © 2001 by Christian Rodemeyer
 
 #ifndef __CONSOLE__
 
-#include "MDITabs.h"
+#include "mditabs.h"
 #include <AFXPRIV.H>
 #include <algorithm>
 #include <vector>
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
@@ -34,14 +34,14 @@ CMDITabs::CMDITabs()
 }
 
 BEGIN_MESSAGE_MAP(CMDITabs, CTabCtrl)
-  //{{AFX_MSG_MAP(CMDITabs)
-  ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnSelChange)
-  ON_WM_PAINT()
-  ON_WM_NCPAINT()
-  ON_WM_LBUTTONDOWN()
-  ON_WM_LBUTTONDBLCLK()
+	//{{AFX_MSG_MAP(CMDITabs)
+	ON_NOTIFY_REFLECT(TCN_SELCHANGE, &CMDITabs::OnSelChange)
+	ON_WM_PAINT()
+	ON_WM_NCPAINT()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
 	//}}AFX_MSG_MAP
-  ON_MESSAGE(WM_SIZEPARENT, OnSizeParent)
+	ON_MESSAGE(WM_SIZEPARENT, &CMDITabs::OnSizeParent)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

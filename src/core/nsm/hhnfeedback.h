@@ -5,7 +5,7 @@
 
 #include "hhnunit.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 class zmuscle;
 struct touch;
@@ -22,7 +22,7 @@ class hhn_feedback : public nn_unit, public hhn_process{
 	public:
 		bool load( istream &file );
 		void save( ostream &file );
-		void init( void );
+		bool init( void ) final;
 		void attach( zmuscle *muscle, touch *grf );
 	public: //--- overrided function
 		void reg_unit( runman *man = NULL );
@@ -30,7 +30,7 @@ class hhn_feedback : public nn_unit, public hhn_process{
 		void *select( unit_code *view ){ return &Output; };
 	private:
 		void feedback( double step );
-static	void feedback( size_t currstep, double step, hhn_process **start );
+static		void feedback( size_t currstep, double step, hhn_process **start );
 	private:
 		double Ltr;
 	public:
@@ -49,5 +49,7 @@ static	void feedback( size_t currstep, double step, hhn_process **start );
 static	double _FbNull;
 };
 
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO imlementation 3d model
+#endif // __MECHANICS_2D__
 #endif // __HHN_FEEDBACK_H

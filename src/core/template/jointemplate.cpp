@@ -2,7 +2,7 @@
 // jointemplate.h
 #include "precompile.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "jointemplate.h"
 #include "walker.h"
@@ -21,14 +21,14 @@ t_joint::t_joint( uni_template *parent, int is_active )
 	: uni_template( parent, is_active, ( char **)__JointNames, __id_MAX_JOINTS ), 
 	IsFixed( false ), A( 90 ), V( 0 ), MinA( 0 ), MaxA( 180 )
 {
+	TypeName = TypeNameS = "Joint";
+	// IsShowType = true;
 	DList.insert( make_pair( "Angle\nA", &A ));
 	DList.insert( make_pair( "Velocity\nV", &V ));
 	DList.insert( make_pair( "Min angle\nMinA", &MinA ));
 	DList.insert( make_pair( "Max angle\nMaxA", &MaxA ));
 	UnitId = __id_generic_J;
 	Name = __JointNames[UnitId];
-	TypeName = "Joint";
-	TypeNameS = "Joint";
 }
 
 t_joint::t_joint( const t_joint &j )
@@ -317,4 +317,6 @@ void t_ankle::copy_to( walker *w, int side )
 	}
 }
 
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__

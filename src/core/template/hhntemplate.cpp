@@ -16,7 +16,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif //__LINUX__
 
@@ -30,11 +30,13 @@ static t_hhn DefaultNeuron( NULL, GRID_NONE );
 // class t_compart
 t_compart::t_compart( uni_template *parent, int is_active )
 	: uni_template( parent, is_active, ( char ** )_CompartmentNames, _id_MAX_COMP ),
-	Vm( -60. ), Iinj( 0. )
+	Vm( -60. ), Iinj( 0. ), Area( 1.0 )
 {
+#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+	Area = 0.0025;
+#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	DList.insert( make_pair( "Membrane potential (mV)\nV", &Vm ));
 	DList.insert( make_pair( "Injected current (mA)\nIinj", &Iinj ));
-	Area = 1;
 	DList.insert( make_pair( "Membrane area (mm\xB2)\nS", &Area ));
 	TypeNameS = TypeName = "Compartment";
 	DefaultChildren.push_back( &DefaultIon );
@@ -44,11 +46,10 @@ t_compart::t_compart( uni_template *parent, int is_active )
 
 t_compart::t_compart( const t_compart &compartment )
 	: uni_template( compartment ),
-	Vm( compartment.Vm ), Iinj( compartment.Iinj )
+	Vm( compartment.Vm ), Iinj( compartment.Iinj ), Area( compartment.Area )
 {
 	DList.insert( make_pair( "Membrane potential (mV)\nV", &Vm ));
 	DList.insert( make_pair( "Injected current (mA)\nIinj", &Iinj ));
-	Area = compartment.Area;
 	DList.insert( make_pair( "Membrane area (mm\xB2)\nS", &Area ));
 }
 
@@ -66,7 +67,7 @@ t_compart &t_compart::operator = ( const t_compart &compartment )
 }
 
 //--- public functions
-void t_compart::copy_ions( vector<hhn_ions *> &ions, hhn_compart *cmp )
+void t_compart::copy_ions( nsm_vector(hhn_ions *) &ions, hhn_compart *cmp )
 {
 	for( size_t i = 0; i < Children.size(); ++i ){
 		string type_ = Children[i]->get_type();
@@ -78,7 +79,7 @@ void t_compart::copy_ions( vector<hhn_ions *> &ions, hhn_compart *cmp )
 	}
 }
 
-void t_compart::copy_pumps( vector<hhn_pump *> &pumps, hhn_compart *cmp )
+void t_compart::copy_pumps( nsm_vector(hhn_pump *) &pumps, hhn_compart *cmp )
 {
 	for( size_t i = 0; i < Children.size(); ++i ){
 		string type_ = Children[i]->get_type();
@@ -90,7 +91,7 @@ void t_compart::copy_pumps( vector<hhn_pump *> &pumps, hhn_compart *cmp )
 	}
 }
 
-void t_compart::copy_chan( vector<hhn_channel *> &channels, hhn_compart *cmp )
+void t_compart::copy_chan( nsm_vector(hhn_channel *) &channels, hhn_compart *cmp )
 {
 	for( size_t i = 0; i < Children.size(); ++i ){
 		string type_ = Children[i]->get_type();
@@ -226,17 +227,14 @@ bool t_compart::add_child( const char *type, const char *name )
 			if( _ChannelNames[i] && name_ == _ChannelNames[i] ){
 				return add_chan( i, _ChannelNames[i] );
 			}
-		}
-	else if( type_ == "gChannel" ){
+	} else if( type_ == "gChannel" ){
 		return add_chan( _id_generic_Chan, name );
-	}
-	else if( type_ == "Ions" ){
+	} else if( type_ == "Ions" ){
 		for( size_t i = 0; i < _id_MAX_ION; i++ )
 			if( _IonsNames[i] && name_ == _IonsNames[i] ){
 				return add_ion( i );
 			}
-	}
-	else if( type_ == "Pumps" ){
+	} else if( type_ == "Pumps" ){
 		for( size_t i = 0; i < _id_MAX_PUMPS; i++ )
 			if( _PumpsNames[i] && name_ == _PumpsNames[i] ){
 				return add_pump( i );
@@ -250,29 +248,30 @@ bool t_compart::load_child( string &str, istream &file ) // backward compatibili
 	if( str == "<Channel" ){
 		file >> ws;
 		getline( file, str, '>');
-		if( !get_child( "Channel", str.c_str() ))
-			add_child( "Channel", str.c_str() );
+		int cid = getChannelID( str.c_str() );
+		if( cid >= 0 ){
+			string name = _ChannelNames[cid];
+			if( !get_child( "Channel", name.c_str() ) && !add_child( "Channel", name.c_str() ))
+				return false;
+			return get_child( "Channel", name.c_str() )->load( file );
+		}
+	} else if( str == "<gChannel" ){
+		file >> ws;
+		getline( file, str, '>');
+		if( !get_child( "Channel", str.c_str() ) && !add_child( "gChannel", str.c_str() ))
+			return false;
 		return get_child( "Channel", str.c_str() )->load( file );
-	}
-	else if( str == "<gChannel" ){
+	} else if( str == "<Ions" ){
 		file >> ws;
 		getline( file, str, '>');
-		if( !get_child( "gChannel", str.c_str() ))
-			add_child( "gChannel", str.c_str() );
-		return get_child( "gChannel", str.c_str() )->load( file );
-	}
-	else if( str == "<Ions" ){
-		file >> ws;
-		getline( file, str, '>');
-		if( !get_child( "Ions", str.c_str() ))
-			add_child( "Ions", str.c_str() );
+		if( !get_child( "Ions", str.c_str() ) && !add_child( "Ions", str.c_str() ))
+			return false;
 		return get_child( "Ions", str.c_str() )->load( file );
-	}
-	else if( str == "<Pumps" ){
+	} else if( str == "<Pumps" ){
 		file >> ws;
 		getline( file, str, '>');
-		if( !get_child( "Pumps", str.c_str() ))
-			add_child( "Pumps", str.c_str() );
+		if( !get_child( "Pumps", str.c_str() ) && !add_child( "Pumps", str.c_str() ))
+			return false;
 		return get_child( "Pumps", str.c_str() )->load( file );
 	}
 	return false;
@@ -283,29 +282,30 @@ bool t_compart::load_addpar( string str, istream &file )
 	if( str == "<Channel" ){
 		file >> ws;
 		getline( file, str, '>');
-		if( !get_child( "Channel", str.c_str() ))
-			add_child( "Channel", str.c_str() );
-		return get_child( "Channel", str.c_str() )->load( file );
-	}
-	else if( str == "<gChannel" ){
+		int cid = getChannelID( str.c_str() );
+		if( cid >= 0 ){
+			string name = _ChannelNames[cid];
+			if( !get_child( "Channel", name.c_str() ) && !add_child( "Channel", name.c_str() ))
+				return false;
+			return get_child( "Channel", name.c_str() )->load( file );
+		}
+	} else if( str == "<gChannel" ){
 		file >> ws;
 		getline( file, str, '>');
-		if( !get_child( "Channel", str.c_str() ))
-			add_child( "gChannel", str.c_str() );
+		if( !get_child( "Channel", str.c_str() ) && !add_child( "gChannel", str.c_str() ))
+			return false;
 		return get_child( "Channel", str.c_str() )->load( file );
-	}
-	else if( str == "<Ions" ){
+	} else if( str == "<Ions" ){
 		file >> ws;
 		getline( file, str, '>');
-		if( !get_child( "Ions", str.c_str() ))
-			add_child( "Ions", str.c_str() );
+		if( !get_child( "Ions", str.c_str() ) && !add_child( "Ions", str.c_str() ))
+			return false;
 		return get_child( "Ions", str.c_str() )->load( file );
-	}
-	else if( str == "<Pumps" ){
+	} else if( str == "<Pumps" ){
 		file >> ws;
 		getline( file, str, '>');
-		if( !get_child( "Pumps", str.c_str() ))
-			add_child( "Pumps", str.c_str() );
+		if( !get_child( "Pumps", str.c_str() ) && !add_child( "Pumps", str.c_str() ))
+			return false;
 		return get_child( "Pumps", str.c_str() )->load( file );
 	}
 	return false;
@@ -661,6 +661,8 @@ t_hhn::t_hhn( uni_template *parent, int is_active )
 	: uni_template( parent, is_active )
 {
 	P = 0.1;
+	Kd = 0.;
+	Td = 0.;
 #if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	DList.insert( make_pair( "Membrane capacitance (\xB5 F)\nC", &Cm ));
 	Cm = 25.;
@@ -674,22 +676,28 @@ t_hhn::t_hhn( uni_template *parent, int is_active )
 
 	DList.insert( make_pair( "P\nP", &P ));
 	DList.insert( make_pair( "Synaptic initial conditions\tExcitatory\nEx", &Y[_id_ExSyn] ));
-#if defined( __RESPIRATION__ )
 	DList.insert( make_pair( "Synaptic initial conditions\tExcitatory II\nEx2", &Y[_id_ExBSyn] ));
-#endif // defined( __RESPIRATION__ )
 	DList.insert( make_pair( "Synaptic initial conditions\tInhibitory I\nInhI", &Y[_id_InhASyn] ));
 	DList.insert( make_pair( "Synaptic initial conditions\tInhibitory II\nInhII", &Y[_id_InhBSyn] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 1\nSyn1", &Y[_id_Syn1] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 2\nSyn2", &Y[_id_Syn2] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 3\nSyn3", &Y[_id_Syn3] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 4\nSyn4", &Y[_id_Syn4] ));
+
+	DList.insert( make_pair("Depression\tMagnitude\nKd", &Kd ));
+	DList.insert( make_pair("Depression\tTime constant\nTd", &Td ));
 	DefaultChildren.push_back( &DefaultCompartment );
 }
 
 t_hhn::t_hhn( const t_hhn &neuron )
-            : uni_template( neuron )
+	: uni_template( neuron )
 {
 	P = neuron.P;
 	Cm = neuron.Cm;
+	Kd = neuron.Kd;
+	Td = neuron.Td;
 	for( size_t i = 0; i < _id_MAX_SYN; Y[i] = neuron.Y[i], i++ );
 
-	const char *tst = "";
 #if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	DList.insert( make_pair( "Membrane capacitance (\xB5 F)\nC", &Cm ));
 #else
@@ -697,11 +705,17 @@ t_hhn::t_hhn( const t_hhn &neuron )
 #endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	DList.insert( make_pair( "P\nP", &P ));
 	DList.insert( make_pair( "Synaptic initial conditions\tExcitatory\nEx", &Y[_id_ExSyn] ));
-#if defined( __RESPIRATION__ )
 	DList.insert( make_pair( "Synaptic initial conditions\tExcitatory II\nEx2", &Y[_id_ExBSyn] ));
-#endif // defined( __RESPIRATION__ )
 	DList.insert( make_pair( "Synaptic initial conditions\tInhibitory I\nInhI", &Y[_id_InhASyn] ));
 	DList.insert( make_pair( "Synaptic initial conditions\tInhibitory II\nInhII", &Y[_id_InhBSyn] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 1\nSyn1", &Y[_id_Syn1] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 2\nSyn2", &Y[_id_Syn2] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 3\nSyn3", &Y[_id_Syn3] ));
+	DList.insert( make_pair( "Synaptic initial conditions\tAdditional synapse 4\nSyn4", &Y[_id_Syn4] ));
+
+	DList.insert( make_pair("Depression\tMagnitude\nKd", &Kd ));
+	DList.insert( make_pair("Depression\tMagnitude\nKd", &Kd ));
+	DList.insert( make_pair("Depression\tTime constant\nTd", &Td ));
 }
 
 t_hhn::~t_hhn( void )
@@ -713,6 +727,8 @@ t_hhn &t_hhn::operator = ( const t_hhn &neuron )
 	uni_template::operator = ( neuron );
 	P = neuron.P;
 	Cm = neuron.Cm;
+	Kd = neuron.Kd;
+	Td = neuron.Td;
 	for( size_t i = 0; i < _id_MAX_SYN; Y[i] = neuron.Y[i], i++ );
 	return *this;
 }

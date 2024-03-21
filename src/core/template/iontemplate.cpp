@@ -11,8 +11,8 @@
 // class t_ions
 //--- constructor
 t_ions::t_ions( uni_template *parent, int is_active, bool showtype )
-	: uni_template( parent, is_active, NULL, 0, showtype ), RTF( 26.54 ), Z( 1.0 ), 
-	Adjustable( false ), Eds( 1.0 ), In( 1.0 ), Out( 1.0 ),
+	: uni_template( parent, is_active, NULL, 0, showtype ), Z( 1.0 ), RTF( 26.54 ), 
+	Adjustable( false ), In( 1.0 ), Out( 1.0 ), Eds( 1.0 ),
 	Dynamics( false ), PumpR( 0.0 ), PumpT( 1.0 ), IonsR( 0.0 )
 {
 	TypeNameS = TypeName = "Ions";
@@ -28,8 +28,8 @@ t_ions::t_ions( uni_template *parent, int is_active, bool showtype )
 }
 
 t_ions::t_ions( const t_ions &ions )
-	: uni_template( ions ), RTF( ions.RTF ), Z( ions.Z ), 
-	Adjustable( ions.Adjustable ), Eds( ions.Eds ), In( ions.In ), Out( ions.Out ),
+	: uni_template( ions ), Z( ions.Z ), RTF( ions.RTF ), 
+	Adjustable( ions.Adjustable ), In( ions.In ), Out( ions.Out ), Eds( ions.Eds ),
 	Dynamics( ions.Dynamics ), PumpR( ions.PumpR ), PumpT( ions.PumpT ), IonsR( ions.IonsR )
 {
 	DList.clear();
@@ -158,8 +158,7 @@ void t_ions::copy_to( hhn_ions *ion )
 	ion->Eds = double( Eds );
 	ion->In = double( In );
 	ion->Out = double( Out );
-	ion->T = double( PumpT );
-	ion->Alpha = double( IonsR );
+	ion->T = double( PumpT ); // ion->Alpha = double( IonsR ); in merged nsm
 	ion->Beta = double( PumpR );
 }
 
@@ -375,7 +374,7 @@ t_pumps &t_pumps::operator = ( const t_pumps &pump )
 ///////////////////////////////////////////////////////////////////////////////
 // class tnak_pump
 tnak_pump::tnak_pump( uni_template *parent, int is_active, bool showtype )
-	: t_pumps( parent, is_active, showtype ), Na0( 8.0 ),Kp( 15.0 ), Rp( 0.0006 )
+	: t_pumps( parent, is_active, showtype ), Na0( 8.0 ), Kp( 15.0 ), Rp( 0.0006 )
 {
 	UnitId = _id_NaK_Pump;
 	Name = _PumpsNames[UnitId];

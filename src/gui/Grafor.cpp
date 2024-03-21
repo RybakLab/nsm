@@ -2,7 +2,7 @@
 
 #ifndef __CONSOLE__
 
-#include "Grafor.h"
+#include "grafor.h"
 #include "func_lib.h"
 
 #define X_axe 1
@@ -11,26 +11,26 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+////#define new DEBUG_NEW
 #endif // _DEBUG
 
 /*-------------------------------------------------------------------------------*/
 Grafor::Grafor(COLORREF color_pen,UINT Width)
 {
-	Font_siz=lfont.lfHeight	=12;
-	lfont.lfWidth			=0;
-	lfont.lfEscapement		=0;
-	lfont.lfOrientation		=0;
-	lfont.lfWeight			=FW_NORMAL;
-	lfont.lfItalic			=0;
-	lfont.lfUnderline		=0;
-	lfont.lfStrikeOut		=0;
-	lfont.lfCharSet			=ANSI_CHARSET;
-	lfont.lfOutPrecision	=OUT_DEFAULT_PRECIS;
-	lfont.lfClipPrecision	=CLIP_DEFAULT_PRECIS;
-	lfont.lfQuality			=DEFAULT_QUALITY;
-	lfont.lfPitchAndFamily	=DEFAULT_PITCH | FF_SWISS;
-	strcpy(lfont.lfFaceName,"Arial");
+	Font_siz=lfont.lfHeight		= 12;
+	lfont.lfWidth			= 0;
+	lfont.lfEscapement		= 0;
+	lfont.lfOrientation		= 0;
+	lfont.lfWeight			= FW_NORMAL;
+	lfont.lfItalic			= 0;
+	lfont.lfUnderline		= 0;
+	lfont.lfStrikeOut		= 0;
+	lfont.lfCharSet			= ANSI_CHARSET;
+	lfont.lfOutPrecision		= OUT_DEVICE_PRECIS;
+	lfont.lfClipPrecision		= CLIP_DEFAULT_PRECIS;
+	lfont.lfQuality			= DEFAULT_QUALITY;
+	lfont.lfPitchAndFamily		= DEFAULT_PITCH | FF_SWISS;
+	strcpy( lfont.lfFaceName, "Arial" );
 
 	Line_Color=color_pen;
 	PenWidth=Width;
@@ -41,7 +41,7 @@ Grafor::Grafor(COLORREF color_pen,UINT Width)
 	font_ratio=(float)1;
 	Gr_Default();
 	SetRect( &Region_Rec, 0,0,1,1);
-    pen_cur.CreatePen( PS_SOLID, PenWidth, Line_Color );
+	pen_cur.CreatePen( PS_SOLID, PenWidth, Line_Color );
 }
 /*-------------------------------------------------------------------------------*/
 Grafor::~Grafor() {} 
@@ -72,35 +72,39 @@ void Grafor::Init_Page(CDC* pDC,RECT *pRec,bool is_Print, bool is_paint)
 	pDC->GetTextMetrics(&TM);
 	Vert_siz_Char=TM.tmHeight;
 	
-	if(!Is_Print) 
+	if( !Is_Print ){
 		font_ratio=(float)Vert_siz_Char/(float)Font_siz;
-	if(font_ratio==0) font_ratio=(float) 1;
+	}
+	if( font_ratio==0.f ){
+		font_ratio=1.f;
+	}
 
-	int	font_sz=(!Is_Print) ? Font_siz :
+	int font_sz=(!Is_Print) ? Font_siz :
 			(int)floor(.5+Vert_siz_Char/font_ratio);
-	font_sz=abs(font_sz);
+	font_sz = abs(font_sz);
 
-	Siz_big_desh=abs(font_sz)/2; if(Siz_big_desh<2) Siz_big_desh=2;
-	Siz_sml_desh=Siz_big_desh/2;  
+	Siz_big_desh = abs(font_sz)/2; if(Siz_big_desh<2) Siz_big_desh=2;
+	Siz_sml_desh = Siz_big_desh/2;  
 
-	if( is_paint ) if(!Paint_rect(pDC,&Page_Rec,Page_col)) return;
+	if( is_paint ){
+		if(!Paint_rect(pDC,&Page_Rec,Page_col)) 
+			return;
+	}
 }
 /*-------------------------------------------------------------------------------*/
 void Grafor::Symbol(CDC* pDC,int x,int y,char *buf)
 {
- CFont	draw_Font;
- bool	ret;
-	pDC->SetBkColor(BkColor);
-	pDC->SetTextColor(TextColor);
+	CFont draw_Font;
+	pDC->SetBkColor( BkColor );
+	pDC->SetTextColor( TextColor );
 
-	int	font_sz=(!Is_Print) ? Font_siz :
-			(int)floor(.5+Vert_siz_Char/font_ratio);
+	int font_sz = ( !Is_Print ) ?Font_siz :
+			(int)floor(.5+Vert_siz_Char/font_ratio)+1;
 	
-	lfont.lfHeight			=font_sz;
+	lfont.lfHeight = font_sz+1;
 
-	ret = draw_Font.CreateFontIndirect(&lfont ) == TRUE;
-
-    CFont* pOldFont = (CFont*) pDC->SelectObject(&draw_Font);
+	draw_Font.CreateFontIndirect(&lfont );
+	CFont* pOldFont = (CFont*) pDC->SelectObject(&draw_Font);
 	pDC->TextOut(x,y,buf);
 	pDC->SelectObject(pOldFont);
 }
@@ -277,7 +281,7 @@ void Grafor::Axes_Gr_0(CDC* pDC,float XB0,int xl,double xm0,double ym0,
 			Line_R1_R2(x1,y1,x2,y2,Axe_Color,pDC);
 	 		if(bul==1) {
 	 			sprintf(buff,"%g",xm);
-				CSize	siz=pDC->GetOutputTextExtent(buff,strlen(buff));
+//				CSize	siz=pDC->GetOutputTextExtent(buff,strlen(buff));
 				if(num_ax==X_axe) y00=y0+i5;
 	 			if(num_ax==Y_axe) {
 	 				if(abs(xo-Region_Rec.left)<5)
@@ -333,7 +337,7 @@ int Grafor::Num_XB(float left,float right,double xb)
 	return(j);
 }		
 /*-------------------------------------------------------------------------------*/
-void Grafor::Draw_array( CDC* pDC,const vector<float> &x, const vector<float> &y, long n, long old_n )
+void Grafor::Draw_array( CDC* pDC,const nsm_vector(float) &x, const nsm_vector(float) &y, long n, long old_n )
 {
  if( x.size() == 0 )
      return;
@@ -363,7 +367,7 @@ void Grafor::Draw_array( CDC* pDC,const vector<float> &x, const vector<float> &y
  pDC->SelectObject( pOldPen );
 }
 
-void Grafor::Draw_hist( CDC* pDC, const vector<float> &x, vector<lvector> &y, long n, long old_n, long bin, float norm )
+void Grafor::Draw_hist( CDC* pDC, const nsm_vector(float) &x, nsm_vector(lvector) &y, long n, long old_n, long bin, float norm )
 {
  static long BIN = 0;
  if( y.size() == 0 )
@@ -400,9 +404,6 @@ void Grafor::Draw_hist( CDC* pDC, const vector<float> &x, vector<lvector> &y, lo
               pDC->LineTo( a, b );
 
 		  BIN = bin;
-//	      The line below is too-o-o-o complicative for MS linker 8.00.50727.42.
-//		  Math_to_Phy_Gr( x[(n_bin+1)*bin], norm*n_spikes*y_norm, &a, &b );
-//		  Windows must die. Does anyone kill the Bill, at last?
 		  Math_to_Phy_Gr( x[n_bin*bin+BIN], norm*n_spikes*y_norm, &a, &b ); // <=>  Math_to_Phy_Gr( x[(n_bin+1)*bin], norm*n_spikes*y_norm, &a, &b );
 
 		  Clip_y( &b );
@@ -413,7 +414,7 @@ void Grafor::Draw_hist( CDC* pDC, const vector<float> &x, vector<lvector> &y, lo
  pDC->SelectObject( pOldPen );
 }
 
-void Grafor::Draw_plot(CDC* pDC,const vector<float> &x, vector<lvector> &y, long n, long old_n )
+void Grafor::Draw_plot(CDC* pDC,const nsm_vector(float) &x, nsm_vector(lvector) &y, long n, long old_n )
 {
  if( x.size() == 0 )
      return;

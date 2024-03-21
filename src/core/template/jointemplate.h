@@ -15,7 +15,7 @@
 
 #include "sptypes.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "unitemplate.h"
 
@@ -37,20 +37,20 @@ class t_joint : public uni_template{
 	public:
 		t_joint( uni_template *parent, int is_active = GRID_COLLAPSE );
 		t_joint( const t_joint &j );
-virtual	~t_joint( void );
+virtual		~t_joint( void );
 	public:
 		t_joint &operator = ( const t_joint &j );
 	public:
-virtual	void copy_to( uni_template **unit, uni_template *parent );
-virtual	void copy_to( walker *w, int side ){};
+virtual		void copy_to( uni_template **unit, uni_template *parent );
+virtual		void copy_to( walker *w, int side ){};
 	protected:
-virtual	int get_datattr( const char *path );
-virtual	bool get_addparlist( vector<string> &parlist );
-virtual	bool get_addpar( const char *path, string &name, string &element, int &type );
-virtual	bool upd_addpar( const char *path, const char *name, string &element, bool save );
+virtual		int get_datattr( const char *path );
+virtual		bool get_addparlist( vector<string> &parlist );
+virtual		bool get_addpar( const char *path, string &name, string &element, int &type );
+virtual		bool upd_addpar( const char *path, const char *name, string &element, bool save );
       //--- Load/save parameters 
-virtual	bool load_addpar( string str, istream &file );
-virtual	void save_addpar( ostream &file );
+virtual		bool load_addpar( string str, istream &file );
+virtual		void save_addpar( ostream &file );
 	public:
 		bool IsFixed;
 		t_data A;
@@ -143,5 +143,7 @@ class t_ankle : public t_joint{
 		};
 };
 
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 #endif //__JOINT_TEMPLATE_H

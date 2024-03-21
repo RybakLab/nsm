@@ -15,7 +15,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif //__LINUX__
 
@@ -86,7 +86,7 @@ void trnap_channel::copy_to( hhn_process **unit, hhn_process *parent )
 trkdr_channel::trkdr_channel( uni_template *parent, int is_active ) 
 	: tk_channel( parent, is_active )
 {
-	Gmax = 90; Tm = 1.0;
+	Gmax = 90; Tm = 4.0; // Tm = 1.0 in merged nsm 
 	UnitId = _id_resp_KdrChan;
 	Name = _ChannelNames[UnitId];
 }

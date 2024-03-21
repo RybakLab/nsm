@@ -1,0 +1,16 @@
+bl_intact = zeros(10,2);
+bl_spinal = zeros(10,2);
+bl_intact_slow = zeros(10,2);
+bl_intact_fast = zeros(10,2);
+bl_spinal_slow = zeros(10,2);
+bl_spinal_fast = zeros(10,2);
+bl_hemi_ipsi = zeros(5,2);
+bl_hemi_contra = zeros(5,2);
+pr_intact = zeros(10,1);
+pr_spinal = zeros(10,1);
+pr_intact_slow = zeros(10,1);
+pr_intact_fast = zeros(10,1);
+pr_spinal_slow = zeros(10,1);
+pr_spinal_fast = zeros(10,1);
+pr_hemi_ipsi = zeros(5,1);
+pr_hemi_contra = zeros(5,1);

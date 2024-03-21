@@ -6,9 +6,9 @@
 #include <xmmintrin.h>
 #include <memory.h>
 
-#define X87FLAGBITS					6
-#define DAZ_BIT						6
-#define FTZ_BIT						15
+#define X87FLAGBITS			6
+#define DAZ_BIT				6
+#define FTZ_BIT				15
 #define DENORMAL_EXCEPTION_MASK		8
 #define UNDERFLOW_EXCEPTION_MASK	11
 #define OVERFLOW_EXCEPTION_MASK		10

@@ -6,17 +6,64 @@
 
 #include "biomechsetup.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 CBiomechSetup::CBiomechSetup( CWnd* pParent ) :
-		CDialog( CBiomechSetup::IDD, pParent ), BiomechT( NULL )
+		CDialog( CBiomechSetup::IDD, pParent ), BiomechT( NULL, GRID_NONE )
 {
 }
 
 void CBiomechSetup::DoDataExchange( CDataExchange* pDX )
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control( pDX, IDC_BIOMECH_PROP, BiomechView );
+	DDX_Control( pDX, IDC_GRID, BiomechView );
+}
+
+BEGIN_MESSAGE_MAP(CBiomechSetup, CDialog)
+	ON_NOTIFY( NM_CLICK, IDC_GRID, &CBiomechSetup::OnGridClick )
+	ON_NOTIFY( GVN_ENDLABELEDIT, IDC_GRID, &CBiomechSetup::OnEndCellEdit )
+//	ON_NOTIFY( NM_DBLCLK, IDC_GRID, OnGridDblClick )
+//	ON_NOTIFY( NM_CLICK, IDC_BIOMECH_PROP, OnGridClick )
+//	ON_NOTIFY( GVN_ENDLABELEDIT, IDC_BIOMECH_PROP, OnEndCellEdit )
+END_MESSAGE_MAP()
+
+void CBiomechSetup::OnGridClick( NMHDR *pNotifyStruct, LRESULT* pResult )
+{
+	BiomechView.OnGridClick( pNotifyStruct, pResult );
+	if( *pResult & GRID_PROCESS ){ 
+		string path;
+		BiomechView.GetActiveBranch( path );
+		OnFlyUpdate( path );
+	}
+	*pResult = 0;
+}
+
+void CBiomechSetup::OnEndCellEdit( NMHDR *pNotifyStruct, LRESULT* pResult )
+{
+	BiomechView.OnEndCellEdit( pNotifyStruct, pResult );
+	string path;
+	if( *pResult & GRID_PROCESS ){ 
+		BiomechView.GetActiveBranch( path );
+		OnFlyUpdate( path );
+	} else{	UpdateView( true ); }
+	*pResult = 0;
+}
+
+void CBiomechSetup::OnFlyUpdate( const string &path )
+{
+	unsigned int pos = path.rfind( '\t' );
+	if( pos != string::npos ){
+		string parent_path = path.substr( 0, pos );
+		string var_path = path.substr( pos+1 );
+		uni_template *unit = BiomechT.get_unit( parent_path.c_str() );
+		if( unit ){
+			UpdateView( true );
+			if( unit->process( var_path.c_str() )){
+				DisplayUnit( &BiomechT, string( BiomechT.get_name()), false );
+				BiomechView.Update( false );
+			}
+		} else{ OnFlyUpdate( parent_path ); }
+	}
 }
 
 BOOL CBiomechSetup::OnInitDialog() 
@@ -29,24 +76,24 @@ BOOL CBiomechSetup::OnInitDialog()
 	return TRUE;
 }
 
+void CBiomechSetup::UpdateView( bool save )
+{
+	BiomechView.UpdateData( save );
+	map<_Grid_Key,_Grid_Element> *all_cells = BiomechView.GetMap();
+	typedef map<_Grid_Key,_Grid_Element>::iterator it;
+	for( it pos = all_cells->begin(); pos != all_cells->end(); ++pos ){
+		BiomechT.update( pos->first.Path.c_str(), pos->first.Name.c_str(), pos->second.Data, save );
+	}
+	BiomechView.UpdateData( save );
+}
+
 void CBiomechSetup::OnOK( void )
 {
 	UpdateView( true );
 	CDialog::OnOK();
 }
 
-void CBiomechSetup::UpdateView( bool save )
-{
-    BiomechView.UpdateData( save );
-    map<_Grid_Key,_Grid_Element> *all_cells = BiomechView.GetMap();
-    typedef map<_Grid_Key,_Grid_Element>::iterator it;
-    for( it pos = all_cells->begin(); pos != all_cells->end(); ++pos ){
-         BiomechT.update( pos->first.Path.c_str(), pos->first.Name.c_str(), pos->second.Data, save );
-         }
-    BiomechView.UpdateData( save );
-}
-
-bool CBiomechSetup::DisplayUnit( uni_template *unit, string &start_path, bool collapse )
+bool CBiomechSetup::DisplayUnit( uni_template *unit, const string &start_path, bool collapse )
 {
 	if( unit ){
 		bool is_success = DisplayUnitPar( unit, start_path );
@@ -55,7 +102,7 @@ bool CBiomechSetup::DisplayUnit( uni_template *unit, string &start_path, bool co
 	return false;
 }
 
-bool CBiomechSetup::DisplayUnitPar( uni_template *unit, string &start_path )
+bool CBiomechSetup::DisplayUnitPar( uni_template *unit, const string &start_path )
 {
 	vector<pair<_Grid_Key,_Grid_Element> > par_list;
 	unit->get_allpar( start_path.c_str(), par_list );
@@ -69,7 +116,7 @@ bool CBiomechSetup::DisplayUnitPar( uni_template *unit, string &start_path )
 	return ( pos > 0? true:false );
 }
 
-bool CBiomechSetup::DisplayUnitChildren( uni_template *unit, string &start_path, bool collapse )
+bool CBiomechSetup::DisplayUnitChildren( uni_template *unit, const string &start_path, bool collapse )
 {
 	vector<pair<string,int> > path;
 	unit->get_childrenpath( start_path.c_str(), path );
@@ -88,46 +135,7 @@ bool CBiomechSetup::DisplayUnitChildren( uni_template *unit, string &start_path,
 	}
 	return ( pos > 0? true:false );
 }
-
-BEGIN_MESSAGE_MAP(CBiomechSetup, CDialog)
-	ON_NOTIFY( NM_CLICK, IDC_BIOMECH_PROP, OnGridClick )
-	ON_NOTIFY( GVN_ENDLABELEDIT, IDC_BIOMECH_PROP, OnEndCellEdit )
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CBiomechSetup message handlers
-void CBiomechSetup::OnEndCellEdit( NMHDR *pNotifyStruct, LRESULT* pResult )
-{
-	BiomechView.OnEndCellEdit( pNotifyStruct, pResult );
-	if( *pResult & GRID_PROCESS ){ 
-		string path;
-		BiomechView.GetActiveBranch( path );
-		OnFlyUpdate( path );
-	}
-	*pResult = 0;
-}
-
-void CBiomechSetup::OnGridClick( NMHDR *pNotifyStruct, LRESULT* pResult )
-{
-	BiomechView.OnGridClick( pNotifyStruct, pResult );
-}
-
-void CBiomechSetup::OnFlyUpdate( const string &path )
-{
-    unsigned int pos = path.rfind( '\t' );
-    if( pos != string::npos ){
-        string parent_path = path.substr( 0, pos );
-        string var_path = path.substr( pos+1 );
-        uni_template *unit = BiomechT.get_unit( parent_path.c_str() );
-        if( unit ){
-            UpdateView( true );
-            if( unit->process( var_path.c_str() )){
-	            DisplayUnit( &BiomechT, string( BiomechT.get_name()), false );
-		        BiomechView.Update( false );
-			}
-        }
-    }
-}
-
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 #endif // __CONSOLE__

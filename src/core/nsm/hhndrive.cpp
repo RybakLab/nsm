@@ -1,6 +1,6 @@
 /*****************************************************************
  ****              (C)  1997 - 2000                           ****
- **           Model of Hodgkin-Haxley type neuron               **
+ **           Model of Hodgkin-Huxley type neuron               **
  **         Developed by Ilia Rybak and Sergey Markin           **
  ****                    Drive (header)                       ****
  *****************************************************************/
@@ -12,7 +12,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
@@ -41,11 +41,12 @@ hhn_drive &hhn_drive::operator = ( const hhn_drive &drive )
 	return *this;
 }
 
-void hhn_drive::init( void )
+bool hhn_drive::init( void )
 {
 	Units.clear();
 	Output = 1.0;
 	Units.push_back( this );
+	return true;
 }
 
 bool hhn_drive::load( istream &file )

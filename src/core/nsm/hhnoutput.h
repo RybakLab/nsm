@@ -8,12 +8,14 @@
 #ifndef __HHN_OUTPUT_H
 #define __HHN_OUTPUT_H
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 class zmuscle;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 //////////////////////////////////////////////////////////////////////
-// class hhn_output
-class hhn_output : public nn_unit, public hhn_process{
+// class hhn_output y = X+K1*t+const; X = input > threshold? LPF(input-threshold): 0
+class alignas( 16 ) hhn_output : public nn_unit, public hhn_process{
 	public:
 		hhn_output( void );
 		hhn_output( const string &name );
@@ -22,13 +24,25 @@ class hhn_output : public nn_unit, public hhn_process{
 	public:
 		hhn_output &operator = ( const hhn_output &output );
 	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
+	public:
 		double &tup( void ){ return Tup; };
 		double &tdown( void ){ return Tdown; };
 		double &threshold( void ){ return Threshold; };
-#ifdef __MECHANICS__
+		double &bias( void ){ return Bias; };
+		double &slp_a( void ){ return SlopeA; };
+		double &pow_a( void ){ return PowA; };
+		double &slp_t( void ){ return SlopeT; };
+		double &pow_t( void ){ return PowT; };
+		double &cap( void ){ return Cap; };
+#if defined (__MECHANICS_2D__)
 		void attach( zmuscle *muscle );
-#endif // __MECHANICS__
-		void init( void );
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
+		void prerun( double step ) final;
+		bool init( void ) final;
 		//--- overrided function
 		void reg_unit( runman *man = NULL );
 		void *select( CHhnControlled *ctrl ){ return &CtrlOut; };
@@ -39,20 +53,29 @@ class hhn_output : public nn_unit, public hhn_process{
 		void add_inputs( const vector<wconnect> &inputs );
 		void add_connection( const vector<nn_unit *> sources, const vector<CConnect> &weights );
 	private:
-		void reset( double step );
-		void calc_out( double step );
-static	void reset( size_t currstep, double step, hhn_process **start );
-static	void calc_out( size_t currstep, double step, hhn_process **start );
+		void calc_out( double step, size_t currstep );
+static		void calc_out( size_t currstep, double step, hhn_process **start );
 	public:
+//		size_t T0;
+		double SlopeA;
+		double SlopeT;
+		double Bias;
 		double Tup;
 		double Tdown;
 		double Threshold;
+		double PowT;
+		double PowA;
 	public:
 		double G;
 		double Ginh;
 	private:
-		double State;
+		double ExpTup;
+		double ExpTdw;
+		double Input;
+		double TimeOut;
 		double CtrlOut;
+		double SlpT; // increment for each integration step
+		double Cap;
 };
 
 #endif // __HHN_OUTPUT_H

@@ -38,7 +38,7 @@
 #include "GridCtrl.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
@@ -252,7 +252,7 @@ BEGIN_MESSAGE_MAP(CInPlaceList, CComboBox)
 	ON_WM_KILLFOCUS()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
-    ON_CONTROL_REFLECT(CBN_SELENDOK, OnSelEndOK)
+    ON_CONTROL_REFLECT(CBN_SELENDOK, &CInPlaceList::OnSelEndOK)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

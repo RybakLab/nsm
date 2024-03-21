@@ -19,7 +19,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame diagnostics
@@ -43,56 +43,58 @@ IMPLEMENT_DYNAMIC(CMainFrame, CMDIFrameWnd)
 BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
-	ON_COMMAND(ID_WINDOW_NEW, OnWindowNew)
-	ON_COMMAND(ID_SAVE_VIEW, OnSaveView)
-	ON_COMMAND(ID_NETWORK_SETUP, OnNetworkSetup)
-	ON_COMMAND(ID_CONNECTION_SETUP, OnConnectionSetup)
-	ON_COMMAND(ID_NETWORK_CONTROL, OnNetworkControl)
-	ON_COMMAND(ID_NETWORK_INIT, OnNetworkInit)
-	ON_COMMAND(ID_NETWORK_DIFF, OnNetworkDiff)
-	ON_COMMAND(ID_MODEL_PARAM, OnModelParam)
-	ON_COMMAND(ID_MODEL_START, OnModelStart)
-	ON_COMMAND(ID_MODEL_STOP, OnModelStop)
-	ON_COMMAND(ID_MODEL_PAUSE, OnModelPause)
-	ON_COMMAND(ID_REDRAW_RESULTS, OnRedrawResults)
-	ON_COMMAND(ID_SAVE_RESULTS, OnSaveResults)
-	ON_COMMAND(ID_NETWORK_VIEW, OnNetworkView)
+	ON_COMMAND(ID_WINDOW_NEW, &CMainFrame::OnWindowNew)
+	ON_COMMAND(ID_SAVE_VIEW, &CMainFrame::OnSaveView)
+	ON_COMMAND(ID_NETWORK_SETUP, &CMainFrame::OnNetworkSetup)
+	ON_COMMAND(ID_CONNECTION_SETUP, &CMainFrame::OnConnectionSetup)
+	ON_COMMAND(ID_NETWORK_CONTROL, &CMainFrame::OnNetworkControl)
+	ON_COMMAND(ID_NETWORK_INIT, &CMainFrame::OnNetworkInit)
+	ON_COMMAND(ID_NETWORK_DIFF, &CMainFrame::OnNetworkDiff)
+	ON_COMMAND(ID_MODEL_PARAM, &CMainFrame::OnModelParam)
+	ON_COMMAND(ID_MODEL_START, &CMainFrame::OnModelStart)
+	ON_COMMAND(ID_MODEL_STOP, &CMainFrame::OnModelStop)
+	ON_COMMAND(ID_MODEL_PAUSE, &CMainFrame::OnModelPause)
+	ON_COMMAND(ID_REDRAW_RESULTS, &CMainFrame::OnRedrawResults)
+	ON_COMMAND(ID_SAVE_RESULTS, &CMainFrame::OnSaveResults)
+	ON_COMMAND(ID_NETWORK_VIEW, &CMainFrame::OnNetworkView)
 
-	ON_UPDATE_COMMAND_UI(ID_FILE_NEW, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_FILE_CLOSE, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE_AS, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_FILE_PRINT, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_FILE_PRINT_PREVIEW, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_FILE_PRINT_SETUP, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_WINDOW_NEW, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_SAVE_VIEW, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_NETWORK_INIT, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_NETWORK_DIFF, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_NETWORK_SETUP, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_MODEL_PARAM, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_MODEL_START, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_NETWORK_CONTROL, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_REDRAW_RESULTS, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_SAVE_RESULTS, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_CONNECTION_SETUP, OnUpdateMenuItem)
-	ON_UPDATE_COMMAND_UI(ID_MODEL_STOP, OnUpdateModelStop)
-	ON_UPDATE_COMMAND_UI(ID_MODEL_PAUSE, OnUpdateModelPause)
-	ON_UPDATE_COMMAND_UI(ID_NETWORK_VIEW, OnUpdateNetworkView)
+	ON_UPDATE_COMMAND_UI(ID_FILE_NEW, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_FILE_OPEN, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_FILE_CLOSE, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE_AS, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_FILE_PRINT, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_FILE_PRINT_PREVIEW, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_FILE_PRINT_SETUP, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_WINDOW_NEW, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_SAVE_VIEW, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_NETWORK_INIT, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_NETWORK_DIFF, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_NETWORK_SETUP, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_MODEL_PARAM, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_MODEL_START, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_NETWORK_CONTROL, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_REDRAW_RESULTS, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_SAVE_RESULTS, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_CONNECTION_SETUP, &CMainFrame::OnUpdateMenuItem)
+	ON_UPDATE_COMMAND_UI(ID_MODEL_STOP, &CMainFrame::OnUpdateModelStop)
+	ON_UPDATE_COMMAND_UI(ID_MODEL_PAUSE, &CMainFrame::OnUpdateModelPause)
+	ON_UPDATE_COMMAND_UI(ID_NETWORK_VIEW, &CMainFrame::OnUpdateNetworkView)
 
 	ON_WM_TIMER()
-	ON_MESSAGE( WM_UPDATE_MAIN_WND, OnUpdateResults )
-	ON_MESSAGE( WM_STOP_MAIN_WND_TIMER, OnStopTimer )
-	ON_MESSAGE( WM_SETMESSAGESTRING, OnSetMessageString )
-#ifdef __MECHANICS__
-	ON_COMMAND( IDM_NEW_LIMB_WINDOW, OnNewlimbwindow )
-	ON_COMMAND( ID_BIOMECHANICS, OnBiomechanics )
-	ON_COMMAND( ID_IS_STICK, OnIsStick )
-	ON_UPDATE_COMMAND_UI( IDM_NEW_LIMB_WINDOW, OnUpdateNewlimbwindow )
-	ON_UPDATE_COMMAND_UI( ID_BIOMECHANICS, OnUpdateMenuItem )
-	ON_UPDATE_COMMAND_UI( ID_IS_STICK, OnUpdateIsStick )
-#endif // __MECHANICS__
+	ON_MESSAGE( WM_UPDATE_MAIN_WND, &CMainFrame::OnUpdateResults )
+	ON_MESSAGE( WM_STOP_MAIN_WND_TIMER, &CMainFrame::OnStopTimer )
+	ON_MESSAGE( WM_SETMESSAGESTRING, &CMainFrame::OnSetMessageString )
+#if defined (__MECHANICS_2D__)
+	ON_COMMAND( IDM_NEW_LIMB_WINDOW, &CMainFrame::OnNewlimbwindow )
+	ON_COMMAND( ID_BIOMECHANICS, &CMainFrame::OnBiomechanics )
+	ON_COMMAND( ID_IS_STICK, &CMainFrame::OnIsStick )
+	ON_UPDATE_COMMAND_UI( IDM_NEW_LIMB_WINDOW, &CMainFrame::OnUpdateNewlimbwindow )
+	ON_UPDATE_COMMAND_UI( ID_BIOMECHANICS, &CMainFrame::OnUpdateMenuItem )
+	ON_UPDATE_COMMAND_UI( ID_IS_STICK, &CMainFrame::OnUpdateIsStick )
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 END_MESSAGE_MAP()
 
 static UINT BASED_CODE indicators[] = {
@@ -146,7 +148,7 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 {
 	if( CMDIFrameWnd::OnCreate( lpCreateStruct ) == -1 )
 		return -1;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	if( !defaultToolBar.CreateEx( this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!defaultToolBar.LoadToolBar( IDR_LOCOTYPE ) ){
@@ -154,13 +156,14 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 		return -1;      // fail to create
 	}
 #else
+	// TODO create the window for 3d graphics
 	if( !defaultToolBar.CreateEx( this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!defaultToolBar.LoadToolBar(IDR_NSMTYPE) ){
 		TRACE0( "Failed to create toolbar\n" );
 		return -1;      // fail to create
 	}
-#endif // __MECHANICS__
+#endif // __MECHANICS_2D__
 	if( !m_wndStatusBar.Create( this ) ||
 		!m_wndStatusBar.SetIndicators( indicators, sizeof(indicators)/sizeof(UINT)) ){
 		TRACE0( "Failed to create status bar\n" );
@@ -244,13 +247,15 @@ void CMainFrame::OnNetworkSetup()
 	neurosim_doc *pDoc = ( neurosim_doc *)GetActiveDoc(); if( !pDoc ) return;
 	CNetworkSetup dlg("Network Setup");
 	dlg.Network = pDoc->Model->Network;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	dlg.BiomT = pDoc->Model->BiomechT;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	GlobalNet = &( dlg.Network );
 	if( dlg.DoModal() == IDOK ){
-		dlg.Network.init( pDoc->Model->SimData.Seed );
-		pDoc->Model->CreateNetwork( dlg.Network, pDoc->Model->SimData.Seed );
+		dlg.Network.init( pDoc->Model->SimData.Seed, NULL ); // -->>> mod !!!
+		pDoc->Model->InitNetwork( dlg.Network, pDoc->Model->SimData.Seed );
 		for( neurosim_view *pView = NULL, *currView = ( neurosim_view *)MDIGetActive()->GetActiveView(); pView != currView; ){
 			MDINext();
 			pView = ( neurosim_view *)MDIGetActive()->GetActiveView();
@@ -268,10 +273,10 @@ void CMainFrame::OnNetworkControl()
 	neurosim_doc *pDoc = ( neurosim_doc *)GetActiveDoc(); if( !pDoc ) return;
 	CNetworkControl dlg;
 	dlg.Network = pDoc->Model->Network;
-	dlg.Network.init( pDoc->Model->SimData.Seed );
+	dlg.Network.init( pDoc->Model->SimData.Seed, NULL ); // -->>> mod !!!
 	if( dlg.DoModal() == IDOK ){
-		dlg.Network.init( pDoc->Model->SimData.Seed );
-		pDoc->Model->CreateNetwork( dlg.Network, pDoc->Model->SimData.Seed ); 
+		dlg.Network.init( pDoc->Model->SimData.Seed, NULL ); // -->>> mod !!!
+		pDoc->Model->InitNetwork( dlg.Network, pDoc->Model->SimData.Seed ); 
 		for( neurosim_view *pView = NULL, *currView = ( neurosim_view *)MDIGetActive()->GetActiveView(); pView != currView; ){
 			MDINext();
 			pView = ( neurosim_view *)MDIGetActive()->GetActiveView();
@@ -400,7 +405,7 @@ void CMainFrame::OnSaveResults()
 			info +=  ( LPCSTR )saveDialog.GetPathName();
 			info += ". Please wait... ";
 			(( CMainFrame* )AfxGetMainWnd())->StatusBarMessage( info.c_str() );
-			pDoc->Model->SaveData( ( LPCSTR )saveDialog.GetPathName(), hhn_pair<int>( int( formatdialog.Wnd1), int( formatdialog.Wnd2) ) ); /*insert window*/
+			pDoc->Model->SaveData( ( LPCSTR )saveDialog.GetPathName(), hhn_pair<int>( int( formatdialog.Wnd1), int( formatdialog.Wnd2)), formatdialog.Prec_T, formatdialog.Prec_A );
 			(( CMainFrame* )AfxGetMainWnd())->StatusBarMessage( "Ready" );
 			EndWaitCursor();
 		}
@@ -414,7 +419,7 @@ void CMainFrame::OnConnectionSetup()
 	CConnectionSetup dlg("Connection setup");
 	dlg.CM = pDoc->Model->Network.nnconnect();
 	dlg.pNetwork = &pDoc->Model->Network;
-	dlg.pNetwork->init( pDoc->Model->SimData.Seed );
+	dlg.pNetwork->init( pDoc->Model->SimData.Seed, NULL ); // -->>> mod !!!
 	if (dlg.DoModal() == IDOK){
 		pDoc->Model->Network.nnconnect() = dlg.CM;
 		pDoc->SetModifiedFlag();
@@ -493,7 +498,7 @@ void CMainFrame::OnTimer(UINT nIDEvent)
 	neurosim_doc *pDoc = (neurosim_doc *)GetActiveDoc();
 	if( pDoc && TimerHandle ){
 		if( !pDoc->SimData->IsSimPaused ){
-			CurrStep += unsigned long( pDoc->SimData->UpdatingTime/pDoc->Model->GetSimStep());
+			CurrStep += ( unsigned long )( pDoc->SimData->UpdatingTime/pDoc->Model->GetSimStep());
 			if( CurrStep >= pDoc->Model->GetNumSteps() ){
 				CurrStep = pDoc->Model->GetNumSteps();
 				PostMessage( WM_STOP_MAIN_WND_TIMER, 0, 0 );
@@ -566,7 +571,7 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 	return nIDLast;
 }
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 bool CMainFrame::IsLimbWnd( void )
 {
 	neurosim_doc *pDoc = ( neurosim_doc *)GetActiveDoc(); if( !pDoc ) return false;
@@ -628,6 +633,7 @@ void CMainFrame::OnBiomechanics()
 	neurosim_doc *pDoc = ( neurosim_doc *)GetActiveDoc(); if( !pDoc ) return;
 	CBiomechSetup dlg;
 	pDoc->Model->upd_outlist();
+	
 	dlg.BiomechT = pDoc->Model->BiomechT;
 	if( dlg.DoModal() == IDOK ){
 		pDoc->Model->BiomechT = dlg.BiomechT;
@@ -649,6 +655,7 @@ void CMainFrame::OnUpdateIsStick(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck( pDoc->SimData->IsStickDiagram );
 	pCmdUI->Enable( pDoc->SimData->IsSimComplete );
 }
-
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 #endif // __CONSOLE__

@@ -2,17 +2,19 @@
 // networksetup.cpp : implementation file
 #include "precompile.h"
 #include "networksetup.h"
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 #include "biomtemplate.h"
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 
 #ifndef __CONSOLE__
 
-#include "../spcord.h"
+#include "../Spcord.h"
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
@@ -51,659 +53,6 @@ BOOL nn_unitSel::OnInitDialog()
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CWeightClone dialog
-IMPLEMENT_DYNAMIC( CWeightClone, CDialog )
-
-CWeightClone::CWeightClone( CWnd* pParent /*=NULL*/ )
-	: CDialog( CWeightClone::IDD, pParent )
-	, IsClone( FALSE )
-	, SelSrc(_T(""))
-	, SelTrg(_T(""))
-{
-}
-
-CWeightClone::~CWeightClone( void )
-{
-}
-
-void CWeightClone::ShowContent( void )
-{
-	if( IsClone ){
-		ListAllSrc.EnableWindow( TRUE );
-		ListAllTrg.EnableWindow( TRUE );
-	}
-	else{
-		ListAllSrc.EnableWindow( FALSE );
-		ListAllTrg.EnableWindow( FALSE );
-	}
-}
-
-void CWeightClone::DoDataExchange( CDataExchange* pDX )
-{
-	CDialog::DoDataExchange( pDX );
-	DDX_Control( pDX, IDC_SRC_CLONE, ListAllSrc );
-	DDX_Control( pDX, IDC_TRG_CLONE, ListAllTrg );
-	DDX_Check( pDX, IDC_CHECK_CLONE, IsClone );
-	DDX_CBString(pDX, IDC_SRC_CLONE, SelSrc);
-	DDX_CBString(pDX, IDC_TRG_CLONE, SelTrg);
-}
-
-BEGIN_MESSAGE_MAP( CWeightClone, CDialog )
-	ON_BN_CLICKED( IDC_CHECK_CLONE, &CWeightClone::OnClone )
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CWeightClone message handlers
-BOOL CWeightClone::OnInitDialog( void )
-{
-	CDialog::OnInitDialog();
-
-	size_t trg_n = 0, src_n = 0;
-	ListAllTrg.AddString( "None" );
-	for( size_t i = 0 ; i < TrgNames.size(); ++i ){
-		ListAllTrg.AddString( TrgNames[i].c_str());
-		if( SelTrg == TrgNames[i].c_str() ){
-			trg_n = i+1;
-		}
-	}
-	ListAllSrc.AddString( "None" );
-	for( size_t i = 0 ; i < SrcNames.size(); ++i ){
-		ListAllSrc.AddString( SrcNames[i].c_str());
-		if( SelSrc == SrcNames[i].c_str() ){
-			src_n = i+1;
-		}
-	}
-	if( trg_n == 0 || src_n == 0 ){
-		trg_n = src_n = 0;
-		SelTrg = "None";
-		SelSrc = "None";
-		IsClone = FALSE;
-	}
-	ListAllTrg.SetCurSel( trg_n );
-	ListAllSrc.SetCurSel( src_n );
-	UpdateData( FALSE );
-	ShowContent();
-	return TRUE;
-}
-
-void CWeightClone::OnClone()
-{
-	UpdateData();
-	ShowContent();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// CWeightSetup dialog
-CString CWeightSetup::SelSrc = "None";
-CString CWeightSetup::SelTrg = "None";
-
-CWeightSetup::CWeightSetup(CWnd* pParent /*=NULL*/)
-	: CDialog(CWeightSetup::IDD, pParent), IsChained(FALSE)
-{
-	ExWeight = 0.0;
-	ExWeightVar = 0;
-	ExSpec = 0;
-	Inh1Spec = 0;
-	Inh2Spec = 0;
-#if defined( __RESPIRATION__ )
-	ExWeight2 = 0.0;
-	ExWeightVar2 = 0;
-	Ex2Spec = 0;
-#endif // defined( __RESPIRATION__ )
-	InhAWeight = 0.0;
-	InhAWeightVar = 0.;
-	InhBWeight = 0.0;
-	InhBWeightVar = 0.;
-	OldIndex = -1;
-	Probability = 1.;
-	ActiveSynapse = -1;
-}
-
-void CWeightSetup::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_CONNECT_TYPE, ConnectType);
-	DDX_Control(pDX, IDC_EDIT_EX_WEIGHT_VAR, EditExWeightVar);
-	DDX_Control(pDX, IDC_SPIN_EX_WEIGHT_VAR, SpinExWeightVar);
-	DDX_Control(pDX, IDC_SPIN_EX_WEIGHT, SpinExWeight);
-	DDX_Control(pDX, IDC_EDIT_EX_WEIGHT, EditExWeight);
-	DDX_Text(pDX, IDC_EDIT_EX_WEIGHT, ExWeight);
-	DDX_Text(pDX, IDC_EDIT_EX_WEIGHT_VAR, ExWeightVar);
-	DDV_MinMaxDouble(pDX, ExWeightVar, 0., 50.);
-#if defined( __RESPIRATION__ )
-	DDX_Control(pDX, IDC_EDIT_EX_WEIGHT_VAR2, EditExWeightVar2);
-	DDX_Control(pDX, IDC_SPIN_EX_WEIGHT_VAR2, SpinExWeightVar2);
-	DDX_Control(pDX, IDC_SPIN_EX_WEIGHT2, SpinExWeight2);
-	DDX_Control(pDX, IDC_EDIT_EX_WEIGHT2, EditExWeight2);
-	DDX_Text(pDX, IDC_EDIT_EX_WEIGHT2, ExWeight2);
-	DDX_Text(pDX, IDC_EDIT_EX_WEIGHT_VAR2, ExWeightVar2);
-	DDV_MinMaxDouble(pDX, ExWeightVar2, 0, 50);
-#endif // defined( __RESPIRATION__ )
-	DDX_Control(pDX, IDC_EDIT_INH1_WEIGHT_VAR, EditInhAWeightVar);
-	DDX_Control(pDX, IDC_SPIN_INH1_WEIGHT_VAR, SpinInhAWeightVar);
-	DDX_Control(pDX, IDC_SPIN_INH1_WEIGHT, SpinInhAWeight);
-	DDX_Control(pDX, IDC_EDIT_INH1_WEIGHT, EditInhAWeight);
-	DDX_Text(pDX, IDC_EDIT_INH1_WEIGHT, InhAWeight);
-	DDX_Text(pDX, IDC_EDIT_INH1_WEIGHT_VAR, InhAWeightVar);
-	DDX_Control(pDX, IDC_EDIT_PROBABILITY, EditProbability);
-	DDX_Control(pDX, IDC_SPIN_PROBABILITY, SpinProbability);
-	DDX_Text(pDX, IDC_EDIT_PROBABILITY, Probability);
-	DDV_MinMaxDouble(pDX, Probability, 0., 1.);
-	DDV_MinMaxDouble(pDX, InhAWeightVar, 0, 50);
-	DDX_Control(pDX, IDC_EDIT_INH2_WEIGHT_VAR, EditInhBWeightVar);
-	DDX_Control(pDX, IDC_SPIN_INH2_WEIGHT_VAR, SpinInhBWeightVar);
-	DDX_Control(pDX, IDC_SPIN_INH2_WEIGHT, SpinInhBWeight);
-	DDX_Control(pDX, IDC_EDIT_INH2_WEIGHT, EditInhBWeight);
-	DDX_Text(pDX, IDC_EDIT_INH2_WEIGHT, InhBWeight);
-	DDX_Text(pDX, IDC_EDIT_INH2_WEIGHT_VAR, InhBWeightVar);
-	DDV_MinMaxDouble(pDX, InhBWeightVar, 0, 50);
-	DDX_CBIndex(pDX, IDC_EX_SPEC, ExSpec);
-#if defined( __RESPIRATION__ )
-	DDX_CBIndex(pDX, IDC_EX2_SPEC, Ex2Spec);
-#endif // defined( __RESPIRATION__ )
-	DDX_CBIndex(pDX, IDC_INH1_SPEC, Inh1Spec);
-	DDX_CBIndex(pDX, IDC_INH2_SPEC, Inh2Spec);
-	DDX_Check(pDX, IDC_CHAINED, IsChained);
-}
-
-int CWeightSetup::DoModal( const char *title ) 
-{
-	Title = title;
-	return CDialog::DoModal();
-} 
-
-BOOL CWeightSetup::DestroyWindow() 
-{
-    OldIndex = ConnectType.GetCurSel();
-    SetWeight();
-	return CDialog::DestroyWindow();
-}
-
-BEGIN_MESSAGE_MAP(CWeightSetup, CDialog)
-	ON_EN_UPDATE(IDC_EDIT_EX_WEIGHT, OnUpdateEditExWeight)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_EX_WEIGHT, OnDeltaposSpinExWeight)
-	ON_EN_UPDATE(IDC_EDIT_EX_WEIGHT_VAR, OnUpdateEditExWeightVar)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_EX_WEIGHT_VAR, OnDeltaposSpinExWeightVar)
-#if defined( __RESPIRATION__ )
-	ON_EN_UPDATE(IDC_EDIT_EX_WEIGHT2, OnUpdateEditExWeight2)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_EX_WEIGHT2, OnDeltaposSpinExWeight2)
-	ON_EN_UPDATE(IDC_EDIT_EX_WEIGHT_VAR2, OnUpdateEditExWeightVar2)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_EX_WEIGHT_VAR2, OnDeltaposSpinExWeightVar2)
-#endif // defined( __RESPIRATION__ )
-	ON_EN_UPDATE(IDC_EDIT_INH1_WEIGHT, OnUpdateEditInhAWeight)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_INH1_WEIGHT, OnDeltaposSpinInhAWeight)
-	ON_EN_UPDATE(IDC_EDIT_INH1_WEIGHT_VAR, OnUpdateEditInhAWeightVar)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_INH1_WEIGHT_VAR, OnDeltaposSpinInhAWeightVar)
-	ON_EN_UPDATE(IDC_EDIT_INH2_WEIGHT, OnUpdateEditInhBWeight)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_INH2_WEIGHT, OnDeltaposSpinInhBWeight)
-	ON_EN_UPDATE(IDC_EDIT_INH2_WEIGHT_VAR, OnUpdateEditInhBWeightVar)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_INH2_WEIGHT_VAR, OnDeltaposSpinInhBWeightVar)
-	ON_CBN_SELCHANGE(IDC_CONNECT_TYPE, OnSelchangeConnectType)
-	ON_EN_UPDATE(IDC_EDIT_PROBABILITY, OnUpdateEditProbability)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_PROBABILITY, OnDeltaposSpinProbability)
-	ON_BN_CLICKED(ID_WEIGHT_DEP, &CWeightSetup::OnWeightDep)
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CWeightSetup message handlers
-BOOL CWeightSetup::OnInitDialog() 
-{
-	CDialog::OnInitDialog();
-	SetWindowText( Title );
-	for( unsigned int i = 0; i < Connect.size(); i++ ){
-		if( Connect[i].Type >= 0 && Connect[i].Type < _id_NN_LAST_CONNECT )
-			ConnectType.AddString( _ConnectionTypes[Connect[i].Type] );
-	}
-	SpinExWeight.SetBuddy(&EditExWeight);
-	SpinExWeight.SetRange(UD_MINVAL,UD_MAXVAL);
-	SpinExWeightVar.SetRange(0,50);
-#if defined( __RESPIRATION__ )
-	SpinExWeight2.SetBuddy(&EditExWeight2);
-	SpinExWeight2.SetRange(UD_MINVAL,UD_MAXVAL);
-	SpinExWeightVar2.SetRange(0,50);
-#endif // defined( __RESPIRATION__ )
-	SpinInhAWeight.SetBuddy(&EditInhAWeight);
-	SpinInhAWeight.SetRange(UD_MINVAL,UD_MAXVAL);
-	SpinInhAWeightVar.SetRange(0,50);
-	SpinInhBWeight.SetBuddy(&EditInhBWeight);
-	SpinInhBWeight.SetRange(UD_MINVAL,UD_MAXVAL);
-	SpinInhBWeightVar.SetRange(0,50);
-	SpinProbability.SetBuddy(&EditProbability);
-	SpinProbability.SetRange(0,1);
-	ConnectType.EnableWindow( FALSE );
-	if( ConnectType.GetCount() >= 1 && !Connect.empty() ){
-		ConnectType.EnableWindow( TRUE );
-		ConnectType.SetCurSel( ConnectType.GetCount()-1 );
-		GetWeight();
-	}
-	if( !Connect.ChainS.empty() && !Connect.ChainT.empty() ){
-		IsChained = TRUE;
-	}
-	else{
-		IsChained = FALSE;
-	}
-	UpdateData( FALSE );
-	return TRUE;
-}
-
-void CWeightSetup::OnWeightDep()
-{
-	CWeightClone dlg;
-	dlg.TrgNames = pCM->name_trg();
-	dlg.SrcNames = pCM->name_src();
-	dlg.SelTrg = CWeightSetup::SelTrg;
-	dlg.SelSrc = CWeightSetup::SelSrc;
-	dlg.IsClone = FALSE;
-	if( !Connect.ChainS.empty() && !Connect.ChainT.empty()){
-		dlg.SelTrg = Connect.ChainT.c_str();
-		dlg.SelSrc = Connect.ChainS.c_str();
-		dlg.IsClone = TRUE;
-	}
-	if( dlg.DoModal() == IDOK ){
-		if( dlg.IsClone && dlg.SelSrc != "None" && dlg.SelTrg != "None" ){
-			pCM->chain( make_pair( string(( LPCSTR )dlg.SelTrg ), string(( LPCSTR )dlg.SelSrc )),
-						make_pair( string(( LPCSTR )TrgName ), string(( LPCSTR )SrcName )));
-			IsChained = TRUE;
-			CWeightSetup::SelSrc = dlg.SelSrc;
-			CWeightSetup::SelTrg = dlg.SelTrg;
-		}
-		else{
-			pCM->unchain( make_pair( string(( LPCSTR )TrgName ), string(( LPCSTR )SrcName )));
-			IsChained = FALSE;
-			CWeightSetup::SelSrc = "None";
-			CWeightSetup::SelTrg = "None";
-		}
-		Connect = ( *pCM )(( LPCSTR )TrgName, ( LPCSTR )SrcName );
-	    GetWeight();
-		Change();
-	}
-}
-
-void CWeightSetup::OnUpdateEditExWeight() 
-{
-    CString strWeight;
-	EditExWeight.GetWindowText( strWeight );
-    if( ExWeight < 0. )
-        ExWeight = 0.;
-    ExWeight = atof( LPCTSTR( strWeight ));
-}
-
-void CWeightSetup::OnDeltaposSpinExWeight(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    ExWeight += pNMUpDown->iDelta*0.1;
-    if( ExWeight < 0. )
-        ExWeight = 0.;
-    CString strWeight;
-    strWeight.Format( "%lg", ExWeight );
-    EditExWeight.SetWindowText(( LPCTSTR ) strWeight );
-	*pResult = 0;
-}
-
-void CWeightSetup::OnUpdateEditExWeightVar() 
-{
-    CString strWeightVar;
-	EditExWeightVar.GetWindowText( strWeightVar );
-    if( ExWeightVar < 0. )
-        ExWeightVar = 0.;
-    ExWeightVar = atof( LPCTSTR( strWeightVar ));
-}
-
-void CWeightSetup::OnDeltaposSpinExWeightVar(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    ExWeightVar += pNMUpDown->iDelta*0.1;
-    if( ExWeightVar < 0. )
-        ExWeightVar = 0.;
-    CString strWeightVar;
-    strWeightVar.Format( "%lg", ExWeightVar );
-    EditExWeightVar.SetWindowText(( LPCTSTR ) strWeightVar );
-	*pResult = 0;
-}
-
-#if defined( __RESPIRATION__ )
-void CWeightSetup::OnUpdateEditExWeight2() 
-{
-    CString strWeight2;
-	EditExWeight2.GetWindowText( strWeight2 );
-    if( ExWeight2 < 0. )
-        ExWeight2 = 0.;
-    ExWeight2 = atof( LPCTSTR( strWeight2 ));
-}
-
-void CWeightSetup::OnDeltaposSpinExWeight2(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    ExWeight2 += pNMUpDown->iDelta*0.1;
-    if( ExWeight2 < 0. )
-        ExWeight2 = 0.;
-    CString strWeight2;
-    strWeight2.Format( "%lg", ExWeight2 );
-    EditExWeight2.SetWindowText(( LPCTSTR ) strWeight2 );
-	*pResult = 0;
-}
-
-void CWeightSetup::OnUpdateEditExWeightVar2() 
-{
-    CString strWeightVar2;
-	EditExWeightVar2.GetWindowText( strWeightVar2 );
-    if( ExWeightVar2 < 0. )
-        ExWeightVar2 = 0.;
-    ExWeightVar2 = atof( LPCTSTR( strWeightVar2 ));
-}
-
-void CWeightSetup::OnDeltaposSpinExWeightVar2(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    ExWeightVar2 += pNMUpDown->iDelta*0.1;
-    if( ExWeightVar2 < 0. )
-        ExWeightVar2 = 0.;
-    CString strWeightVar2;
-    strWeightVar2.Format( "%lg", ExWeightVar2 );
-    EditExWeightVar2.SetWindowText(( LPCTSTR ) strWeightVar2 );
-	*pResult = 0;
-}
-#endif // defined( __RESPIRATION__ )
-
-void CWeightSetup::OnUpdateEditInhAWeight() 
-{
-    CString strWeight;
-	EditInhAWeight.GetWindowText( strWeight );
-    if( InhAWeight < 0. )
-        InhAWeight = 0.;
-    InhAWeight = atof( LPCTSTR( strWeight ));
-}
-
-void CWeightSetup::OnDeltaposSpinInhAWeight(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    InhAWeight += pNMUpDown->iDelta*0.1;
-    if( InhAWeight < 0. )
-        InhAWeight = 0.;
-    CString strWeight;
-    strWeight.Format( "%lg", InhAWeight );
-    EditInhAWeight.SetWindowText(( LPCTSTR ) strWeight );
-	*pResult = 0;
-}
-
-void CWeightSetup::OnUpdateEditInhAWeightVar() 
-{
-    CString strWeightVar;
-	EditInhAWeightVar.GetWindowText( strWeightVar );
-    if( InhAWeightVar < 0. )
-        InhAWeightVar = 0.;
-    InhAWeightVar = atof( LPCTSTR( strWeightVar ));
-}
-
-void CWeightSetup::OnDeltaposSpinInhAWeightVar(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    InhAWeightVar += pNMUpDown->iDelta*0.1;
-    if( InhAWeightVar < 0. )
-        InhAWeightVar = 0.;
-    CString strWeightVar;
-    strWeightVar.Format( "%lg", InhAWeightVar );
-    EditInhAWeightVar.SetWindowText(( LPCTSTR )strWeightVar );
-	*pResult = 0;
-}
-
-void CWeightSetup::OnUpdateEditInhBWeight() 
-{
-    CString strWeight;
-	EditInhBWeight.GetWindowText( strWeight );
-    if( InhBWeight < 0. )
-        InhBWeight = 0.;
-    InhBWeight = atof( LPCTSTR( strWeight ));
-}
-
-void CWeightSetup::OnDeltaposSpinInhBWeight(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    InhBWeight += pNMUpDown->iDelta*0.1;
-    if( InhBWeight < 0. )
-        InhBWeight = 0.;
-    CString strWeight;
-    strWeight.Format( "%lg", InhBWeight );
-    EditInhBWeight.SetWindowText(( LPCTSTR ) strWeight );
-	*pResult = 0;
-}
-
-void CWeightSetup::OnUpdateEditInhBWeightVar() 
-{
-    CString strWeightVar;
-	EditInhBWeightVar.GetWindowText( strWeightVar );
-    if( InhBWeightVar < 0. )
-        InhBWeightVar = 0.;
-    InhBWeightVar = atof( LPCTSTR( strWeightVar ));
-}
-
-void CWeightSetup::OnDeltaposSpinInhBWeightVar(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    InhBWeightVar += pNMUpDown->iDelta*0.1;
-    if( InhBWeightVar < 0. )
-        InhBWeightVar = 0.;
-    CString strWeightVar;
-    strWeightVar.Format( "%lg", InhBWeightVar );
-    EditInhBWeightVar.SetWindowText(( LPCTSTR ) strWeightVar );
-	*pResult = 0;
-}
-
-void CWeightSetup::OnUpdateEditProbability() 
-{
-    CString str;
-	EditProbability.GetWindowText( str );
-    Probability = atof( LPCTSTR( str ));
-}
-
-void CWeightSetup::OnDeltaposSpinProbability(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-    Probability += pNMUpDown->iDelta*0.05;
-	if(Probability < 0.) Probability = 0.;
-	if(Probability > 1.) Probability = 1.;
-    CString str;
-    str.Format( "%g", Probability );
-    EditProbability.SetWindowText(( LPCTSTR ) str );
-	*pResult = 0;
-}
-
-void CWeightSetup::OnSelchangeConnectType() 
-{
-    SetWeight();
-    GetWeight();
-	Change();
-}
-
-void CWeightSetup::GetWeight( void )
-{
-    int index = ConnectType.GetCurSel();
-    if( index < 0 )
-        return;
-    CString name;
-    ConnectType.GetLBText( index, name );
-    for( int type = 0; type < _id_NN_LAST_CONNECT; type++ )
-         if( name == _ConnectionTypes[type] ){
-             CConnect connect_type( Connect.get_connect( type ));
-             CHhnConnect connect( connect_type.Connect );
-             Probability = connect.Probability;
-             CStat ex = connect.weight( _id_ExSyn );
-             ExWeight = ex.Value;
-             ExWeightVar = ex.Variance*100.;
-             ExSpec = 0;
-             if( connect.Sigma[_id_ExSyn] )
-                 ExSpec = 1;
-             if( connect.Depression[_id_ExSyn] )
-                 ExSpec = 2;
-             if( connect.PreInh[_id_ExSyn] )
-                 ExSpec = 3;
-#if defined( __RESPIRATION__ )
-             CStat ex2 = connect.weight( _id_ExBSyn );
-             ExWeight2 = ex2.Value;
-             ExWeightVar2 = ex2.Variance*100.;
-             Ex2Spec = 0;
-             if( connect.Sigma[_id_ExBSyn] )
-                 Ex2Spec = 1;
-             if( connect.Depression[_id_ExBSyn] )
-                 Ex2Spec = 2;
-             if( connect.PreInh[_id_ExBSyn] )
-                 Ex2Spec = 3;
-#endif // defined( __RESPIRATION__ )
-             CStat inha = connect.weight( _id_InhASyn );
-             InhAWeight = inha.Value;
-             InhAWeightVar = inha.Variance*100.;
-             Inh1Spec = 0;
-             if( connect.Sigma[_id_InhASyn] )
-                 Inh1Spec = 1;
-             if( connect.Depression[_id_InhASyn] )
-                 Inh1Spec = 2;
-             if( connect.PreInh[_id_InhASyn] )
-                 Inh1Spec = 3;
-             CStat inhb = connect.weight( _id_InhBSyn );
-             InhBWeight = inhb.Value;
-             InhBWeightVar = inhb.Variance*100.;
-             Inh2Spec = 0;
-             if( connect.Sigma[_id_InhBSyn] )
-                 Inh2Spec = 1;
-             if( connect.Depression[_id_InhBSyn] )
-                 Inh2Spec = 2;
-             if( connect.PreInh[_id_InhBSyn] )
-                 Inh2Spec = 3;
-             UpdateData( FALSE );
-             break;
-             }
-    OldIndex = index;
-}
-
-void CWeightSetup::SetWeight( void )
-{
-    if( OldIndex < 0 )
-        return;
-    CString name;
-    ConnectType.GetLBText( OldIndex, name );
-    for( int type = 0; type < _id_NN_LAST_CONNECT; type++ )
-         if( name == _ConnectionTypes[type] ){
-             CHhnConnect weight( Connect.get_connect( type ).Connect );
-             weight.Probability = Probability;
-             weight.weight( _id_ExSyn ) = CStat( ExWeight, ExWeightVar/100. );
-             weight.Sigma[_id_ExSyn] = false;
-             weight.Depression[_id_ExSyn] = false;
-             weight.PreInh[_id_ExSyn] = false;
-             if( ExSpec == 1 )
-                 weight.Sigma[_id_ExSyn] = true;
-             if( ExSpec == 2 )
-                 weight.Depression[_id_ExSyn] = true;
-             else if( ExSpec == 3 )
-                 weight.PreInh[_id_ExSyn] = true;
-#if defined( __RESPIRATION__ )
-             weight.weight( _id_ExBSyn ) = CStat( ExWeight2, ExWeightVar2/100. );
-             weight.Sigma[_id_ExBSyn] = false;
-             weight.Depression[_id_ExBSyn] = false;
-             weight.PreInh[_id_ExBSyn] = false;
-             if( Ex2Spec == 1 )
-                 weight.Sigma[_id_ExBSyn] = true;
-             if( Ex2Spec == 2)
-                 weight.Depression[_id_ExBSyn] = true;
-             else if( Ex2Spec == 3 )
-                 weight.PreInh[_id_ExBSyn] = true;
-#endif // defined( __RESPIRATION__ )
-             weight.weight( _id_InhASyn ) = CStat( InhAWeight, InhAWeightVar/100. );
-             weight.Sigma[_id_InhASyn] = false;
-             weight.Depression[_id_InhASyn] = false;
-             weight.PreInh[_id_InhASyn] = false;
-             if( Inh1Spec == 1 )
-                 weight.Sigma[_id_InhASyn] = true;
-             if( Inh1Spec == 2 )
-                 weight.Depression[_id_InhASyn] = true;
-             else if( Inh1Spec == 3 )
-                 weight.PreInh[_id_InhASyn] = true;
-             weight.weight( _id_InhBSyn ) = CStat( InhBWeight, InhBWeightVar/100. );
-             weight.Sigma[_id_InhBSyn] = false;
-             weight.Depression[_id_InhBSyn] = false;
-             weight.PreInh[_id_InhBSyn] = false;
-             if( Inh2Spec == 1 )
-                 weight.Sigma[_id_InhBSyn] = true;
-             if( Inh2Spec == 2 )
-                 weight.Depression[_id_InhBSyn] = true;
-             else if( Inh2Spec == 3 )
-                 weight.PreInh[_id_InhBSyn] = true;
-             Connect.add_connect( CConnect( weight, type ), true );
-             break;
-             }
-}
-
-void CWeightSetup::Change( void )
-{
-	SpinExWeightVar.EnableWindow( FALSE );
-	SpinExWeight.EnableWindow( FALSE );
-	EditExWeight.EnableWindow( FALSE );
-	EditExWeightVar.EnableWindow( FALSE );
-#if defined( __RESPIRATION__ )
-	SpinExWeightVar2.EnableWindow( FALSE );
-	SpinExWeight2.EnableWindow( FALSE );
-	EditExWeight2.EnableWindow( FALSE );
-    EditExWeightVar2.EnableWindow( FALSE );
-#endif // defined( __RESPIRATION__ )
-	SpinInhAWeightVar.EnableWindow( FALSE );
-	SpinInhAWeight.EnableWindow( FALSE );
-	EditInhAWeight.EnableWindow( FALSE );
-	EditInhAWeightVar.EnableWindow( FALSE );
-	SpinInhBWeightVar.EnableWindow( FALSE );
-	SpinInhBWeight.EnableWindow( FALSE );
-	EditInhBWeight.EnableWindow( FALSE );
-	EditInhBWeightVar.EnableWindow( FALSE );
-    if( Connect.empty())
-        return;
-    switch( ActiveSynapse ){
-            case _id_ExSyn:
-                 SpinExWeightVar.EnableWindow( TRUE );
-                 SpinExWeight.EnableWindow( TRUE );
-                 EditExWeight.EnableWindow( TRUE );
-                 EditExWeightVar.EnableWindow( TRUE );
-                 break;
-#if defined( __RESPIRATION__ )
-            case _id_ExBSyn:
-                 SpinExWeightVar2.EnableWindow( TRUE );
-                 SpinExWeight2.EnableWindow( TRUE );
-                 EditExWeight2.EnableWindow( TRUE );
-                 EditExWeightVar2.EnableWindow( TRUE );
-                 break;
-#endif // defined( __RESPIRATION__ )
-            case _id_InhASyn:
-	             SpinInhAWeightVar.EnableWindow( TRUE );
-	             SpinInhAWeight.EnableWindow( TRUE );
-	             EditInhAWeight.EnableWindow( TRUE );
-                 EditInhAWeightVar.EnableWindow( TRUE );
-                 break;
-            case _id_InhBSyn:
-                 SpinInhBWeightVar.EnableWindow( TRUE );
-                 SpinInhBWeight.EnableWindow( TRUE );
-                 EditInhBWeight.EnableWindow( TRUE );
-                 EditInhBWeightVar.EnableWindow( TRUE );
-                 break;
-            default:
-                 SpinExWeightVar.EnableWindow( TRUE );
-                 SpinExWeight.EnableWindow( TRUE );
-                 EditExWeight.EnableWindow( TRUE );
-                 EditExWeightVar.EnableWindow( TRUE );
-#if defined( __RESPIRATION__ )
-                 SpinExWeightVar2.EnableWindow( TRUE );
-                 SpinExWeight2.EnableWindow( TRUE );
-                 EditExWeight2.EnableWindow( TRUE );
-                 EditExWeightVar2.EnableWindow( TRUE );
-#endif // defined( __RESPIRATION__ )
-                 SpinInhAWeightVar.EnableWindow( TRUE );
-                 SpinInhAWeight.EnableWindow( TRUE );
-                 EditInhAWeight.EnableWindow( TRUE );
-                 EditInhAWeightVar.EnableWindow( TRUE );
-                 SpinInhBWeightVar.EnableWindow( TRUE );
-                 SpinInhBWeight.EnableWindow( TRUE );
-                 EditInhBWeight.EnableWindow( TRUE );
-                 EditInhBWeightVar.EnableWindow( TRUE );
-            }
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CNetworkParam property page
 IMPLEMENT_DYNCREATE(CNetworkParam, CPropertyPage)
 
@@ -715,12 +64,12 @@ CNetworkParam::CNetworkParam(void)
 void CNetworkParam::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_SYNAPSES_PROP, NetParView );
+	DDX_Control(pDX, IDC_GRID, NetParView );
 }
 
 BEGIN_MESSAGE_MAP(CNetworkParam, CPropertyPage)
-	ON_NOTIFY( NM_CLICK, IDC_SYNAPSES_PROP, OnGridClick )
-    ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID, OnEndCellEdit )
+	ON_NOTIFY( NM_CLICK, IDC_GRID, &CNetworkParam::OnGridClick )
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID, &CNetworkParam::OnEndCellEdit )
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -743,10 +92,7 @@ void CNetworkParam::OnEndCellEdit( NMHDR *pNotifyStruct, LRESULT* pResult )
 	if( *pResult & GRID_PROCESS ){ 
 		NetParView.GetActiveBranch( path );
 		OnFlyUpdate( path );
-	}
-	else{
-		UpdateView( true );
-	}
+	} else{	UpdateView( true ); }
 	*pResult = 0;
 }
 
@@ -763,11 +109,18 @@ void CNetworkParam::OnFlyUpdate( const string &path )
 				DisplayUnit( &( Network->NetParam ), string( Network->NetParam.get_type()), false );
 				NetParView.Update( false );
 			}
-		}
-		else{
-			OnFlyUpdate( parent_path );
-		}
+		} else{ OnFlyUpdate( parent_path ); }
 	}
+}
+
+BOOL CNetworkParam::OnInitDialog() 
+{
+	CPropertyPage::OnInitDialog();
+	NetParView.InitGridCtrl( "Name" );
+	DisplayUnit( &( Network->NetParam ), string( Network->NetParam.get_type()));
+	NetParView.Update();
+	UpdateView( false );
+	return TRUE;
 }
 
 void CNetworkParam::UpdateView( bool save )
@@ -781,7 +134,7 @@ void CNetworkParam::UpdateView( bool save )
 	NetParView.UpdateData( save );
 }
 
-bool CNetworkParam::DisplayUnit( uni_template *unit, string &start_path, bool collapse )
+bool CNetworkParam::DisplayUnit( uni_template *unit, const string &start_path, bool collapse )
 {
 	if( unit ){
 		bool is_success = DisplayUnitPar( unit, start_path );
@@ -790,21 +143,21 @@ bool CNetworkParam::DisplayUnit( uni_template *unit, string &start_path, bool co
 	return false;
 }
 
-bool CNetworkParam::DisplayUnitPar( uni_template *unit, string &start_path )
+bool CNetworkParam::DisplayUnitPar( uni_template *unit, const string &start_path )
 {
 	vector<pair<_Grid_Key,_Grid_Element> > par_list;
 	unit->get_allpar( start_path.c_str(), par_list );
 	unsigned int pos = 0;
 	for( pos = 0; pos < par_list.size(); ++pos ){
 		if( !NetParView.InsertElement( par_list[pos].first.Path, par_list[pos].first.Name,
-										 par_list[pos].second.InitStr, par_list[pos].second.Type )){
+			par_list[pos].second.InitStr, par_list[pos].second.Type )){
 			NetParView.SetElement( par_list[pos].first.Path, par_list[pos].first.Name, par_list[pos].second );
 		}
 	}
 	return ( pos > 0? true:false );
 }
 
-bool CNetworkParam::DisplayUnitChildren( uni_template *unit, string &start_path, bool collapse )
+bool CNetworkParam::DisplayUnitChildren( uni_template *unit, const string &start_path, bool collapse )
 {
 	vector<pair<string,int> > path;
 	unit->get_childrenpath( start_path.c_str(), path );
@@ -822,16 +175,6 @@ bool CNetworkParam::DisplayUnitChildren( uni_template *unit, string &start_path,
 		NetParView.CollapseAllSubLevels( unit_prop.first );
 	}
 	return ( pos > 0? true:false );
-}
-
-BOOL CNetworkParam::OnInitDialog() 
-{
-	CPropertyPage::OnInitDialog();
-	NetParView.InitGridCtrl( "Name" );
-	DisplayUnit( &( Network->NetParam ), string( Network->NetParam.get_type()));
-	NetParView.Update();
-	UpdateView( false );
-	return TRUE;
 }
 
 BOOL CNetworkParam::OnSetActive() 
@@ -871,10 +214,10 @@ void CPopulatSetup::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPopulatSetup, CPropertyPage)
-	ON_BN_CLICKED(IDC_ADD_POPULAT, OnAddPopulat)
-	ON_BN_CLICKED(IDC_DEL_POPULAT, OnDelPopulat)
-	ON_BN_CLICKED(IDC_PROP_POPULAT, OnPropPolulat)
-	ON_LBN_DBLCLK(IDC_LIST_POPULAT, OnDblclkListPopulat)
+	ON_BN_CLICKED(IDC_ADD_POPULAT, &CPopulatSetup::OnAddPopulat)
+	ON_BN_CLICKED(IDC_DEL_POPULAT, &CPopulatSetup::OnDelPopulat)
+	ON_BN_CLICKED(IDC_PROP_POPULAT, &CPopulatSetup::OnPropPolulat)
+	ON_LBN_DBLCLK(IDC_LIST_POPULAT, &CPopulatSetup::OnDblclkListPopulat)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -910,28 +253,19 @@ void CPopulatSetup::OnDelPopulat()
 
 void CPopulatSetup::OnPropPolulat() 
 {
-    int i = ListPopulat.GetCurSel();
-    if( i == -1 )
-        return;
-    hhn_populat populat( Network->get_pop( i ));
+	int i = ListPopulat.GetCurSel();
+	if( i == -1 )
+		return;
+	hhn_populat populat( Network->get_pop( i ));
 // temporary solution ------- begin
 	CPopulatProperties dlg;
 	dlg.PopulateTemplate.set_parent( &Network->NetParam );
-    dlg.PopulateTemplate.CopyFrom( &populat );
-/*
-    dlg.PopulateTemplate.InNa = Network->get_naions()->In;
-    dlg.PopulateTemplate.OutNa = Network->get_naions()->Out;
-    dlg.PopulateTemplate.InK = Network->get_kions()->In;
-    dlg.PopulateTemplate.OutK = Network->get_kions()->Out;
-    dlg.PopulateTemplate.InCl = Network->get_clions()->In;
-    dlg.PopulateTemplate.OutCl = Network->get_clions()->Out;
-    dlg.PopulateTemplate.RTF = Network->get_naions()->RTF;
-*/
+	dlg.PopulateTemplate.CopyFrom( &populat );
 	if( dlg.DoModal() == IDOK ){
-        populat.set_name(dlg.PopulateTemplate.get_name());
-        populat.create(Network,*dlg.PopulateTemplate.get_neuronT(),dlg.PopulateTemplate.GetSize());
-        Network->set_pop( populat, i );
-        Change();
+		populat.set_name(dlg.PopulateTemplate.get_name());
+		populat.create(Network,*dlg.PopulateTemplate.get_neuronT(),dlg.PopulateTemplate.GetSize());
+		Network->set_pop( populat, i );
+		Change();
 	}
 // temporary solution ------- end
 	ListPopulat.SetCurSel( i );
@@ -1001,10 +335,10 @@ void CDriveSetup::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CDriveSetup, CPropertyPage)
-	ON_BN_CLICKED(IDC_ADD_DRIVE, OnAddDrive)
-	ON_BN_CLICKED(IDC_DEL_DRIVE, OnDelDrive)
-	ON_BN_CLICKED(IDC_PROP_DRIVE, OnPropDrive)
-	ON_LBN_DBLCLK(IDC_LIST_DRIVE, OnDblclkListDrive)
+	ON_BN_CLICKED(IDC_ADD_DRIVE, &CDriveSetup::OnAddDrive)
+	ON_BN_CLICKED(IDC_DEL_DRIVE, &CDriveSetup::OnDelDrive)
+	ON_BN_CLICKED(IDC_PROP_DRIVE, &CDriveSetup::OnPropDrive)
+	ON_LBN_DBLCLK(IDC_LIST_DRIVE, &CDriveSetup::OnDblclkListDrive)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1037,17 +371,16 @@ void CDriveSetup::OnDelDrive()
 
 void CDriveSetup::OnPropDrive() 
 {
-    int i = ListDrive.GetCurSel();
-    if( i == -1 )
-        return;
+	int i = ListDrive.GetCurSel();
+	if( i == -1 ){ return; }
 	CDriveName dlg;
-    hhn_drive drive( Network->get_drv(i) );
-    dlg.DriveName = drive.get_name().c_str();
-    if( dlg.DoModal() == IDOK ){
-        drive.set_name( LPCTSTR( dlg.DriveName ));
-        Network->set_drv( drive, i );
-        Change();
-        } 
+	hhn_drive drive( Network->get_drv(i) );
+	dlg.DriveName = drive.get_name().c_str();
+	if( dlg.DoModal() == IDOK ){
+		drive.set_name( LPCTSTR( dlg.DriveName ));
+		Network->set_drv( drive, i );
+		Change();
+	} 
 }
 
 void CDriveSetup::OnDblclkListDrive() 
@@ -1092,37 +425,75 @@ BOOL CDriveSetup::OnSetActive()
 // COutputProp dialog
 COutputProp::COutputProp(CWnd* pParent /*=NULL*/)
 	: CDialog(COutputProp::IDD, pParent)
+	, Name( _T("") )
+	, T1( 0 )
+	, T2( 0 )
+	, Threshold( 0 )
+	, Bias( 0 )
+	, SlpA( 0 )
+	, PowA( 0 )
+	, SlpT( 0 )
+	, PowT( 0 )
 {
-	Name = _T("");
-	T1 = 0.0;
-	T2 = 0.0;
-	Threshold = 0.0;
 }
 
 void COutputProp::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_SPIN_THRESHOLD, Spin_Threshold);
-	DDX_Control(pDX, IDC_EDIT_THRESHOLD, Edit_Threshold);
-	DDX_Control(pDX, IDC_SPIN_T2, SpinT2);
-	DDX_Control(pDX, IDC_SPIN_T1, SpinT1);
-	DDX_Control(pDX, IDC_EDIT_T2, EditT2);
-	DDX_Control(pDX, IDC_EDIT_T1, EditT1);
-	DDX_Text(pDX, IDC_EDIT_OUTPUT_NAME, Name);
-	DDX_Text(pDX, IDC_EDIT_T1, T1);
-	DDV_MinMaxDouble(pDX, T1, 0.0, 100000.);
-	DDX_Text(pDX, IDC_EDIT_T2, T2);
-	DDV_MinMaxDouble(pDX, T2, 0.0, 100000.);
-	DDX_Text(pDX, IDC_EDIT_THRESHOLD, Threshold);
+	CDialog::DoDataExchange( pDX );
+	DDX_Text( pDX, IDC_EDIT_OUTPUT_NAME, Name );
+
+	DDX_Control( pDX, IDC_EDIT_THRESHOLD, EditThreshold );
+	DDX_Control( pDX, IDC_EDIT_T2, EditT2 );
+	DDX_Control( pDX, IDC_EDIT_T1, EditT1 );
+	DDX_Control( pDX, IDC_EDIT_BIAS, EditBias );
+	DDX_Control( pDX, IDC_EDIT_SLOPEA, EditSlpA );
+	DDX_Control( pDX, IDC_EDIT_POWA, EditPowA );
+	DDX_Control( pDX, IDC_EDIT_SLOPET, EditSlpT );
+	DDX_Control( pDX, IDC_EDIT_POWT, EditPowT );
+	DDX_Control( pDX, IDC_EDIT_CAP, EditCap );
+
+	DDX_Control( pDX, IDC_SPIN_T2, SpinT2 );
+	DDX_Control( pDX, IDC_SPIN_T1, SpinT1 );
+	DDX_Control( pDX, IDC_SPIN_THRESHOLD, SpinThreshold );
+	DDX_Control( pDX, IDC_SPIN_BIAS, SpinBias );
+	DDX_Control( pDX, IDC_SPIN_SLOPEA, SpinSlpA );
+	DDX_Control( pDX, IDC_SPIN_POWA, SpinPowA );
+	DDX_Control( pDX, IDC_SPIN_SLOPET, SpinSlpT );
+	DDX_Control( pDX, IDC_SPIN_POWT, SpinPowT );
+	DDX_Control( pDX, IDC_SPIN_CAP, SpinCap );
+
+	DDX_Text( pDX, IDC_EDIT_T1, T1 );
+	DDX_Text( pDX, IDC_EDIT_T2, T2 );
+	DDX_Text( pDX, IDC_EDIT_THRESHOLD, Threshold );
+	DDX_Text( pDX, IDC_EDIT_BIAS, Bias );
+	DDX_Text( pDX, IDC_EDIT_SLOPEA, SlpA );
+	DDX_Text( pDX, IDC_EDIT_POWA, PowA );
+	DDX_Text( pDX, IDC_EDIT_SLOPET, SlpT );
+	DDX_Text( pDX, IDC_EDIT_POWT, PowT );
+	DDX_Text( pDX, IDC_EDIT_CAP, Cap );
 }
 
 BEGIN_MESSAGE_MAP(COutputProp, CDialog)
-	ON_EN_UPDATE(IDC_EDIT_T1, OnUpdateEditT1)
-	ON_EN_UPDATE(IDC_EDIT_T2, OnUpdateEditT2)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_T1, OnDeltaposSpinT1)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_T2, OnDeltaposSpinT2)
-	ON_EN_UPDATE(IDC_EDIT_THRESHOLD, OnUpdateEditThreshold)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_THRESHOLD, OnDeltaposSpinThreshold)
+	ON_EN_UPDATE(IDC_EDIT_T1, &COutputProp::OnUpdateEditT1)
+	ON_EN_UPDATE(IDC_EDIT_T2, &COutputProp::OnUpdateEditT2)
+	ON_EN_UPDATE(IDC_EDIT_THRESHOLD, &COutputProp::OnUpdateEditThreshold)
+	ON_EN_UPDATE(IDC_EDIT_BIAS, &COutputProp::OnUpdateBias)
+	ON_EN_UPDATE(IDC_EDIT_SLOPEA, &COutputProp::OnUpdateSlpA)
+	ON_EN_UPDATE(IDC_EDIT_POWA, &COutputProp::OnUpdatePowA)
+	ON_EN_UPDATE(IDC_EDIT_SLOPET, &COutputProp::OnUpdateSlpT)
+	ON_EN_UPDATE(IDC_EDIT_POWT, &COutputProp::OnUpdatePowT)
+	ON_EN_UPDATE(IDC_EDIT_CAP, &COutputProp::OnUpdateCap)
+
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_T1, &COutputProp::OnDeltaposSpinT1)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_T2, &COutputProp::OnDeltaposSpinT2)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_THRESHOLD, &COutputProp::OnDeltaposSpinThreshold)
+
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_BIAS, &COutputProp::OnDeltaposSpinBias)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_SLOPEA, &COutputProp::OnDeltaposSpinSlpA)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_POWA, &COutputProp::OnDeltaposSpinPowA)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_SLOPET, &COutputProp::OnDeltaposSpinSlpT)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_POWT, &COutputProp::OnDeltaposSpinPowT)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_CAP, &COutputProp::OnDeltaposSpinCap)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1134,8 +505,21 @@ BOOL COutputProp::OnInitDialog()
 	SpinT1.SetRange(0,UD_MAXVAL);
 	SpinT2.SetBuddy(&EditT2);
 	SpinT2.SetRange(0,UD_MAXVAL);
-	Spin_Threshold.SetBuddy(&Edit_Threshold);
-	Spin_Threshold.SetRange(0,UD_MAXVAL);
+	SpinThreshold.SetBuddy(&EditThreshold);
+	SpinThreshold.SetRange(0,UD_MAXVAL);
+	SpinBias.SetBuddy(&EditBias);
+	SpinBias.SetRange(0,UD_MAXVAL);
+	SpinSlpA.SetBuddy(&EditSlpA);
+	SpinSlpA.SetRange(0,UD_MAXVAL);
+	SpinPowA.SetBuddy(&EditPowA);
+	SpinPowA.SetRange(0,UD_MAXVAL);
+	SpinSlpT.SetBuddy(&EditSlpT);
+	SpinSlpT.SetRange(0,UD_MAXVAL);
+	SpinPowT.SetBuddy(&EditPowT);
+	SpinPowT.SetRange(0,UD_MAXVAL);
+	SpinCap.SetBuddy(&EditCap);
+	SpinCap.SetRange(0,UD_MAXVAL);
+
 	UpdateData();
 	return TRUE;
 }
@@ -1144,6 +528,7 @@ void COutputProp::OnUpdateEditT1()
 {
 	CString strT1;
 	EditT1.GetWindowText( strT1 );
+	T1 = ( T1 < 0. )? 0.: T1;
 	T1 = atof( LPCTSTR( strT1 ));
 }
 
@@ -1151,13 +536,64 @@ void COutputProp::OnUpdateEditT2()
 {
 	CString strT2;
 	EditT2.GetWindowText( strT2 );
+	T2 = ( T2 < 0. )? 0.: T2;
 	T2 = atof( LPCTSTR( strT2 ));
+}
+
+void COutputProp::OnUpdateEditThreshold() 
+{
+	CString str;
+	EditThreshold.GetWindowText( str );
+	Threshold = atof( LPCTSTR( str ));
+}
+
+void COutputProp::OnUpdateBias()
+{
+	CString str;
+	EditBias.GetWindowText( str );
+	Bias = atof( LPCTSTR( str ));
+}
+
+void COutputProp::OnUpdateSlpA()
+{
+	CString str;
+	EditSlpA.GetWindowText( str );
+	SlpA = atof( LPCTSTR( str ));
+}
+
+void COutputProp::OnUpdatePowA()
+{
+	CString str;
+	EditPowA.GetWindowText( str );
+	PowA = atof( LPCTSTR( str ));
+}
+
+void COutputProp::OnUpdateSlpT()
+{
+	CString str;
+	EditSlpT.GetWindowText( str );
+	SlpT = atof( LPCTSTR( str ));
+}
+
+void COutputProp::OnUpdatePowT()
+{
+	CString str;
+	EditPowT.GetWindowText( str );
+	PowT = atof( LPCTSTR( str ));
+}
+
+void COutputProp::OnUpdateCap()
+{
+	CString str;
+	EditCap.GetWindowText( str );
+	Cap = atof( LPCTSTR( str ));
 }
 
 void COutputProp::OnDeltaposSpinT1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-	T1 += pNMUpDown->iDelta*1.;
+	T1 += pNMUpDown->iDelta*0.1;
+	T1 = ( T1 < 0. )? 0.: T1;
 	CString strT1;
 	strT1.Format( "%lg", T1 );
 	EditT1.SetWindowText(( LPCTSTR ) strT1 );
@@ -1167,27 +603,82 @@ void COutputProp::OnDeltaposSpinT1(NMHDR* pNMHDR, LRESULT* pResult)
 void COutputProp::OnDeltaposSpinT2(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-	T2 += pNMUpDown->iDelta*1.;
+	T2 += pNMUpDown->iDelta*0.1;
+	T2 = ( T2 < 0. )? 0.: T2;
 	CString strT2;
 	strT2.Format( "%lg", T2 );
 	EditT2.SetWindowText(( LPCTSTR ) strT2 );
 	*pResult = 0;
 }
 
-void COutputProp::OnUpdateEditThreshold() 
-{
-	CString str;
-	Edit_Threshold.GetWindowText( str );
-	Threshold = atof( LPCTSTR( str ));
-}
-
-void COutputProp::OnDeltaposSpinThreshold(NMHDR* pNMHDR, LRESULT* pResult) 
+void COutputProp::OnDeltaposSpinThreshold(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 	Threshold += pNMUpDown->iDelta*0.1;
 	CString str;
 	str.Format( "%lg", Threshold );
-	Edit_Threshold.SetWindowText( LPCTSTR( str ));
+	EditThreshold.SetWindowText( LPCTSTR( str ));
+	*pResult = 0;
+}
+
+void COutputProp::OnDeltaposSpinBias(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+	Bias += pNMUpDown->iDelta*0.1;
+	CString str;
+	str.Format( "%lg", Bias );
+	EditBias.SetWindowText( LPCTSTR( str ));
+	*pResult = 0;
+}
+
+void COutputProp::OnDeltaposSpinSlpA(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+	SlpA += pNMUpDown->iDelta*0.1;
+	CString str;
+	str.Format( "%lg", SlpA );
+	EditSlpA.SetWindowText( LPCTSTR( str ));
+	*pResult = 0;
+}
+
+void COutputProp::OnDeltaposSpinPowA(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+	PowA += pNMUpDown->iDelta*0.1;
+	CString str;
+	str.Format( "%lg", PowA );
+	EditPowA.SetWindowText( LPCTSTR( str ));
+	*pResult = 0;
+}
+
+void COutputProp::OnDeltaposSpinSlpT(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+	SlpT += pNMUpDown->iDelta*0.1;
+	CString str;
+	str.Format( "%lg", SlpT );
+	EditSlpT.SetWindowText( LPCTSTR( str ));
+	*pResult = 0;
+}
+
+void COutputProp::OnDeltaposSpinPowT(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+	PowT += pNMUpDown->iDelta*0.1;
+	CString str;
+	str.Format( "%lg", PowT );
+	EditPowT.SetWindowText( LPCTSTR( str ));
+	*pResult = 0;
+}
+
+void COutputProp::OnDeltaposSpinCap(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+	Cap += pNMUpDown->iDelta*0.1;
+	Cap = ( Cap < 0. )? 0.: Cap;
+	CString str;
+	str.Format( "%lg", Cap );
+	EditCap.SetWindowText( LPCTSTR( str ));
 	*pResult = 0;
 }
 
@@ -1211,10 +702,10 @@ void COutputNetwork::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(COutputNetwork, CPropertyPage)
-	ON_BN_CLICKED(IDC_ADD_OUTPUT, OnAddOutput)
-	ON_BN_CLICKED(IDC_DEL_OUTPUT, OnDelOutput)
-	ON_BN_CLICKED(IDC_PROP_OUTPUT, OnPropOutput)
-	ON_LBN_DBLCLK(IDC_LIST_OUTPUT, OnDblclkListOutput)
+	ON_BN_CLICKED(IDC_ADD_OUTPUT, &COutputNetwork::OnAddOutput)
+	ON_BN_CLICKED(IDC_DEL_OUTPUT, &COutputNetwork::OnDelOutput)
+	ON_BN_CLICKED(IDC_PROP_OUTPUT, &COutputNetwork::OnPropOutput)
+	ON_LBN_DBLCLK(IDC_LIST_OUTPUT, &COutputNetwork::OnDblclkListOutput)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1222,52 +713,64 @@ END_MESSAGE_MAP()
 BOOL COutputNetwork::OnInitDialog() 
 {
 	CPropertyPage::OnInitDialog();
-    NewOutput = Network->size_out();
-    Change();
+	NewOutput = Network->size_out();
+	Change();
 	return TRUE;
 }
 
 void COutputNetwork::OnAddOutput() 
 {
-    CString name;
+	CString name;
 #if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-    name.Format("Object %d",NewOutput);
+	name.Format("Object %d",NewOutput);
 #else
-    name.Format("Output %d",NewOutput);
+	name.Format("Output %d",NewOutput);
 #endif //defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	Network->add_out( hhn_output( string(( LPCTSTR )name )));
-    NewOutput++;
-    Change();
+	NewOutput++;
+	Change();
 }
 
 void COutputNetwork::OnDelOutput() 
 {
-    unsigned int i = ListOutput.GetCurSel();
-    if( i == -1 )
-        return;
-    Network->del_out(i);
-    Change();
+	unsigned int i = ListOutput.GetCurSel();
+	if( i == -1 )
+		return;
+	Network->del_out(i);
+	Change();
 }
 
 void COutputNetwork::OnPropOutput() 
 {
-    unsigned int i = ListOutput.GetCurSel();
-    if( i < 0 )
-        return;
+	unsigned int i = ListOutput.GetCurSel();
+	if( i < 0 )
+		return;
 	COutputProp dlg;
-    hhn_output output( Network->get_out( i ));
-    dlg.Name = output.get_name().c_str();
-    dlg.T1 = output.tup();
-    dlg.T2 = output.tdown();
+	hhn_output output( Network->get_out( i ));
+	dlg.Name = output.get_name().c_str();
+	dlg.T1 = output.tup();
+	dlg.T2 = output.tdown();
 	dlg.Threshold = output.threshold();
-    if( dlg.DoModal() == IDOK ){
-        output.set_name(( LPCTSTR )dlg.Name );
-        output.tup() = dlg.T1;
-        output.tdown() = dlg.T2;
+	dlg.Bias = output.bias();
+	dlg.SlpA = output.slp_a();
+	dlg.PowA = output.pow_a();
+	dlg.SlpT = output.slp_t();
+	dlg.PowT = output.pow_t();
+	dlg.Cap = output.cap();
+	if( dlg.DoModal() == IDOK ){
+		output.set_name(( LPCTSTR )dlg.Name );
+		output.tup() = dlg.T1;
+		output.tdown() = dlg.T2;
 		output.threshold() = dlg.Threshold;
-        Network->set_out( output, i );
-        Change();
-        }
+		output.bias() = dlg.Bias;
+		output.slp_a() = dlg.SlpA;
+		output.pow_a() = dlg.PowA;
+		output.slp_t() = dlg.SlpT;
+		output.pow_t() = dlg.PowT;
+		output.cap() = dlg.Cap;
+		Network->set_out( output, i );
+		Change();
+	}
 }
 
 void COutputNetwork::OnDblclkListOutput() 
@@ -1277,43 +780,40 @@ void COutputNetwork::OnDblclkListOutput()
 
 void COutputNetwork::Change( void )
 {
-    add_out.EnableWindow(TRUE);
-    if( Network->size_out() == 0 ){
-        PropOutput.EnableWindow(FALSE);
-        DelOutput.EnableWindow(FALSE);
-        }
-	else{
+	add_out.EnableWindow(TRUE);
+	if( Network->size_out() == 0 ){
+		PropOutput.EnableWindow(FALSE);
+		DelOutput.EnableWindow(FALSE);
+	} else{
 		DelOutput.EnableWindow(TRUE);
 		PropOutput.EnableWindow(TRUE);
-		}
+	}
 
-    unsigned int index = ListOutput.GetCurSel();
-    if( index == -1 ) index = 0;
-    if( index >= Network->size_out() ) index = Network->size_out()-1;
+	unsigned int index = ListOutput.GetCurSel();
+	if( index == -1 ) index = 0;
+	if( index >= Network->size_out() ) index = Network->size_out()-1;
 
-    CString str;
+	CString str;
 #if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-    str.Format("Number of objects - %d", Network->size_out());
+	str.Format("Number of objects - %d", Network->size_out());
 #else
-
-    str.Format("Number of outputs - %d", Network->size_out());
+	str.Format("Number of outputs - %d", Network->size_out());
 #endif //defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-
-    StringSize.SetWindowText(str);
-    ListOutput.ResetContent();
-    for( unsigned int i = 0 ; i < Network->size_out(); i++ ){
-         ListOutput.AddString( Network->get_out(i).get_name().c_str() );
-         }
-    ListOutput.SetCurSel( index );
+	StringSize.SetWindowText(str);
+	ListOutput.ResetContent();
+	for( size_t i = 0 ; i < Network->size_out(); i++ ){
+		ListOutput.AddString( Network->get_out(i).get_name().c_str() );
+	}
+	ListOutput.SetCurSel( index );
 }
 
 BOOL COutputNetwork::OnSetActive() 
 {
-    Change();
+	Change();
 	return CPropertyPage::OnSetActive();
 }
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 /////////////////////////////////////////////////////////////////////////////
 // CFBProp dialog
 CFBProp::CFBProp(CWnd* pParent /*=NULL*/)
@@ -1368,24 +868,24 @@ void CFBProp::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CFBProp, CDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO_TYPE, OnSelchangeComboType)
-	ON_CBN_SELCHANGE(IDC_COMBO_LISTFB, OnSelchangeListFB)
-	ON_EN_UPDATE(IDC_KV, OnUpdateKV)
-	ON_EN_UPDATE(IDC_PV, OnUpdatePV)
-	ON_EN_UPDATE(IDC_KL, OnUpdateKL)
-	ON_EN_UPDATE(IDC_KEMG, OnUpdateKEMG)
-	ON_EN_UPDATE(IDC_KF, OnUpdateKF)
-	ON_EN_UPDATE(IDC_KFTR, OnUpdateKFTR)
-	ON_EN_UPDATE(IDC_KC, OnUpdateKC)
-	ON_EN_UPDATE(IDC_KGR, OnUpdateKG)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KV, OnDeltaposSpinKV)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_PV, OnDeltaposSpinPV)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KL, OnDeltaposSpinKL)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KEMG, OnDeltaposSpinKEMG)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KF, OnDeltaposSpinKF)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KFTR, OnDeltaposSpinKFTR)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KC, OnDeltaposSpinKC)
-	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KGR, OnDeltaposSpinKG)
+	ON_CBN_SELCHANGE(IDC_COMBO_TYPE, &CFBProp::OnSelchangeComboType)
+	ON_CBN_SELCHANGE(IDC_COMBO_LISTFB, &CFBProp::OnSelchangeListFB)
+	ON_EN_UPDATE(IDC_KV, &CFBProp::OnUpdateKV)
+	ON_EN_UPDATE(IDC_PV, &CFBProp::OnUpdatePV)
+	ON_EN_UPDATE(IDC_KL, &CFBProp::OnUpdateKL)
+	ON_EN_UPDATE(IDC_KEMG, &CFBProp::OnUpdateKEMG)
+	ON_EN_UPDATE(IDC_KF, &CFBProp::OnUpdateKF)
+	ON_EN_UPDATE(IDC_KFTR, &CFBProp::OnUpdateKFTR)
+	ON_EN_UPDATE(IDC_KC, &CFBProp::OnUpdateKC)
+	ON_EN_UPDATE(IDC_KGR, &CFBProp::OnUpdateKG)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KV, &CFBProp::OnDeltaposSpinKV)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_PV, &CFBProp::OnDeltaposSpinPV)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KL, &CFBProp::OnDeltaposSpinKL)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KEMG, &CFBProp::OnDeltaposSpinKEMG)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KF, &CFBProp::OnDeltaposSpinKF)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KFTR, &CFBProp::OnDeltaposSpinKFTR)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KC, &CFBProp::OnDeltaposSpinKC)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_KGR, &CFBProp::OnDeltaposSpinKG)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1651,10 +1151,10 @@ void CFeedbackSetup::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CFeedbackSetup, CPropertyPage)
-	ON_BN_CLICKED(IDC_DEL_FEEDBACK, OnDelFeedback)
-	ON_BN_CLICKED(IDC_ADD_FEEDBACK, OnAddFeedback)
-	ON_BN_CLICKED(IDC_PROP_FEEDBACK, OnPropFeedback)
-	ON_LBN_DBLCLK(IDC_LIST_FEEDBACK, OnDblclkListFeedback)
+	ON_BN_CLICKED(IDC_DEL_FEEDBACK, &CFeedbackSetup::OnDelFeedback)
+	ON_BN_CLICKED(IDC_ADD_FEEDBACK, &CFeedbackSetup::OnAddFeedback)
+	ON_BN_CLICKED(IDC_PROP_FEEDBACK, &CFeedbackSetup::OnPropFeedback)
+	ON_LBN_DBLCLK(IDC_LIST_FEEDBACK, &CFeedbackSetup::OnDblclkListFeedback)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1800,7 +1300,9 @@ BOOL CFeedbackSetup::OnSetActive()
 	Change();
 	return CPropertyPage::OnSetActive();
 }
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 
 /////////////////////////////////////////////////////////////////////////////
 // CNetworkSetup
@@ -1808,9 +1310,11 @@ IMPLEMENT_DYNAMIC(CNetworkSetup, CPropertySheet)
 
 CNetworkSetup::CNetworkSetup(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 	:CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	, BiomT( NULL )
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 {
 	AddPage( &NetworkParam );
 	AddPage( &PopulatSetup );
@@ -1820,17 +1324,21 @@ CNetworkSetup::CNetworkSetup(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage
 	PopulatSetup.Network = &Network;
 	DriveSetup.Network = &Network;
 	OutputSetup.Network = &Network;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	AddPage( &FeedbackSetup );
 	FeedbackSetup.Network = &Network;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 }
 
 CNetworkSetup::CNetworkSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 	:CPropertySheet(pszCaption, pParentWnd, iSelectPage)
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	, BiomT( NULL )
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 {
 	AddPage( &NetworkParam );
 	AddPage( &PopulatSetup );
@@ -1840,11 +1348,13 @@ CNetworkSetup::CNetworkSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectP
 	PopulatSetup.Network = &Network;
 	DriveSetup.Network = &Network;
 	OutputSetup.Network = &Network;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	AddPage( &FeedbackSetup );
 	FeedbackSetup.Network = &Network;
 	FeedbackSetup.BiomT = &BiomT;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 }
 
 CNetworkSetup::~CNetworkSetup()

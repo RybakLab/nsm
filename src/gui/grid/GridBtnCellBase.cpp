@@ -16,7 +16,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif
 
 CString CGridBtnCellBase::m_strTipText;
@@ -168,12 +168,11 @@ BOOL CGridBtnCellBase::DrawBtnCell(CDC* pDC, int /* nRow */, int /* nCol */, CRe
         {
             for( int i1=0; i1 < iCtlNbr; i1++)
             {
-                UINT uiType = GetDrawCtlType( i1);
                 UINT uiState = GetDrawCtlState( i1);
-				xpDrawFrameControl(  pDC->GetSafeHdc(),
-										RectAry[ i1],
-                                        uiType,
-                                        uiState);
+/*
+                UINT uiType = GetDrawCtlType( i1);
+		xpDrawFrameControl(  pDC->GetSafeHdc(), RectAry[ i1], uiType, uiState);
+*/
                 // if button has text, draw it, too
                 const char* pszBtnText = GetDrawCtlBtnText( i1);
                 if( pszBtnText != NULL)
@@ -353,8 +352,7 @@ void CGridBtnCellBase::OnDblClick( CPoint PointCellRelative)
 
 BOOL CGridBtnCellBase::GetTextRect( LPRECT pRect)  // i/o:  i=dims of cell rect; o=dims of text rect
 {
-    CGridCtrl* pGrid = GetGrid();
-    ASSERT( pGrid);
+    ASSERT( GetGrid() );
 
     CRect RectCell( *pRect);
 

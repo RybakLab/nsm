@@ -1,6 +1,6 @@
 /*****************************************************************
  ****              (C)  1997 - 2000                           ****
- **           Model of Hodgkin-Haxley type neuron               **
+ **           Model of Hodgkin-Huxley type neuron               **
  **         Developed by Ilia Rybak and Sergey Markin           **
  ****                   Control (header)                      ****
  *****************************************************************/
@@ -16,7 +16,7 @@ class CHhnNetwork;
 
 /////////////////////////////////////////////////////////////////////////////
 // CHhnControlled class
-class CHhnControlled{
+class alignas( 16 ) CHhnControlled{
 	public:
 		CHhnControlled( void ) : Code(), Init( 0. ), Origin( &Init ){};
 		CHhnControlled( const unit_code &code ) : Code( code ), Init( 0. ), Origin( &Init ){};
@@ -33,6 +33,9 @@ class CHhnControlled{
 		};
 		bool operator == ( const CHhnControlled &ctrl ) const{ return ( Code == ctrl.Code ); };
 	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
+	public:
 		unit_code get_par( void ) const{ return Code; };
 	public:
 		void select( nn_unit *object );
@@ -41,21 +44,24 @@ class CHhnControlled{
 		bool load( istream &file, CSimulate *manager);
 		void save( ostream &file, CSimulate *manager);
 	private:
+		unit_code Code;
 		double Init;
 		double *Origin;
-		unit_code Code;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 // hhn_control class
-class hhn_control : public nn_unit, public hhn_process{
+class alignas( 16 ) hhn_control : public nn_unit, public hhn_process{
 	public:
-		hhn_control( CHhnNetwork *network = NULL );
-		hhn_control( const string &name, CHhnNetwork *network = NULL );
+		hhn_control( void );
+		hhn_control( const string &name );
 		hhn_control( const hhn_control &ctrl );
 		~hhn_control( void );
 	public:
 		hhn_control &operator = ( const hhn_control &control );
+	public:
+		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
+		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		size_t nctabs( void ) const{ return CtrTabFunc.size(); };
 		size_t ncunits( void ) const{ return CtrUnits.size(); };
@@ -80,15 +86,17 @@ class hhn_control : public nn_unit, public hhn_process{
 		void init( CHhnNetwork *network );
 		void reg_unit( runman *man = NULL );
 	private:
+		using hhn_process::init;
+	private:
 		void control( size_t currstep, double step );
-static	void control( size_t currstep, double step, hhn_process **start );
+static		void control( size_t currstep, double step, hhn_process **start );
 	private:
 		bool StepFunc;
 		double LastOutput;
 		double Variance;
 		size_t CurrTabs;
-		vector< hhn_pair<double> > CtrTabFunc;
-		vector<CHhnControlled> CtrUnits;
+		nsm_vector(hhn_pair<double>) CtrTabFunc;
+		nsm_vector(CHhnControlled) CtrUnits;
 };
 
 #endif

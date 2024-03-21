@@ -1,6 +1,6 @@
 #include "precompile.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "biomtemplate.h"
 #include "walker.h"
@@ -9,11 +9,17 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
-static void new_link( int id, uni_template **unit, uni_template *parent )
+static t_muscle DefaultMuscle( NULL );
+static t_link DefaultLink( NULL );
+static t_joint DefaultJoint( NULL );
+static t_limb DefaultLimb( NULL, "" );
+static t_body DefaultBody( NULL, "" );
+
+void new_link( int id, uni_template **unit, uni_template *parent )
 {
 	switch( id ){
 		case __id_FOREPART:
@@ -41,7 +47,7 @@ static void new_link( int id, uni_template **unit, uni_template *parent )
 	}
 }
 
-static void new_joint( int id, uni_template **unit, uni_template *parent )
+void new_joint( int id, uni_template **unit, uni_template *parent )
 {
 	switch( id ){
 		case __id_LOINS:
@@ -63,7 +69,7 @@ static void new_joint( int id, uni_template **unit, uni_template *parent )
 	}
 }
 
-static void new_muscle( int id, uni_template **unit, uni_template *parent, const char *lscheme = "None" )
+void new_muscle( int id, uni_template **unit, uni_template *parent, const char *lscheme = "None" )
 {
 	switch( id ){
 		case __id_IP:
@@ -102,16 +108,12 @@ static void new_muscle( int id, uni_template **unit, uni_template *parent, const
 
 /////////////////////////////////////////////////////////////////////////////
 // t_limb 
-t_muscle t_limb::DefaultMuscle( NULL );
-t_link t_limb::DefaultLink( NULL );
-t_joint t_limb::DefaultJoint( NULL );
-
 t_limb::t_limb( uni_template *parent, const char *name )
 		: uni_template( parent, GRID_NONE )
 {
+	IsShowType = true;
 	TypeNameS = TypeName = "Hindlimb";
 	Name = name;
-	IsShowType = true;
 	UnitId = 0;
 	DefaultChildren.push_back( &DefaultLink );
 	DefaultChildren.push_back( &DefaultJoint );
@@ -149,8 +151,10 @@ void t_limb::get_fblist( vector<string> &fb_list ) const
 		if( ctype == "Muscle" ){
 			zmuscle *m = NULL;
 			(( t_muscle *)Children[i] )->copy_to( &m );
-			fb_list.push_back( m->get_name() );
-			delete m;
+			if( NULL != m ){
+				fb_list.push_back( m->get_name() );
+				delete m;
+			}
 		} 
 	}
 }
@@ -323,20 +327,17 @@ void t_limb::save_addpar( ostream &file )
 
 /////////////////////////////////////////////////////////////////////////////
 // t_body 
-t_link t_body::DefaultLink( NULL );
-t_joint t_body::DefaultJoint( NULL );
-
 t_body::t_body( uni_template *parent, const char *name )
 		: uni_template( parent, GRID_NONE )
 {
+	TypeName = TypeNameS = "Body";
+//	IsShowType = true;
+	Name = name;
+	UnitId = 1;
 	add_child( "Joint", __id_LOINS );
 	for( int i = __id_FOREPART; i < __id_THIGH; ++i ){
 		add_child( "Link", i );
 	}
-	Name = name;
-	UnitId = 1;
-	TypeName = "Body";
-	TypeNameS = "Body";
 	DefaultChildren.push_back( &DefaultLink );
 	DefaultChildren.push_back( &DefaultJoint );
 }
@@ -446,7 +447,7 @@ void t_body::save_addpar( ostream &file )
 /////////////////////////////////////////////////////////////////////////////
 // t_biomech 
 t_biomech::t_biomech( uni_template *parent, int is_active )
-	: uni_template( parent, is_active ), IsFixed( false ), G( ::Gravity ), Vel( 0.0 ),
+	: uni_template( parent, is_active ), IsFixed( false ), G( ::Gravity ), Vel( 0.0 ), AddVelL( 0.0 ), AddVelR( 0.0 ),
 	MusBM( 0.02 ), MusBT( 0.02 ), JointVis( 0.2 ),
 	TrunkK( 5000.0 ), TrunkB( 20000.0 ),
 	PelvisK( 5000.0 ), PelvisB( 20000.0 ),
@@ -458,8 +459,9 @@ t_biomech::t_biomech( uni_template *parent, int is_active )
 	Xmin( -560.0 ), Ymin( 240.0 ),
 	dX( 0.5 ), dY( 0.0 ), dA( 0.0 )
 {
+	IsShowType = true;
 	TypeNameS = TypeName = "Biomechanics";
-	Name = "Biomechanics";
+	Name = "Cat";
 	UnitId = 0;
 
 	add_child( "Body", "Body" );
@@ -468,6 +470,8 @@ t_biomech::t_biomech( uni_template *parent, int is_active )
 
 	DList.insert( make_pair( "Common parameters\tTreadmil\tLevel (mm)\nGL", &GroundLevel ));
 	DList.insert( make_pair( "Common parameters\tTreadmil\tVelocity (mm/msec)\nVel", &Vel ));
+	DList.insert( make_pair( "Common parameters\tTreadmil\tVelocity plus left (mm/msec)\nAddVelL", &AddVelL ));
+	DList.insert( make_pair( "Common parameters\tTreadmil\tVelocity plus right (mm/msec)\nAddVelR", &AddVelR ));
 	DList.insert( make_pair( "Common parameters\tTreadmil\tGround reaction\tElasticity\nKG", &GroundK ));
 	DList.insert( make_pair( "Common parameters\tTreadmil\tGround reaction\tViscosity\nBG", &GroundB ));
 	DList.insert( make_pair( "Common parameters\tMechanics\tInitial conditions\tHip\tPosition (mm)\tX component\nX", &X ));
@@ -495,7 +499,7 @@ t_biomech::t_biomech( uni_template *parent, int is_active )
 }
 
 t_biomech::t_biomech( const t_biomech &biomech )
-	: uni_template( biomech ), IsFixed( biomech.IsFixed ), G( biomech.G ), Vel( biomech.Vel ),
+	: uni_template( biomech ), IsFixed( biomech.IsFixed ), G( biomech.G ), Vel( biomech.Vel ), AddVelL( biomech.AddVelL ), AddVelR( biomech.AddVelR ),
 	MusBM( biomech.MusBM ), MusBT( biomech.MusBT ),	JointVis( biomech.JointVis ),
 	PelvisK( biomech.PelvisK ), PelvisB( biomech.PelvisB ),
 	TrunkK( biomech.TrunkK ), TrunkB( biomech.TrunkB ),
@@ -510,6 +514,8 @@ t_biomech::t_biomech( const t_biomech &biomech )
 {
 	DList.insert( make_pair( "Common parameters\tTreadmil\tLevel (mm)\nGL", &GroundLevel ));
 	DList.insert( make_pair( "Common parameters\tTreadmil\tVelocity (mm/msec)\nVel", &Vel ));
+	DList.insert( make_pair( "Common parameters\tTreadmil\tVelocity plus left (mm/msec)\nAddVelL", &AddVelL ));
+	DList.insert( make_pair( "Common parameters\tTreadmil\tVelocity plus right (mm/msec)\nAddVelR", &AddVelR ));
 	DList.insert( make_pair( "Common parameters\tTreadmil\tGround reaction\tElasticity\nKG", &GroundK ));
 	DList.insert( make_pair( "Common parameters\tTreadmil\tGround reaction\tViscosity\nBG", &GroundB ));
 	DList.insert( make_pair( "Common parameters\tMechanics\tInitial conditions\tHip\tPosition (mm)\tX component\nX", &X ));
@@ -549,9 +555,9 @@ void t_biomech::copy_to( uni_template **unit, uni_template *parent )
 void t_biomech::copy_to( walker **w )
 {
 	*w = new walker();
-	double *m = new double[NUM_TYPELINK];
-	double *cm = new double[NUM_TYPELINK];
-	double *I = new double[NUM_TYPELINK];
+	double m[NUM_TYPELINK] = {0.};
+	double cm[NUM_TYPELINK] = {0.};
+	double I[NUM_TYPELINK] = {0.};
 	for( size_t i = 0; i < Children.size(); ++i ){
 		string ctype = Children[i]->get_type();
 		if( ctype == "Body" ){
@@ -563,7 +569,8 @@ void t_biomech::copy_to( walker **w )
 	}
 	( *w )->BM = double( MusBM ); ( *w )->BT = double( MusBT );
 
-	( *w )->GV = double( Vel ); 
+	( *w )->GV_L = double( Vel )+AddVelL;
+	( *w )->GV_R = double( Vel )+AddVelR;
 	( *w )->GL = double( GroundLevel ); 
 	( *w )->Gravity = double( G );
 	( *w )->BJ = double( JointVis );
@@ -591,15 +598,13 @@ void t_biomech::copy_to( walker **w )
 		( *w )->LoinsLim( 50000.0, 500000.0 );
 		( *w )->PelvisLim( 50000.0, 500000.0 );
 	}
-	delete I;
-	delete cm;
-	delete m;
 }
 
 t_biomech &t_biomech::operator = ( const t_biomech &biomech )
 {
 	uni_template::operator = ( biomech );
 	IsFixed = biomech.IsFixed; G = biomech.G; Vel = biomech.Vel; 
+	AddVelL = biomech.AddVelL; AddVelR = biomech.AddVelR;
 	MusBM = biomech.MusBM; MusBT = biomech.MusBT; JointVis = biomech.JointVis;
 	ForepartK = biomech.ForepartK; ForepartB = biomech.ForepartB;
 	TrunkK = biomech.TrunkK; TrunkB = biomech.TrunkB;
@@ -752,16 +757,16 @@ bool t_biomech::load_addpar( string str, istream &file )
 	if( str == "<Body" ){
 		file >> ws;
 		getline( file, str, '>') ;
-		if( !get_child( "Body", str.c_str() )&& !add_child( "Body", str.c_str() ))
-			return false;
-		return get_child( "Body", str.c_str() )->load( file );
+		if( !get_child( "Body", str.c_str() )&& add_child( "Body", str.c_str() )){
+			return get_child( "Body", str.c_str() )->load( file );
+		}
 	}
 	else if( str == "<Hindlimb" ){
 		file >> ws;
 		getline( file, str, '>') ;
-		if( !get_child( "Hindlimb", str.c_str() )&& !add_child( "Hindlimb", str.c_str() ))
-			return false;
-		return get_child( "Hindlimb", str.c_str() )->load( file );
+		if( !get_child( "Hindlimb", str.c_str() )&& add_child( "Hindlimb", str.c_str() )){
+			return get_child( "Hindlimb", str.c_str() )->load( file );
+		}
 	}
 	else if( str == "IsFixed"){
 		file >> str >> str;
@@ -800,4 +805,6 @@ void t_biomech::nail( void )
 	}
 }
 */
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__

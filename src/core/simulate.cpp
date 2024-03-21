@@ -9,14 +9,14 @@
 #include <iostream>
 using std::cout;
 #else  
-#include "../gui/spcord.h"
+#include "../gui/Spcord.h"
 #endif // __CONSOLE__
 
 #ifdef __LINUX__
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif // __LINUX__
 
@@ -80,7 +80,7 @@ bool CSimParameters::IsValidate( void ) const
 /////////////////////////////////////////////////////////////////////////////
 // constructors/destructor
 CSimulateData::CSimulateData( void )
-             : Promt(), ModelName()
+	: Promt(), ModelName()
 {
 	Seed = long( -time( NULL ));
 	NumThreads = 0;
@@ -92,18 +92,20 @@ CSimulateData::CSimulateData( void )
 	HistNorm = 1000.;
 	BeginView = 0;
 	EndView = 1000;
-	TimeFactor = 20.;
+	TimeFactor = 1.;
 	IsSimPaused = false;
 	IsSimComplete = true;
 	IsRedrawResults = false;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	LimbSkip = 1;
 	LimbScale = 5;
 	LimbOriginX = 0.5;
 	LimbOriginY = 0.5;
 	IsStickDiagram = false;
 	Slope = 0.;
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 }
 
 CSimulateData::CSimulateData( const CSimulateData &data )
@@ -123,14 +125,16 @@ CSimulateData::CSimulateData( const CSimulateData &data )
 	IsSimPaused = data.IsSimPaused;
 	IsSimComplete = data.IsSimComplete;
 	IsRedrawResults = data.IsRedrawResults;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	LimbSkip = data.LimbSkip;
 	LimbScale = data.LimbScale;
 	LimbOriginX = data.LimbOriginX;
 	LimbOriginY = data.LimbOriginY;
 	IsStickDiagram = data.IsStickDiagram;
 	Slope = data.Slope;
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 }
 
 CSimulateData::~CSimulateData( void )
@@ -159,14 +163,16 @@ CSimulateData &CSimulateData::operator = ( const CSimulateData &data )
 	IsRedrawResults = data.IsRedrawResults;
 	Promt = data.Promt;
 	ModelName = data.ModelName;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	LimbSkip = data.LimbSkip;
 	LimbScale = data.LimbScale;
 	LimbOriginX = data.LimbOriginX;
 	LimbOriginY = data.LimbOriginY;
 	IsStickDiagram = data.IsStickDiagram;
 	Slope = data.Slope;
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 	return *this;
 }
 
@@ -233,7 +239,7 @@ bool CSimulateData::LoadData( istream &file )
 		else if( str == "NumThreads"){
 			file >> str >> NumThreads;
 		}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		else if( str == "LimbSkip"){
 			file >> str >> LimbSkip;
 		}
@@ -249,7 +255,9 @@ bool CSimulateData::LoadData( istream &file )
 		else if( str == "Slope"){
 			file >> str >> Slope;
 		}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 		else if( str == "</SimulateData>"){
 			return true;
 		}
@@ -275,13 +283,15 @@ void CSimulateData::SaveData( ostream &file )
 	file << "EndView = " << EndView << endl;
 	file << "TimeFactor = " << TimeFactor << endl;
 	file << "NumThreads = " << NumThreads << endl;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	file << "LimbSkip = " << LimbSkip << endl;
 	file << "LimbScale = " << LimbScale << endl;
 	file << "LimbOriginX = " << LimbOriginX << endl;
 	file << "LimbOriginY = " << LimbOriginY << endl;
 	file << "Slope = " << Slope << endl;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	file << "</SimulateData>" << endl;
 }
 
@@ -290,11 +300,20 @@ void CSimulateData::SaveData( ostream &file )
 /////////////////////////////////////////////////////////////////////////////
 // constructors/destructor
 CSimulate::CSimulate( void ) 
-	: SimPar(),	DataFormat( 0 )
-#ifdef __MECHANICS__
-	, BiomechT( NULL ), Walker( NULL )
-#endif // __MECHANICS__
+/*, SimCfg( NULL ), NetworkT( NULL ) TODO alex*/
 {
+	/* TODO alex
+	Control_values.reserve( NumCheck );
+	std::generate_n( std::back_inserter( Control_values ), NumCheck, []{ return 0.; });
+	//	Control_values.resize(NumCheck);//AK 
+	view = 2;
+	NumControl = 10;
+	#ifdef __CONSOLE__
+	ContFileName = "TestCons.txt";
+	#else
+	ContFileName = "TestGUI.txt";
+	#endif // __CONSOLE__#ifndef __CONSOLE__
+	*/
 #ifndef __CONSOLE__
 	IsHandleLocked = ::CreateMutex( NULL, true, NULL );
 	NumSteps = 0;
@@ -305,15 +324,40 @@ CSimulate::CSimulate( void )
 	IsSimulate = ::CreateEvent( NULL, true, false, NULL );  // manual-reset event
 	SimThread = NULL;
 #endif // __CONSOLE__
-    ChartBuffer = new CChartBuffer( this );
-#ifdef __MECHANICS__
-    WalkerBuffer = new CWalkerBuffer( this );
-#endif // __MECHANICS__
+	DataFormat = 0;
+	NumThreads = 1;
+	NumSteps = 0;
+	CurrStep = 0;
+	RunMan = new runman(); // -->>> mod
+	ChartBuffer = new CChartBuffer( this );
+#if defined (__MECHANICS_2D__)
+	BiomechT = NULL;
+	Walker = NULL;
+	WalkerBuffer = new CWalkerBuffer( this );
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 #ifndef __CONSOLE__
 	::ReleaseMutex( IsHandleLocked );
 #endif // __CONSOLE__
 }
-
+/* TODO alex
+CSimulate & CSimulate ::operator = (const CSimulate & SS)	//AK
+{
+	SimData = SS.SimData; //AK there is  operator =
+	*RunMan = *SS.RunMan;			//AK there is  operator =
+	Network = SS.Network;	//AK there is  operator =
+#if defined (__MECHANICS_2D__)
+	//	*Walker = *SS.Walker;			//AK there was NO!!! operator = !!added by AK
+	BiomechT = SS.BiomechT;		//AK there is  operator =
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
+	// *ChartBuffer = *SS.ChartBuffer;
+	// *WalkerBuffer = *SS.WalkerBuffer;
+	return *this;
+}
+*/
 CSimulate::~CSimulate( void )
 {
 #ifndef __CONSOLE__
@@ -327,12 +371,15 @@ CSimulate::~CSimulate( void )
 	::CloseHandle( Timer );
 	::CloseHandle( IsShutdown );
 #endif // __CONSOLE__
+	delete RunMan;
 	delete ChartBuffer;
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	if( Walker )
 		delete Walker;
 	delete WalkerBuffer;
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	for( size_t i = 0; i < Views.size(); i++ )
 		delete Views[i];
 #ifndef __CONSOLE__
@@ -345,31 +392,18 @@ CSimulate::~CSimulate( void )
 // public methods
 void CSimulate::init( long seed, bool rand )
 {
-	Network.init( seed, NULL, rand );
-#ifdef __MECHANICS__
+	Network.init( seed, RunMan, rand ); // -->>> mod
+#if defined (__MECHANICS_2D__)
 	if( Walker )
 		delete Walker;
+//	BiomechT.SetSlope(SimData.Slope); //TODO alex
 	BiomechT.copy_to( &Walker );
 	Walker->attach( &Network );
 	Walker->set_slope( SimData.Slope );
-	Walker->reg_unit( NULL );
-#endif	// __MECHANICS__
-}
-
-void CSimulate::InitViews( void )
-{
-	for( size_t i = 0; i < Views.size(); i++ )
-		Views[i]->init_view( this );
-	ChartBuffer->reserve();
-	ChartBuffer->reg_unit();
-}
-
-void CSimulate::ReleaseViews( void )
-{
-	ChartBuffer->release_views();
-#ifdef __MECHANICS__
-	WalkerBuffer->release_views();
-#endif // __MECHANICS__
+	Walker->reg_unit( RunMan ); // -->>> mod
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif	// __MECHANICS_2D__
 }
 
 void CSimulate::SetTimeScale( double begin, double end)
@@ -380,14 +414,16 @@ void CSimulate::SetTimeScale( double begin, double end)
 
 void CSimulate::SaveModel( const char *filename )
 {
-    ofstream file( filename, ios_base::trunc );
+	ofstream file( filename, ios_base::trunc );
 	if( file.is_open() ){
 		file << "Generated by " << _ProjectName << endl;
 		SimData.ModelName = filename;
 		SimData.SaveData( file );
 		Network.save( file, this );
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		BiomechT.save( file );
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
 #endif
 		SaveViews( file );
 		SaveRecords( file );
@@ -398,11 +434,11 @@ void CSimulate::SaveModel( const char *filename )
 
 void CSimulate::PreSaveData( const vector<unit_code> &buffers, int format )
 {
-    DataFormat = format;
-    Results = buffers;
+	DataFormat = format;
+	Results = buffers;
 }
 
-void CSimulate::SaveData( const char *filename, const hhn_pair<int> &wnd, double prec ) /*insert window*/
+void CSimulate::SaveData( const char *filename, const hhn_pair<int> &wnd, double prec_t, int prec_a )
 {
 	ofstream *file = NULL;
 	switch( DataFormat ){
@@ -416,7 +452,7 @@ void CSimulate::SaveData( const char *filename, const hhn_pair<int> &wnd, double
 			return;
 	}
 	if( file ){
-		ChartBuffer->save( *file, Results, wnd, prec, DataFormat );
+		ChartBuffer->save( *file, Results, wnd, prec_t, prec_a, DataFormat );
 		delete file;
 	}
 }
@@ -477,18 +513,39 @@ void CSimulate::Initialize( double freq )
 {
 	if( freq <= 0 )
 		freq = SimPar.Freq;
-	ChartBuffer->init_views( SimPar.SimStep, NumSteps, freq );
-#ifdef __MECHANICS__
-	WalkerBuffer->init_views( SimPar.SimStep, NumSteps );
-#endif // __MECHANICS__
+	ChartBuffer->init_all_buffers( SimPar.SimStep, NumSteps, freq );
+#if defined (__MECHANICS_2D__)
+	WalkerBuffer->init_all_buffers( SimPar.SimStep, NumSteps );
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	InitViews();
 	CurrStep = 0;
 #ifdef __OMP__
-	NumThreads = omp_get_num_procs();
+	NumThreads = ( SimData.NumThreads == 0 )? omp_get_num_procs(): SimData.NumThreads;
 #else
 	NumThreads = 1; // debug version
 #endif //__OMP__
-	::schedule( NumThreads );
+	::schedule( NumThreads, RunMan ); // -->>> mod
+}
+
+void CSimulate::InitViews( void )
+{
+	for( size_t i = 0; i < Views.size(); i++ )
+		Views[i]->init_view( this );
+	for( size_t i = 0; i < Views.size(); i++ )
+		Views[i]->alloc_view();
+	ChartBuffer->reg_unit(RunMan);
+}
+
+void CSimulate::ReleaseViews( void )
+{
+	ChartBuffer->release_all_buffers();
+#if defined (__MECHANICS_2D__)
+	WalkerBuffer->release_all_buffers();
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 }
 
 void CSimulate::Shutdown( void )
@@ -510,11 +567,13 @@ void CSimulate::CheckViews( CHhnNetwork &network )
 	for( i = 0; i < Network.size_out(); i++ ){
 		CheckView( network, Network.get_out( i ).get_name() );
 	}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	for( i = 0; i < Network.size_fbk(); i++ ){
 		CheckView( network, Network.get_fbk( i ).get_name() );
 	}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	for( i = 0; i < Network.size_ctr(); i++ ){
 		CheckView( network, Network.get_ctr( i ).get_name() );
 	}
@@ -522,11 +581,11 @@ void CSimulate::CheckViews( CHhnNetwork &network )
 		for( size_t j = 0; j < Views[i]->npars(); j++ ){
 			unit_code viewcode = Views[i]->get_par(j)->ParCode;
 			if( viewcode.UnitId == _id_NNControl ){
-				unsigned index = viewcode.NNIndex;
+				DWORD index = viewcode.NNIndex;
 				for( size_t k = 0; k < network.size_ctr(); k++ ){
 					string ctrlname = network.get_ctr( k ).get_name();
 					if( ctrlname == Network.get_ctr( index ).get_name() ){
-						viewcode.NNIndex = k;
+						viewcode.NNIndex = ( DWORD )k;
 						break;
 					}
 				}
@@ -541,8 +600,8 @@ void CSimulate::CheckView( CHhnNetwork &network, const string &name )
 	if( nnunit == NULL ){
 		unit_code nncode;
 		if( Network.get_nnunit( name )){
-			nncode.UnitId = Network.get_nnunit( name )->uid();
-			nncode.NNIndex = Network.get_nnunit( name )->nn_inx();
+			nncode.UnitId = (DWORD)Network.get_nnunit( name )->uid();
+			nncode.NNIndex = (DWORD)Network.get_nnunit( name )->nn_inx();
 			for( size_t i = 0; i < Views.size(); i++ ){
 				for( size_t j = 0; j < Views[i]->npars(); j++ ){
 					unit_code viewcode = Views[i]->get_par(j)->ParCode;
@@ -556,12 +615,12 @@ void CSimulate::CheckView( CHhnNetwork &network, const string &name )
 	}
 	else{
 		unit_code newcode;
-		newcode.UnitId = network.get_nnunit( name )->uid();
-		newcode.NNIndex = network.get_nnunit( name )->nn_inx();
+		newcode.UnitId = (DWORD)network.get_nnunit( name )->uid();
+		newcode.NNIndex = (DWORD)network.get_nnunit( name )->nn_inx();
 		unit_code oldcode;
 		if( Network.get_nnunit( name )){
-			oldcode.UnitId = Network.get_nnunit( name )->uid();
-			oldcode.NNIndex = Network.get_nnunit( name )->nn_inx();
+			oldcode.UnitId = (DWORD)Network.get_nnunit( name )->uid();
+			oldcode.NNIndex = (DWORD)Network.get_nnunit( name )->nn_inx();
 			for( size_t i = 0; i < Views.size(); i++ ){
 				for( size_t j = 0; j < Views[i]->npars(); j++ ){
 					unit_code *viewcode = &( Views[i]->get_par(j)->ParCode );
@@ -583,7 +642,7 @@ void CSimulate::CheckView( CHhnNetwork &network, const string &name )
 			if( Network.get_ctr( k ).get_name() == name ){
 				unit_code nncode;
 				nncode.UnitId = _id_NNControl;
-				nncode.NNIndex = k;
+				nncode.NNIndex = (DWORD)k;
 				for( size_t i = 0; i < Views.size(); i++ ){
 					for( size_t j = 0; j < Views[i]->npars(); j++ ){
 						unit_code viewcode = Views[i]->get_par(j)->ParCode;
@@ -609,11 +668,13 @@ void CSimulate::CheckRecords( CHhnNetwork &network )
 	for( size_t i = 0; i < Network.size_out(); i++ ){
 		CheckRecord( network, Network.get_out( i ).get_name() );
 	}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 	for( size_t i = 0; i < Network.size_fbk(); i++ ){
 		CheckRecord( network, Network.get_fbk( i ).get_name() );
 	}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	for( size_t i = 0; i < Network.size_ctr(); i++ ){
 		CheckRecord( network, Network.get_ctr( i ).get_name() );
 	}
@@ -623,7 +684,7 @@ void CSimulate::CheckRecords( CHhnNetwork &network )
 			for( size_t k = 0; k < network.size_ctr(); k++ ){
 				string ctrlname = network.get_ctr( k ).get_name();
 				if( ctrlname == Network.get_ctr( index ).get_name() ){
-					Results[i].NNIndex = k;
+					Results[i].NNIndex = (DWORD)k;
 					break;
 				}
 			}
@@ -637,8 +698,8 @@ void CSimulate::CheckRecord( CHhnNetwork &network, const string &name )
 	if( nnunit == NULL ){
 		unit_code nncode;
 		if( Network.get_nnunit( name )){
-			nncode.UnitId = Network.get_nnunit( name )->uid();
-			nncode.NNIndex = Network.get_nnunit( name )->nn_inx();
+			nncode.UnitId = (DWORD)Network.get_nnunit( name )->uid();
+			nncode.NNIndex = (DWORD)Network.get_nnunit( name )->nn_inx();
 			for( size_t i = 0; i < Results.size(); i++ ){
 				if(  Results[i].UnitId == nncode.UnitId && Results[i].NNIndex == nncode.NNIndex ){
 					Results.erase( Results.begin()+i );
@@ -649,12 +710,12 @@ void CSimulate::CheckRecord( CHhnNetwork &network, const string &name )
 	}
 	else{
 		unit_code newcode;
-		newcode.UnitId = network.get_nnunit( name )->uid();
-		newcode.NNIndex = network.get_nnunit( name )->nn_inx();
+		newcode.UnitId = (DWORD)network.get_nnunit( name )->uid();
+		newcode.NNIndex = (DWORD)network.get_nnunit( name )->nn_inx();
 		unit_code oldcode;
 		if( Network.get_nnunit( name )){
-			oldcode.UnitId = Network.get_nnunit( name )->uid();
-			oldcode.NNIndex = Network.get_nnunit( name )->nn_inx();
+			oldcode.UnitId = (DWORD)Network.get_nnunit( name )->uid();
+			oldcode.NNIndex = (DWORD)Network.get_nnunit( name )->nn_inx();
 			for( size_t i = 0; i < Results.size(); i++ ){
 				if( Results[i].UnitId == oldcode.UnitId && Results[i].NNIndex == oldcode.NNIndex ){
 					Results[i].UnitId = newcode.UnitId;
@@ -673,7 +734,7 @@ void CSimulate::CheckRecord( CHhnNetwork &network, const string &name )
 			if( Network.get_ctr( k ).get_name() == name ){
 				unit_code nncode;
 				nncode.UnitId = _id_NNControl;
-				nncode.NNIndex = k;
+				nncode.NNIndex = (DWORD)k;
 				for( size_t i = 0; i < Results.size(); i++ ){
 					if( Results[i].UnitId == nncode.UnitId && Results[i].NNIndex == nncode.NNIndex ){
 						Results.erase( Results.begin()+i );
@@ -695,14 +756,68 @@ bool CSimulate::IsParPresent( CHhnNetwork &network, const unit_code &code )
 		hhn_control *control = ( hhn_control *)network.get_crtunit( code );
 		if( control )
 			data = ( void *)( control->select(( unit_code *)&code ));
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		else
 			data = ( void *)Walker->select(( unit_code *)&code );
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 	}
 	if( data )
 		return true;
 	return false;
+}
+
+size_t CSimulate::ctrl_handler( bool *quit, size_t *currstep )
+{
+#ifndef __CONSOLE__
+	size_t error_code = _SIM_NOERRORS;
+	HANDLE synch_objects[4] = { IsShutdown, IsStop,	Timer, IsSimulate, };
+	ChartBuffer->next_step( CurrStep );
+#if defined (__MECHANICS_2D__)
+	WalkerBuffer->next_step( CurrStep );
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
+	long code = WaitForMultipleObjects( 4, synch_objects, false, INFINITE );
+	switch( code ){
+		case WAIT_OBJECT_0:                // the shutdown event is occured
+			error_code = _SIM_SHUTDOWN;
+			*quit = true;
+			break;
+		case WAIT_OBJECT_0+1:              // the stop event is occured
+			error_code = _SIM_NOERRORS;
+			*quit = true;
+			break;
+		case WAIT_OBJECT_0+2:              // to send a notify message to the main window
+			if( IsStopped())
+				break;
+			if( IsPaused())
+				break;
+			if( !UpdateResults( false )){
+				error_code = _SIM_UPDATE_ERROR;
+				*quit = true;
+				break;
+			}
+		case WAIT_OBJECT_0+3:              // to continue the simulation
+			break;
+		default:
+			error_code = _SIM_SYNCH_ERROR;
+			*quit = true;
+	}
+	if( ++CurrStep >= NumSteps-1 ){
+		SetEvent( IsStop );
+	}
+	*currstep = CurrStep;
+	return error_code;
+#else
+	size_t error_code = _SIM_NOERRORS;
+	if( ++CurrStep >= NumSteps-1 ){
+		*quit = true;
+	}
+	*currstep = CurrStep;
+	return error_code;
+#endif /*__CONSOLE__*/
 }
 
 #ifdef __CONSOLE__
@@ -711,63 +826,60 @@ bool CSimulate::LoadModel( const char *filename )
 #ifdef __LINUX__
 	remove_char( filename, 0x0D );
 #endif
-#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-	_FileVersion = 1.0;
-#else
 	_FileVersion = 2.05;
-#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-	bool LoadOK=false;
+	
+	ifstream file( filename );
+	if( !file.is_open() ){
+		message( "Cannot open file", "Error" );
+		return false;
+	}
+	file.seekg(0, std::ios::end);
+	std::streamsize fsize = file.tellg();
+	file.seekg( 0, ios::beg );
+	vector<char> buffer( fsize );
+	file.read( buffer.data(), fsize );
+	istringstream inp( string( buffer.begin(), buffer.begin()+file.gcount()));
+	file.close();
+
 	string str;
 	CSimulate manager;
-	CChartFrameView view;
-	manager.add_view( &view );
-
-	ifstream file( filename );
-	while( file >> str ){
+	bool LoadOK = false;
+	while( inp >> str ){
 		if( str == "Generated" ){
-			getline( file, str );
+			getline( inp, str );
 			_FileVersion = 2.05;
 		}
 		else if(str == "<SimulateData>" ){
-			LoadOK = manager.SimData.LoadData( file );
+			LoadOK = SimData.LoadData( inp );
 		}
 		else if( str == "<Network" ){
-			LoadOK = manager.Network.load( file, &manager );
+			LoadOK = Network.load( inp, this );
 		}
 		else if( str == "<Views>" ){
-			LoadOK = manager.LoadViews( file );
+			LoadOK = LoadViews( inp );
 		}
 		else if( str == "<Records>" ){
-			LoadOK = manager.LoadRecords( file );
+ 			LoadOK = LoadRecords( inp );
 		}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		else if( str == "<Biomechanics" ){
-			file >> ws;
-			getline( file, str, '>') ;
-			manager.BiomechT.load( file );
+			inp >> ws;
+			getline( inp, str, '>') ;
+			BiomechT.load( inp );
 		}
-#endif
-		else
-			unknown_string( file, str );
-	}
-	if( manager.Views.size() < 2 ){
-		view.SetTimeScale( SimData.BeginView, SimData.EndView );
-		manager.add_view( &view );
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif	// __MECHANICS_2D__
+		else if( !str.empty() && str[0] != 0x00 ){
+			unknown_string( inp, str );
+		}
 	}
 	if( LoadOK ){
-		SimData = manager.SimData;
-		Network = manager.Network;
-		for( size_t i = 0; i < manager.Views.size(); i++ )
-			add_view( manager.Views[i] );
-		DataFormat = manager.DataFormat;
-		Results = manager.Results;
 		init( SimData.Seed );
-#ifdef __MECHANICS__
-//?????
-#endif
 		SimData.ModelName = filename;
 	}
 	return LoadOK;
+
 }
 
 bool CSimulate::LoadViews( istream &file )
@@ -775,20 +887,28 @@ bool CSimulate::LoadViews( istream &file )
 	string str;
 	while( file >> str){
 		if( str == "<View"){
-			file >> ws;
-			getline( file, str, '>' );
+		file >> ws;
+		getline( file, str, '>' );
 			if( str == "Chart"){
 				CChartFrameView view;
-				if( view.LoadView( file, this ) )
-					add_view( &view );
-			}
-#ifdef __MECHANICS__
+				if( view.load( file, this ) ){
+					CFrameView *new_view = NULL;
+					view.copy_to( &new_view );
+					Views.push_back( new_view );
+				}
+		}
+#if defined (__MECHANICS_2D__)
 			else if( str == "Walker"){
 				CWalkerFrameView view;
-				if( view.LoadView( file, this ) )
-					add_view( &view );
+				if( view.load( file, this )){
+					CFrameView *new_view = NULL;
+					view.copy_to( &new_view );
+					Views.push_back( new_view );
+				}
 			}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 		}
 		else if( str == "</Views>"){
 			return true;
@@ -805,31 +925,35 @@ bool CSimulate::StartSimulation( const char *ifilename, const char *ofilename )
 {
 	cout << "Loading the model " << ifilename << ". Please wait... " << endl;
 	if( LoadModel( ifilename )){
-	SimData.Promt = "Single simulation: the model ";
-	SimData.Promt += ifilename;
-	SimData.Promt += " is running. Please wait...";
-	LockData();
-	ChartBuffer->FreeBuffers();
-#ifdef __MECHANICS__
-	WalkerBuffer->FreeBuffers();
-#endif // __MECHANICS__
-	UnlockData();
-	SimData.SetSimParameters( &SimPar );
-	NumSteps = SimPar.NNSteps;
-	Initialize( 1. );
-	cout << endl;
-	long slice = NumSteps/100;
-	long percent = 0;
-	long t0 = long( time( NULL ));
-	for( CurrStep = 0; CurrStep < NumSteps; next_step(), ++CurrStep )
-		if( CurrStep%slice == 0 ){
-			cout << SimData.Promt << std::setw( 3 ) << percent << "%\r";
-			++percent;
+		SimData.Promt = "Single simulation: the model ";
+		SimData.Promt += ifilename;
+		SimData.Promt += " is running. Please wait...";
+		lock_data();
+		ChartBuffer->release_all_buffers();
+#if defined (__MECHANICS_2D__)
+		WalkerBuffer->release_all_buffers();
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
+		unlock_data();
+		SimData.SetSimParameters( &SimPar );
+		NumSteps = SimPar.NNSteps;
+		Initialize();
+		cout << endl;
+		long slice = NumSteps/100;
+		long percent = 0;
+		long t0 = long( time( NULL ));
+		for( CurrStep = 0; CurrStep < NumSteps; ){
+			::next_step( SimPar.SimStep, CurrStep, NumThreads, this, RunMan );// -->>> mod
+			if( CurrStep%slice == 0 ){
+				cout << SimData.Promt << std::setw( 3 ) << percent << "%\r";
+				++percent;
+			}
 		}
-	cout << endl << "The simulation is complete. Total duration is " << long( time( NULL ))-t0 << " sec" << endl;
-	SaveData( ofilename );
-	Shutdown();
-	return true;
+		cout << endl << "The simulation is complete. Total duration is " << long( time( NULL ))-t0 << " sec" << endl;
+		SaveData( ofilename );
+		Shutdown();
+		return true;
 	}
 	return false;
 }
@@ -903,12 +1027,12 @@ static	string unique_name = "";
 	return name;
 }
 
-void CSimulate::CreateNetwork( CHhnNetwork &network, long seed )
+void CSimulate::InitNetwork( CHhnNetwork &network, long seed )
 {
 	CheckViews( network );
 	CheckRecords( network );
 	Network = network;
-	Network.init( seed );
+	Network.init( seed, RunMan ); // -->>> mod
 }
 
 bool CSimulate::diff( const string &pattern, ostream &log, char delim1, char delim2 )
@@ -931,32 +1055,21 @@ bool CSimulate::diff( const string &pattern, ostream &log, char delim1, char del
 bool CSimulate::LoadModel( const char *filename, queue<CFrameView *> &viewfifo )
 {
 #ifdef __LINUX__
-    remove_char( filename, 0x0D );
+	remove_char( filename, 0x0D );
 #endif
-#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-    _FileVersion = 1.0;
-#else
-    _FileVersion = 2.05;
-#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
-
+	_FileVersion = 2.05;
 	ifstream file( filename );
 	if( !file.is_open() ){
 		message( "Cannot open file", "Error" );
 		return false;
 	}
-
-	file.seekg( 0, ios::end );
-	size_t size = file.tellg(); 
+	file.seekg(0, std::ios::end);
+	std::streamsize fsize = file.tellg();
 	file.seekg( 0, ios::beg );
-	char *buffer = new char[size];	// allocate memory to store file data
-	memset( buffer, 0, size );
-	file.rdbuf()->sgetn( buffer, size );		// load data from file to buffer
+	vector<char> buffer( fsize );
+	file.read( buffer.data(), fsize );
+	istringstream inp( string( buffer.begin(), buffer.begin()+file.gcount()));
 	file.close();
-
-	istringstream inp;
-	inp.clear();
-	inp.str( string( buffer, size ));
-
 	string str;
 	CSimulate manager;
 	bool LoadOK = false;
@@ -977,18 +1090,19 @@ bool CSimulate::LoadModel( const char *filename, queue<CFrameView *> &viewfifo )
 		else if( str == "<Records>" ){
  			LoadOK = LoadRecords( inp );
 		}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 		else if( str == "<Biomechanics" ){
 			inp >> ws;
 			getline( inp, str, '>') ;
 			BiomechT.load( inp );
 		}
-#endif	// __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif	// __MECHANICS_2D__
 		else if( !str.empty() && str[0] != 0x00 ){
 			unknown_string( inp, str );
 		}
 	}
-	delete[] buffer;
 
 	if( LoadOK ){
 		init( SimData.Seed );
@@ -1002,8 +1116,8 @@ bool CSimulate::LoadViews( istream &file, queue<CFrameView *> &viewfifo )
 	string str;
 	while( file >> str){
 		if( str == "<View"){
-            file >> ws;
-            getline( file, str, '>' );
+		file >> ws;
+		getline( file, str, '>' );
 			if( str == "Chart"){
 				CChartFrameView view;
 				if( view.load( file, this ) ){
@@ -1012,7 +1126,7 @@ bool CSimulate::LoadViews( istream &file, queue<CFrameView *> &viewfifo )
 					viewfifo.push( new_view );
 				}
 			}
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 			else if( str == "Walker"){
 				CWalkerFrameView view;
 				if( view.load( file, this )){
@@ -1021,7 +1135,9 @@ bool CSimulate::LoadViews( istream &file, queue<CFrameView *> &viewfifo )
 					viewfifo.push( new_view );
 				}
 			}
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 		}
 		else if( str == "</Views>"){
 			return true;
@@ -1034,7 +1150,7 @@ bool CSimulate::LoadViews( istream &file, queue<CFrameView *> &viewfifo )
 	return false;
 }
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 void CSimulate::upd_outlist( void )
 {
 	vector<string> outlist;
@@ -1043,8 +1159,9 @@ void CSimulate::upd_outlist( void )
 	}
 	BiomechT.upd_outlist( outlist );
 }
-
-#endif // __MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif // __MECHANICS_2D__
 
 /////////////////////////////////////////////////////////////////////////////
 // multi-threading implementation
@@ -1088,9 +1205,8 @@ void CSimulate::EnableTimer( bool enabled )
 	if( enabled ){
 		LARGE_INTEGER start_time;
 		start_time.QuadPart = -long( SimPar.UpdatingTime*10000 );
-		SetWaitableTimer( Timer, &start_time, SimPar.UpdatingTime, NULL, NULL, FALSE );
-	}
-	else{
+		SetWaitableTimer( Timer, &start_time, (LONG)SimPar.UpdatingTime, NULL, NULL, FALSE );
+	} else{
 		CancelWaitableTimer( Timer );
 	}
 }
@@ -1102,7 +1218,7 @@ bool CSimulate::startsim( void )
 	bool exit_code = true;
 	Initialize();
 	EnableTimer( true );
-	UpdateResults( false );     	// to send a notify message to the main window
+	UpdateResults( false );		// to send a notify message to the main window
 	return exit_code;
 }
 
@@ -1110,57 +1226,14 @@ void CSimulate::stopsim( void )
 {
 	EnableTimer( false );
 	Shutdown();
-	UpdateResults( true );     	// to send a notify message to the main window
+	UpdateResults( true );		// to send a notify message to the main window
 }
 
 size_t CSimulate::runsim( void )
 {
 	size_t error_code = _SIM_NOERRORS;
-	error_code = ::run( SimPar.SimStep, CurrStep, NumThreads, this );
-	return error_code;
-}
-
-//size_t CSimulate::ctrl_handler( bool *run, bool *quit, size_t *currstep )
-size_t CSimulate::ctrl_handler( bool *quit, size_t *currstep )
-{
-	size_t error_code = _SIM_NOERRORS;
-	HANDLE synch_objects[4] = { IsShutdown, IsStop,	Timer, IsSimulate, };
-	ChartBuffer->next_step( CurrStep );
-	#ifdef __MECHANICS__
-		WalkerBuffer->next_step( CurrStep );
-	#endif // __MECHANICS__
-	long code = WaitForMultipleObjects( 4, synch_objects, false, INFINITE );
-//	*run = false;
-	switch( code ){
-		case WAIT_OBJECT_0:                // the shutdown event is occured
-			error_code = _SIM_SHUTDOWN;
-			*quit = true;
-			break;
-		case WAIT_OBJECT_0+1:              // the stop event is occured
-			error_code = _SIM_NOERRORS;
-			*quit = true;
-			break;
-		case WAIT_OBJECT_0+2:              // to send a notify message to the main window
-			if( IsStopped())
-				break;
-			if( IsPaused())
-				break;
-			if( !UpdateResults( false )){
-				error_code = _SIM_UPDATE_ERROR;
-				*quit = true;
-				break;
-			}
-		case WAIT_OBJECT_0+3:              // to continue the simulation
-//			*run = true;
-			break;
-		default:
-			error_code = _SIM_SYNCH_ERROR;
-			*quit = true;
-	}
-	if( ++CurrStep >= NumSteps-1 ){
-		SetEvent( IsStop );
-	}
-	*currstep = CurrStep;
+	Network.prerun( SimPar.SimStep );
+	error_code = ::run( SimPar.SimStep, CurrStep, NumThreads, this, RunMan );
 	return error_code;
 }
 
@@ -1172,7 +1245,7 @@ unsigned int WINAPI CSimulate::SimulationThread( void *param )
 		error_code = the_sim->runsim();
 		the_sim->stopsim();
 	}
-	return error_code;
+	return ( unsigned int )error_code;
 }
 
 #endif /* ! __CONSOLE__*/

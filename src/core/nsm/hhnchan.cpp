@@ -12,12 +12,12 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 #endif //__LINUX__
 
-static double _pKGmax = 1.;
-static double _pKIonsE = 1.;
+alignas( 16 ) static double _pKGmax = 1.;
+alignas( 16 ) static double _pKIonsE = 1.;
 
 /////////////////////////////////////////////////////////////////////////////
 // class hhn_channel
@@ -70,8 +70,8 @@ hhn_channel &hhn_channel::operator = ( const hhn_channel &channel )
 /////////////////////////////////////////////////////////////////////////////
 // class gen_channel
 gen_channel::gen_channel( hhn_compart *neuron, hhn_ions *ions, bool modi, size_t subid )
-	: hhn_channel( neuron ), GChannelId( subid ),
-	IsModI( modi ), IsNscpE( false ), NScpE( 0. ), Kpump( 1.0 )
+	: hhn_channel( neuron ), Kpump( 1.0 ), GChannelId( subid ),
+	NScpE( 0. ), IsModI( modi ), IsNscpE( false )
 {
 	ChannelId = _id_generic_Chan;
 	if( _ChannelNames[ChannelId] )
@@ -84,8 +84,8 @@ gen_channel::gen_channel( hhn_compart *neuron, hhn_ions *ions, bool modi, size_t
 }
 
 gen_channel::gen_channel( hhn_compart *neuron, double e, size_t subid )
-	: hhn_channel( neuron ), GChannelId( subid ),
-	IsModI( false ), IsNscpE( true ), NScpE( e ), Kpump( 1.0 )
+	: hhn_channel( neuron ), Kpump( 1.0 ), GChannelId( subid ),
+	NScpE( e ), IsModI( false ), IsNscpE( true )
 {
 	ChannelId = _id_generic_Chan;
 	if( _ChannelNames[ChannelId] )
@@ -98,8 +98,8 @@ gen_channel::gen_channel( hhn_compart *neuron, double e, size_t subid )
 }
 
 gen_channel::gen_channel( const gen_channel &channel )
-	: hhn_channel( channel ), GChannelId( channel.GChannelId ),
-	IsModI( channel.IsModI ), IsNscpE( channel.IsNscpE ), NScpE( channel.NScpE ), Kpump( channel.Kpump )
+	: hhn_channel( channel ), Kpump( channel.Kpump ), GChannelId( channel.GChannelId ),
+	NScpE( channel.NScpE ), IsModI( channel.IsModI ), IsNscpE( channel.IsNscpE )
 {
 	IonsE = IsNscpE? &NScpE: channel.IonsE;
 	IonsI = IsModI? channel.IonsI: NULL;
@@ -150,7 +150,7 @@ void gen_channel::copy_to( hhn_channel **chan )
 
 void gen_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*Gmax;
 	if( PowM > 0 ){
 		double m0 = Mk*( GENERIC_G( v, Hvm, Slpm ));
@@ -189,6 +189,9 @@ hgna_channel::hgna_channel( hhn_compart *neuron )
 	hhn_channel::init_channel( 4., 10., 1. );
 	init_channel( 0.02, -40., -6., -40., -12., 1, 0.3, -48., 6, -48., 12., 1 );
 	Th = 1.;
+#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+	Th = 0.33;
+#endif // __MECHANICS_2D__
 }
 
 hgna_channel::hgna_channel( const hgna_channel &channel )
@@ -242,7 +245,7 @@ void hgna_channel::copy_to( hhn_channel **chan )
 
 void hgna_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*Gmax;
 	if( PowM > 0 ){
 		double m0 = GENERIC_G( v, V12m, Km );
@@ -299,7 +302,7 @@ void hgnap_channel::reg_unit( runman *man  )
 
 void hgnap_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = GENERIC_G( v, V12m, Km );
 	double tm = GENERIC_T( Tm, v, V12tm, Ktm );
 	double m = EXP_EULER( M, m0, step, tm );
@@ -370,7 +373,7 @@ void hgkdr_channel::reg_unit( runman *man  )
 
 void hgkdr_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = GENERIC_G( v, V12m, Km );
 	double tm = GENERIC_T_MOD( Shifttm, Tm, v, V12tm, Ktm, Ktm_1 );
 	double m = EXP_EULER( M, m0, step, tm );
@@ -446,7 +449,7 @@ void hgka_channel::copy_to( hhn_channel **chan )
 
 void hgka_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*Gmax;
 	if( PowM > 0 ){
 		double m0 = GENERIC_G( v, V12m, Km );
@@ -520,7 +523,7 @@ void hgkca_channel::copy_to( hhn_channel **chan )
 
 void hgkca_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*Gmax;
 	if( PowM > 0 ){
 		double cacnc = Hhn->CaIons->In;
@@ -577,7 +580,7 @@ void hgcan_channel::copy_to( hhn_channel **chan )
 
 void hgcan_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*Gmax;
 	if( PowM > 0 ){
 		double cacnc = Hhn->CaIons->In;
@@ -646,7 +649,7 @@ void hgh_channel::copy_to( hhn_channel **chan )
 
 void hgh_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double h0 = GENERIC_G( v, V12h, Kh );
 	double th = GENERIC_T( Th, v, V12th, Kth );
 	double h = EXP_EULER( H, h0, step, th );
@@ -676,6 +679,9 @@ hna_channel::hna_channel( hhn_compart *neuron )
 	init_channel( 0.02, 0.3 );
 #endif // __LOCOMOTION__
 	Th = 1.;
+#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+	Th = 0.33;
+#endif // __MECHANICS_2D__
 }
 
 hna_channel::hna_channel( const hna_channel &channel )
@@ -703,7 +709,7 @@ void hna_channel::copy_to( hhn_channel **chan )
 
 void hna_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double h0 = 1./( 1+EXP(( v+55. )/7.0 ));
 	double th =  Th*30./( EXP(( v+50. )/15. )+EXP( -( v+50. )/16. ));
 	double m = 1./( 1+EXP(( v+35. )/-7.8 ));
@@ -733,6 +739,9 @@ hk_channel::hk_channel( hhn_compart *neuron )
 	init_channel( 0.03 );
 	H = 1;
 	Tm = 1.;
+#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+	Tm = 0.33;
+#endif // __MECHANICS_2D__
 }
 
 hk_channel::hk_channel( const hk_channel &channel )
@@ -759,7 +768,7 @@ void hk_channel::copy_to( hhn_channel **chan )
 
 void hk_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 
 #if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	//McCormick
@@ -817,7 +826,7 @@ void hnaf_channel::copy_to( hhn_channel **chan )
 
 void hnaf_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1.+EXP( -( v+34. )/5. ));
 	double h0 = 1.-1/( 1.+EXP( -( v+29. )/4. ));
 	double th = 10./COSH(( v+29. )/8. );
@@ -867,7 +876,7 @@ void hnap_channel::copy_to( hhn_channel **chan )
 
 void hnap_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1/( 1.+EXP( -( v+40. )/6 ));
 	double h0 = 1./( 1.+EXP(( v+48. )/6. ));
 	double th = Th/COSH(( v+48. )/12. );
@@ -916,7 +925,7 @@ void hkdr_channel::copy_to( hhn_channel **chan )
 
 void hkdr_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1/( 1.+EXP( -( v+29. )/4. ));
 	double tm = 10./COSH(( v+29. )/8. );
 	double m = EXP_EULER( M, m0, step, tm );
@@ -980,7 +989,7 @@ void hka_channel::copy_to( hhn_channel **chan )
 
 void hka_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0ka1 = 1./( 1+EXP( -( v+60 )/8.5 ));
 	double tm1 = 1./( EXP(( v+35.82 )/19.69 )+EXP( -( v+79.69 )/12.7 )+0.37 );
 	double h0ka1 = 1./( 1+EXP(( v+78 )/6. ));
@@ -1048,7 +1057,7 @@ void hcal_channel::copy_to( hhn_channel **chan )
 
 void hcal_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double tm = Tm;
 	double m0 = 1./( 1+EXP(( v+40. )/-7 ));
 	double m = EXP_EULER( M, m0, step, tm );
@@ -1100,7 +1109,7 @@ void hm_channel::copy_to( hhn_channel **chan )
 
 void hm_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1+EXP( -( v+35 )/10. ));
 	double tm = Tm*1000./( 3.3*EXP(( v+35 )/40. )+EXP( -( v+35 )/20. ));
 	double m = EXP_EULER( M, m0, step, tm );
@@ -1153,7 +1162,7 @@ void hcat_channel::copy_to( hhn_channel **chan )
 
 void hcat_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1.+EXP( -( v+60.5 )/6.2 ));
 	double tm = ( 0.612+( 1./( 1.+EXP( -( v+131.6 )/16.7 )+EXP(( v+16.8 )/18.2 ))))*Tm;
 	double h0 = 1./( 1.+EXP(( v+84.5 )/4.03 ));
@@ -1213,7 +1222,7 @@ void hcan_channel::copy_to( hhn_channel **chan )
 
 void hcan_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1+EXP(( v+30. )/-5. ));
 	double h0 = 1./( 1+EXP(( v+45.)/5. ));
 	double tm = Tm;
@@ -1270,7 +1279,7 @@ void hkc_channel::copy_to( hhn_channel **chan )
 
 void hkc_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double cacnc = Hhn->CaIons->In;
 	double tm = Tm/( 250.*cacnc*EXP( v/24. )+0.1*EXP( -( v/24. )));
 	double m0 = 250.*cacnc*EXP( v/24. )*tm;
@@ -1325,7 +1334,7 @@ void hkca_channel::copy_to( hhn_channel **chan )
 
 void hkca_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double cacnc = Hhn->CaIons->In;
 	double m0 = cacnc/( cacnc+0.2 );
 	double tm = Tm*1000./( cacnc+0.2 );
@@ -1387,7 +1396,7 @@ void hh_channel::copy_to( hhn_channel **chan )
 
 void hh_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double m0 = 1./( 1.+EXP(( v+75. )/5.5 ));
 	double tm = Tm*3900./( EXP( -7.68-0.086*v )+EXP( 5.04+0.0701*v ));
 	double m = EXP_EULER( M, m0, step, tm );
@@ -1453,7 +1462,7 @@ void hleak_channel::calc_g( double step )
 	double e = *pKIonsE*Eleak;
 
 	G = g;
-	I = g*( Hhn->Vm[1]-e );
+	I = g*( Hhn->get_vm()-e );
 
 	Hhn->G  += g;	// pass prevm
 	Hhn->GE += g*e;
@@ -1506,9 +1515,9 @@ void hsoma_channel::copy_to( hhn_channel **chan )
 
 void hsoma_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*G;
-	double e = *pKIonsE*Soma->Vm[1];
+	double e = *pKIonsE*Soma->get_vm();
 
 	I = g*( v-e );
 
@@ -1561,12 +1570,10 @@ void hdendr_channel::copy_to( hhn_channel **chan )
 
 void hdendr_channel::calc_g( double step )
 {
-	double v = Hhn->Vm[1];
+	double v = Hhn->get_vm();
 	double g = *pKGmax*G;
-	double e = *pKIonsE*Dendr->Vm[1];
-
+	double e = *pKIonsE*Dendr->get_vm();
 	I = g*( v-e );
-
 	Hhn->G += g;	// pass prevm
 	Hhn->GE += g*e;
 }

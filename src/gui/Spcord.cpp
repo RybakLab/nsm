@@ -12,7 +12,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ BOOL neurosim_app::InitInstance( void )
 	// document type specified in the first document template; and
 	// therefore does not represent the user with a File New dialog.
 	InitCommonControls();
-#if !defined __MECHANICS__
+#if !defined __MECHANICS_2D__ || !defined __MECHANICS_3D__
 	m_pView = new CMultiDocTemplate(IDR_NSMTYPE,
 		RUNTIME_CLASS(neurosim_doc),
 		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
@@ -103,13 +103,17 @@ BOOL neurosim_app::InitInstance( void )
 		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
 		RUNTIME_CLASS(CChartView));
 	AddDocTemplate(m_pView);
+#if defined __MECHANICS_2D__
 	m_pLimb = new CMultiDocTemplate(IDR_LIMBVIEW,
         RUNTIME_CLASS(neurosim_doc),
         RUNTIME_CLASS(CChildFrame),
         RUNTIME_CLASS(CLimbView));
 	// create main MDI Frame window
 	AddDocTemplate(m_pLimb);
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+	// TODO implementation 3d model
+#endif /*__MECHANICS_2D__*/
+#endif //__LOCOMOTION__
 	CMainFrame* pMainFrame = new CMainFrame;
 	if( !pMainFrame->LoadFrame( IDR_MAINFRAME ))
 		return FALSE;
@@ -180,10 +184,10 @@ CDocument *neurosim_app::OpenDocumentFile( LPCTSTR lpszFileName )
 /////////////////////////////////////////////////////////////////////////////
 // message handlers
 BEGIN_MESSAGE_MAP(neurosim_app, CWinApp)
-	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
-	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
-	ON_COMMAND(ID_FILE_NEW, OnFileNew)
-	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
+	ON_COMMAND(ID_APP_ABOUT, &neurosim_app::OnAppAbout)
+	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
+	ON_COMMAND(ID_FILE_NEW, &neurosim_app::OnFileNew)
+	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinApp::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
 void neurosim_app::OnFileNew() 
@@ -191,7 +195,7 @@ void neurosim_app::OnFileNew()
 	m_pView->CloseAllDocuments( FALSE );
 	neurosim_doc *doc = ( neurosim_doc *)m_pView->OpenDocumentFile( NULL ); ASSERT( doc );
 	initViews( doc );
-    (( CMainFrame* )m_pMainWnd )->StatusBarMessage( "Ready" );
+	(( CMainFrame* )m_pMainWnd )->StatusBarMessage( "Ready" );
 }
 
 void neurosim_app::OnAppAbout()

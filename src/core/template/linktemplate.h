@@ -14,7 +14,7 @@
 
 #include "sptypes.h"
 
-#ifdef __MECHANICS__
+#if defined (__MECHANICS_2D__)
 
 #include "unitemplate.h"
 
@@ -39,21 +39,21 @@ class t_link : public uni_template{
 	public:
 		t_link( uni_template *parent, int is_active = GRID_COLLAPSE );
 		t_link( const t_link &l );
-virtual	~t_link( void );
+virtual		~t_link( void );
 	public:
 		t_link &operator = ( const t_link &l );
 	public:
-virtual	void copy_to( uni_template **unit, uni_template *parent );
-virtual	void copy_to( walker *w, int side, double *m, double *cm, double *i ){};
+virtual		void copy_to( uni_template **unit, uni_template *parent );
+virtual		void copy_to( walker *w, int side, double *m, double *cm, double *i ){};
 	protected:
-virtual	int get_datattr( const char *path );
-virtual	bool get_addparlist( vector<string> &parlist );
-virtual	bool get_addpar( const char *path, string &name, string &element, int &type );
-virtual	bool upd_addpar( const char *path, const char *name, string &element, bool save );
+virtual		int get_datattr( const char *path );
+virtual		bool get_addparlist( vector<string> &parlist );
+virtual		bool get_addpar( const char *path, string &name, string &element, int &type );
+virtual		bool upd_addpar( const char *path, const char *name, string &element, bool save );
 		//--- Load/save parameters 
-virtual	bool load_addpar( string str, istream &file );
-virtual	void save_addpar( ostream &file );
-virtual	void load_dummy( void );
+virtual		bool load_addpar( string str, istream &file );
+virtual		void save_addpar( ostream &file );
+virtual		void load_dummy( void );
 	protected:
 		void set_default_data( void );
 	protected:
@@ -417,5 +417,7 @@ class t_foot : public t_link{
 		void load_dummy( void );
 };
 
-#endif //__MECHANICS__
+#elif defined (__MECHANICS_3D__)
+// TODO implementation 3d model
+#endif //__MECHANICS_2D__
 #endif //__LINK_TEMPLATE_H

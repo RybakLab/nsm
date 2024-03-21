@@ -21,14 +21,13 @@ static long newseed( long seed )
 		seed += IM;
 	return seed;
 }
-
 /////////////////////////////////////////////////////////////////////////////
 // class CStat
-bool CStat::Flag = true;
-long CStat::Seed = long( -time( NULL ));
-long CStat::Iy = 0;
-long CStat::Iv[NTAB] = {0};
-double CStat::Gset = 0.;
+alignas( 16 ) bool CStat::Flag = true;
+alignas( 16 ) long CStat::Seed = long( -time( NULL ));
+alignas( 16 ) long CStat::Iy = 0;
+alignas( 16 ) long CStat::Iv[NTAB] = {0};
+alignas( 16 ) double CStat::Gset = 0.;
 
 // --- public functions
 void CStat::SetSeed( long  seed )
@@ -46,8 +45,7 @@ double CStat::Random( void )
 		Seed = ( -Seed < 1 )? 1: -Seed;
 		for( int i = NTAB + 7; i >= 0; i--){
 			Seed = newseed( Seed );
-			if( i < NTAB ) 
-				Iv[i] = Seed;
+			if( i < NTAB ){ Iv[i] = Seed; }
 		}
 		Iy = Iv[0];
 	}
@@ -56,8 +54,7 @@ double CStat::Random( void )
 	Iy = Iv[index];
 	Iv[index] = Seed;
 	double temp = AM*Iy;
-	if( temp > RNMX) 
-		return RNMX;
+	if( temp > RNMX){ return RNMX; }
 	return temp;
 }
 
@@ -74,8 +71,7 @@ double CStat::GaussDistr( void )
 		double fac = sqrt( -2.*log( rsq )/rsq );
 		Gset = v1*fac;
 		return v2*fac;
-	} 
-	else{
+	} else{
 		Flag = true;
 		return Gset;
 	}
@@ -98,8 +94,7 @@ istream &operator >> ( istream &s, CStat &x )
 		s >> var;
 		s.get(ch);
 		OK = (ch == ')');
-	}
-	else{
+	} else{
 		s.putback(ch);
 	}
 	

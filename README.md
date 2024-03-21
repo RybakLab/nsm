@@ -1,4 +1,4 @@
-# nsm
+# nsm 2.5.7
 NSM is a simulation environment specially developed for multiscale modeling and computational analysis of cross-level integration of: 
 * the intrinsic biophysical properties of single neurons (at the level of ionic channel kinetics, dynamical changes of ionic concentrations, synaptic processes); 
 * population properties (synaptic interactions between neurons within populations with random distributions of neuronal parameters); 

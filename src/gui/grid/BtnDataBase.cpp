@@ -12,7 +12,7 @@
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
+//#define new DEBUG_NEW
 #endif // _DEBUG
 
 //////////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ CBtnDataBase::CBtnDataBase()
 
 CBtnDataBase::~CBtnDataBase()
 {
-    delete m_plfFont;
+	if( m_plfFont ) delete m_plfFont;
 }
 
 #endif // __CONSOLE__
