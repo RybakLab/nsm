@@ -545,7 +545,7 @@ void CHhnNetwork::init( long seed, runman *man, bool rand )
 	for( size_t i = 0; i < Feedback.size(); Feedback[i].init(), ++i );
 #elif defined (__MECHANICS_3D__)
 	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif /*__MECHANICS_2D__*/
 	for( size_t i = 0; i < Output.size(); Output[i].init(), ++i );
 	for( size_t i = 0; i < Populat.size(); Populat[i].init(), ++i );
 	for( size_t i = 0; i < Control.size(); Control[i].init( this ), ++i );

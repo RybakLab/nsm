@@ -41,7 +41,7 @@ class trkdr_channel : public tk_channel{
 	public:
 	//--- constructor
 		trkdr_channel( uni_template *parent, int is_active = GRID_DEL_ROW );
-		trkdr_channel( const trkdr_channel &channel ) : tk_channel( channel ){};
+		trkdr_channel( const trkdr_channel &channel );
 virtual		~trkdr_channel( void ){}; 
 	public: //--- overrided function
 virtual		void copy_to( uni_template **unit, uni_template * parent );
@@ -50,7 +50,7 @@ virtual		void copy_to( hhn_process **unit, hhn_process *parent );
 
 ///////////////////////////////////////////////////////////////////////////////
 // class trka_channel
-class trka_channel : public tka_channel{   
+class trka_channel : public tka_channel{ 
 	public: //--- constructor
 		trka_channel( uni_template *parent, int is_active = GRID_DEL_ROW );
 		trka_channel( const trka_channel &channel ) : tka_channel( channel ){};

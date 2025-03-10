@@ -21,9 +21,9 @@ hhn_compart::hhn_compart( hhn_neuron *neuron )
 	NaIons( NULL ), KIons( NULL ), CaIons( NULL ), ClIons( NULL ),
 	Populat( NULL ), Neuron( neuron ), NeuronT( NULL )
 {
-#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	Area = 0.0025;
-#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 }
 
 hhn_compart::hhn_compart( const hhn_compart &compartment )
@@ -31,9 +31,9 @@ hhn_compart::hhn_compart( const hhn_compart &compartment )
 	Iinj( compartment.Iinj ), Vm( compartment.Vm ), NaIons( NULL ), KIons( NULL ), CaIons( NULL ), ClIons( NULL ),
 	Populat( NULL ), Name( compartment.Name ), Neuron( compartment.Neuron ), NeuronT( NULL )
 {
-#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	Area = compartment.Area;
-#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	create( compartment.NeuronT, compartment.Populat  );
 }
 
@@ -79,9 +79,9 @@ bool hhn_compart::init( void )
 		Iinj = NeuronT->Iinj;
 		Ipumps = 0.0;
 		G = GE = Ipumps = 0;
-#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 		Area = NeuronT->GetArea();
-#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 		create_ions( NeuronT );
 		create_syn();
 		create_chan( NeuronT );
@@ -124,24 +124,27 @@ void hhn_compart::create_ions( t_compart *tcomp )
 	KIons = Populat->Network->get_kions();
 	CaIons = Populat->Network->get_caions();
 	ClIons = Populat->Network->get_clions();
-	for( size_t i = 0; i < Ions.size(); ++i ){
-		switch( Ions[i]->getid()){
+	for( auto &ion: Ions ){
+		switch( ion->getid() ){
 			case _id_Na_Ion:
-				NaIons = ( hna_ions *)Ions[i];
+				NaIons = ( hna_ions * )ion;
 			break;
 			case _id_K_Ion:
-				KIons = ( hk_ions *)Ions[i];
+				KIons = ( hk_ions * )ion;
 			break;
 			case _id_Ca_Ion:
-				CaIons = ( hca_ions *)Ions[i];
+				CaIons = ( hca_ions * )ion;
 			break;
 			case _id_Cl_Ion:
-				ClIons = ( hcl_ions *)Ions[i];
+				ClIons = ( hcl_ions * )ion;
 			break;
 		}
 	}
 //	pumps must be created AFTER ions
 	tcomp->copy_pumps( Pumps, this );
+	for( auto &pump: Pumps ){
+		pump->init();
+	}
 }
 
 void hhn_compart::create_chan( t_compart *tcomp )
@@ -197,7 +200,7 @@ hhn_soma::~hhn_soma( void )
 {
 }
 
-void hhn_soma::copy_to( hhn_compart **part )
+void hhn_soma::copy_to( hhn_compart **part ) const
 {
 	*part = new hhn_soma( *this );
 }
@@ -258,7 +261,7 @@ hhn_dendr::~hhn_dendr( void )
 {
 }
 
-void hhn_dendr::copy_to( hhn_compart **part )
+void hhn_dendr::copy_to( hhn_compart **part ) const
 {
 	*part = new hhn_dendr( *this );
 }
@@ -318,7 +321,7 @@ hhn_neuron &hhn_neuron::operator = ( const hhn_neuron &hhn )
 }
 
 //--- public functions
-void hhn_neuron::copy_to( hhn_neuron **neuron )
+void hhn_neuron::copy_to( hhn_neuron **neuron ) const
 {
 	*neuron = new hhn_neuron( *this );
 }

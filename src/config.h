@@ -17,6 +17,11 @@
 // (both 2D & 3D mechanical model of a cat)
 #define __LOCOMOTION__
 
+/////////////////////////////////////////////////////////////////////////////
+// uncomment the definition below if you want to use the package in compatible
+// mode (debugging only)
+//#define __COMPATIBLE__
+
 #ifdef __LOCOMOTION__
 /////////////////////////////////////////////////////////////////////////////
 // uncomment the definition below if you want to include
@@ -57,7 +62,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // uncomment the definition below if you want to use
 // Runge-Kutta integtration method 
-//#define __RK__
+// #define __RK__
 
 /////////////////////////////////////////////////////////////////////////////
 // uncomment the definition below if you want to use

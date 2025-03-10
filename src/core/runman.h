@@ -18,14 +18,12 @@ enum _pass_id_{
 // 3.  calculate the intrinsic properties of a neurons
 	_id_PASS_IEDS,		// calculate Nernst potentials for all ions (Na, K, Ca, Cl)
 	_id_PASS_G,		// conductance and current for all ions channels and synapses
-	_id_PASS_IPUMP,		// pump current
-#ifndef __RK__
-	_id_PASS_IDYN,		// ions dynamics
-#else
-	_id_PASS_IDYN_K1,
-	_id_PASS_IPUMP_K2,
-	_id_PASS_IDYN_K2,
+#ifdef __RK__
+	_id_PASS_IDYN_K1,	// intermediate values for ion dynamics
+	_id_PASS_IPUMP_K1,	// intermediate values for pump current
 #endif
+	_id_PASS_IDYN,		// finalize ions dynamics
+	_id_PASS_IPUMP,		// finalize pump current
 	_id_PASS_PREVM,		// finalize all preliminary calucations before solving the diff. eq. for membrane potential
 	_id_PASS_VM,		// solve diff. equation for membrane patential af any compartment but soma
 	_id_PASS_SOMA_VM,	// solve diff. equation for membrane patential of soma and detect if a spike occur

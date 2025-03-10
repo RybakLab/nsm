@@ -158,7 +158,9 @@ void t_ions::copy_to( hhn_ions *ion )
 	ion->Eds = double( Eds );
 	ion->In = double( In );
 	ion->Out = double( Out );
-	ion->T = double( PumpT ); // ion->Alpha = double( IonsR ); in merged nsm
+	ion->T = double( PumpT ); 
+	// ion->Alpha = double( IonsR ); in merged nsm
+	ion->Alpha = double( IonsR )/ion->T;
 	ion->Beta = double( PumpR );
 }
 

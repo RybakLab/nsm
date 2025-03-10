@@ -369,76 +369,75 @@ void Grafor::Draw_array( CDC* pDC,const nsm_vector(float) &x, const nsm_vector(f
 
 void Grafor::Draw_hist( CDC* pDC, const nsm_vector(float) &x, nsm_vector(lvector) &y, long n, long old_n, long bin, float norm )
 {
- static long BIN = 0;
- if( y.size() == 0 )
-     return;
- if( x.size() == 0 )
-     return;
- if( x.size() <= (unsigned int)n )
-     n = x.size()-1;
- CPen* pOldPen = pDC->SelectObject( &pen_cur );
- float y_norm = float( 1./y.size());
- for( long n_bin = old_n/bin-1, step = 0; (n_bin+1)*bin <= n; n_bin++ )
-      if( n_bin >= 0 ){
-          long n_spikes = 0;
-          for( unsigned int neuron = 0; neuron < y.size(); neuron++ ){
-               lvector::iterator fpos = lower_bound( y[neuron].begin(), y[neuron].end(), ( unsigned int )n_bin*bin );
-			   lvector::iterator lpos = lower_bound( fpos, y[neuron].end(), ( unsigned int )( n_bin+1 )*bin );
-               if( fpos != y[neuron].end() ){
-				   if( lpos == y[neuron].end() && lpos > y[neuron].begin() )
-                       lpos--;
-				   if( lpos >= fpos ){
-					   n_spikes += lpos-fpos;
-					   if( *lpos < (unsigned int)( n_bin+1 )*bin )
-                           n_spikes += 1;
-				       }
-                   }
-               }
-          int a, b;
-          Math_to_Phy_Gr( x[n_bin*bin], norm*n_spikes*y_norm, &a, &b );
-          Clip_y( &b );
-          Clip_x( &a );
-		  if( step == 0 ) //first step
-              pDC->MoveTo( a, b );
-		  else
-              pDC->LineTo( a, b );
-
-		  BIN = bin;
-		  Math_to_Phy_Gr( x[n_bin*bin+BIN], norm*n_spikes*y_norm, &a, &b ); // <=>  Math_to_Phy_Gr( x[(n_bin+1)*bin], norm*n_spikes*y_norm, &a, &b );
-
-		  Clip_y( &b );
-		  Clip_x( &a );
-		  pDC->LineTo( a, b );
-		  step++;
-          }
- pDC->SelectObject( pOldPen );
+	static long BIN = 0;
+	if( y.size() == 0 )
+		return;
+	if( x.size() == 0 )
+		return;
+	if( x.size() <= ( size_t )n )
+		n = x.size()-1;
+	CPen* pOldPen = pDC->SelectObject( &pen_cur );
+	float y_norm = float( 1./y.size());
+	for( long n_bin = old_n/bin-1, step = 0; (n_bin+1)*bin <= n; n_bin++ )
+		if( n_bin >= 0 ){
+			long n_spikes = 0;
+			for( auto &neuron: y ){
+				auto fpos = lower_bound( neuron.begin(), neuron.end(), ( unsigned long )n_bin*bin );
+				auto lpos = lower_bound( fpos, neuron.end(), ( unsigned long )( n_bin+1 )*bin );
+				if( fpos != neuron.end() ){
+					if( lpos > neuron.begin() && lpos == neuron.end() ){
+						lpos--;
+					}
+					if( lpos >= fpos ){
+						n_spikes += lpos-fpos;
+						if( *lpos < ( unsigned long )( n_bin+1 )*bin )
+							n_spikes += 1;
+					}
+				}
+			}
+			int a, b;
+			Math_to_Phy_Gr( x[n_bin*bin], norm*n_spikes*y_norm, &a, &b );
+			Clip_y( &b );
+			Clip_x( &a );
+			if( step == 0 ) //first step
+				pDC->MoveTo( a, b );
+			else
+				pDC->LineTo( a, b );
+			BIN = bin;
+			Math_to_Phy_Gr( x[n_bin*bin+BIN], norm*n_spikes*y_norm, &a, &b ); // <=>  Math_to_Phy_Gr( x[(n_bin+1)*bin], norm*n_spikes*y_norm, &a, &b );
+			Clip_y( &b );
+			Clip_x( &a );
+			pDC->LineTo( a, b );
+			step++;
+		}
+	pDC->SelectObject( pOldPen );
 }
 
 void Grafor::Draw_plot(CDC* pDC,const nsm_vector(float) &x, nsm_vector(lvector) &y, long n, long old_n )
 {
- if( x.size() == 0 )
-     return;
- if( x.size() <= ( unsigned int )n )
-     n = x.size()-1;
- if( n < 2 )
-     return;
- for( unsigned int neuron = 0; neuron < y.size(); neuron++ ){
-      old_a1 = 0; old_b1 = 0;
-      for( lvector::iterator pos = upper_bound( y[neuron].begin(), y[neuron].end(),(  unsigned int )old_n ); pos != y[neuron].end() && *pos < (unsigned int)n; pos++ )
-           if( *pos >= ( unsigned int )old_n ){
-               int a, b;
-               Math_to_Phy_Gr( x[*pos], ( float )neuron+1, &a, &b );
-               Clip_y( &b );
-               if( a != old_a1 || b != old_b1 ){
-                   pDC->SetPixelV( a, b, Line_Color );
-/*
-                   pDC->SetPixelV( a+1, b, Line_Color );
-                   pDC->SetPixelV( a, b+1, Line_Color );
-                   pDC->SetPixelV( a+1, b+1, Line_Color );
-*/
-                   old_a1 = a; old_b1 = b;
-                   }
-               }
-      }
+	if( x.size() == 0 )
+		return;
+	if( x.size() <= ( unsigned int )n )
+		n = x.size()-1;
+	if( n < 2 )
+		return;
+	for( unsigned int neuron = 0; neuron < y.size(); neuron++ ){
+		old_a1 = 0; old_b1 = 0;
+		for( lvector::iterator pos = upper_bound( y[neuron].begin(), y[neuron].end(),(  unsigned int )old_n ); pos != y[neuron].end() && *pos < (unsigned int)n; pos++ )
+			if( *pos >= ( unsigned int )old_n ){
+				int a, b;
+				Math_to_Phy_Gr( x[*pos], ( float )neuron+1, &a, &b );
+				Clip_y( &b );
+				if( a != old_a1 || b != old_b1 ){
+					pDC->SetPixelV( a, b, Line_Color );
+			/*
+					pDC->SetPixelV( a+1, b, Line_Color );
+					pDC->SetPixelV( a, b+1, Line_Color );
+					pDC->SetPixelV( a+1, b+1, Line_Color );
+			*/
+					old_a1 = a; old_b1 = b;
+				}
+			}
+	}
 }
 #endif // __CONSOLE__

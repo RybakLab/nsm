@@ -44,7 +44,7 @@ void hrnaf_channel::reg_unit( runman *man  )
 	::reg_unit( this, hrnaf_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hrnaf_channel::copy_to( hhn_channel **chan )
+void hrnaf_channel::copy_to( hhn_channel **chan ) const
 {
  *chan = new hrnaf_channel( *this );
 }
@@ -96,7 +96,7 @@ void hrnap_channel::reg_unit( runman *man  )
 	::reg_unit( this, hrnap_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hrnap_channel::copy_to( hhn_channel **chan )
+void hrnap_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hrnap_channel( *this );
 }
@@ -130,9 +130,12 @@ hrkdr_channel::hrkdr_channel( hhn_compart *neuron )
 	ChannelId = _id_resp_KdrChan; 
 	if( _ChannelNames[ChannelId] )
 		Name = _ChannelNames[ChannelId];
-	Gmax = 90;
-	Tm = 4.0; // Tm = 1.0 in merged nsm
-	H = 1;
+	Gmax = 90.;
+	Tm = 4.0;
+#ifdef __COMPATIBLE__
+	Tm = 1.0;
+#endif /*__COMPATIBLE__*/ 
+	H = 1.;
 	init_channel( 0.03 );
 }
 
@@ -146,7 +149,7 @@ void hrkdr_channel::reg_unit( runman *man  )
 	::reg_unit( this, hrkdr_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hrkdr_channel::copy_to( hhn_channel **chan )
+void hrkdr_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hrkdr_channel( *this );
 }
@@ -154,9 +157,7 @@ void hrkdr_channel::copy_to( hhn_channel **chan )
 void hrkdr_channel::calc_g( double step )
 {
 	double v = Hhn->get_vm();
-	double m0 = 1/( 1.+EXP( -( v+44.5 )/5 ));
-	double tm = Tm/COSH(( v+44.5 )/10 );
-/* in merged nsm
+#ifdef __COMPATIBLE__
 	double shift = -1.;
 	double k0 = v+45+shift; 
 	double k1 = 0.01*k0/( 1-EXP( -k0/5. ));
@@ -164,7 +165,11 @@ void hrkdr_channel::calc_g( double step )
 	double k3 = 1./( k1+k2 );
 	double tm = Tm*k3;
 	double m0 = k1*k3;
-*/
+#else
+	double m0 = 1/( 1.+EXP( -( v+44.5 )/5 ));
+	double tm = Tm/COSH(( v+44.5 )/10 );
+#endif /*__COMPATIBLE__*/ 
+
 	double m = EXP_EULER( M, m0, step, tm );
 	double g = *pKGmax*Gmax*POW_4( m );
 	double e = *pKIonsE*Hhn->KIons->Eds;
@@ -200,7 +205,7 @@ void hrka_channel::reg_unit( runman *man  )
 	::reg_unit( this, hrka_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hrka_channel::copy_to( hhn_channel **chan )
+void hrka_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hrka_channel( *this );
 }
@@ -259,7 +264,7 @@ void hrcal_channel::reg_unit( runman *man  )
 	::reg_unit( this, hrcal_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hrcal_channel::copy_to( hhn_channel **chan )
+void hrcal_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hrcal_channel( *this );
 }
@@ -308,7 +313,7 @@ void hrcat_channel::reg_unit( runman *man  )
 	::reg_unit( this, hrcat_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hrcat_channel::copy_to( hhn_channel **chan )
+void hrcat_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hrcat_channel( *this );
 }
@@ -359,7 +364,7 @@ void hrkca_channel::reg_unit( runman *man  )
 	::reg_unit( this, hrkca_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hrkca_channel::copy_to( hhn_channel **chan )
+void hrkca_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hrkca_channel( *this );
 }
@@ -415,10 +420,11 @@ void hrleak_channel::init_channel( bool adjustable, double pna, double pcl, doub
 	Adjustable = adjustable;
 	Pna = pna;
 	Pcl = pcl;
-	if( Adjustable )
+	if( Adjustable ){
 		calc_eds();
-	else 
+	} else{
 		Eleak = eds;
+	}
 }
 
 void hrleak_channel::reg_unit( runman *man  )
@@ -439,7 +445,7 @@ void hrleak_channel::calc_eds(void)
 	Eleak = RTF*log((OutK + Pna*OutNa + Pcl*InCl)/(InK + Pna*InNa + Pcl*OutCl));
 }
 
-void hrleak_channel::copy_to( hhn_channel **chan )
+void hrleak_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hrleak_channel( *this );
 }

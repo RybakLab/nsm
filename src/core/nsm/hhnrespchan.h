@@ -18,7 +18,7 @@ class alignas( 16 ) hrnaf_channel : public hna_channel{
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -36,7 +36,7 @@ class alignas( 16 ) hrnap_channel : public hna_channel{
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -57,7 +57,7 @@ class alignas( 16 ) hrkdr_channel : public hk_channel{
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -76,7 +76,7 @@ class alignas( 16 ) hrka_channel : public hka_channel{
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -94,7 +94,7 @@ class alignas( 16 ) hrcal_channel : public hcal_channel{
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -112,7 +112,7 @@ class alignas( 16 ) hrcat_channel : public hcat_channel{
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -130,7 +130,7 @@ class alignas( 16 ) hrkca_channel : public hkca_channel{
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -152,7 +152,7 @@ class alignas( 16 ) hrleak_channel : public hleak_channel{
 		void init_channel( bool adjustable, double pna, double pcl, double eds = -65 );
 		void calc_eds( void ); 
 		void reg_unit( runman *man = NULL );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );

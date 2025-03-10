@@ -162,19 +162,7 @@ void hhn_ions::calc_ieds( size_t currstep, double step, hhn_process **start ) //
 #endif /*__IONS__ON__*/
 }
 
-#ifndef __RK__
-// Simple Euler method
-void hhn_ions::calc_idyn( size_t currstep, double step, hhn_process **start ) // _id_PASS_IDYN
-{
-#if defined( __IONS__ON__ )
-	for( ; *start != NULL; ++start ){
-		hhn_ions *ions = ( hhn_ions *)*start;
-		ions->calc_idyn( step );
-	}
-#endif /*__IONS__ON__*/
-}
-#else
-//	RK-2 
+#ifdef __RK__ /*Runge-Kutta 2*/
 void hhn_ions::calc_idyn1( size_t currstep, double step, hhn_process **start ) // _id_PASS_IDYN_K1
 {
 #if defined( __IONS__ON__ )
@@ -184,21 +172,32 @@ void hhn_ions::calc_idyn1( size_t currstep, double step, hhn_process **start ) /
 	}
 #endif /*__IONS__ON__*/
 }
-
-void hhn_ions::calc_idyn2( size_t currstep, double step, hhn_process **start ) // _id_PASS_IDYN_K2
+#endif /*__RK__*/
+void hhn_ions::calc_idyn( size_t currstep, double step, hhn_process **start ) // _id_PASS_IDYN
 {
 #if defined( __IONS__ON__ )
 	for( ; *start != NULL; ++start ){
 		hhn_ions *ions = ( hhn_ions *)*start;
-		ions->calc_idyn2( step );
+		ions->calc_idyn( step );
 	}
 #endif /*__IONS__ON__*/
 }
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // class hnak_pump
-void hnak_pump::calc_ipump( size_t currstep, double step, hhn_process **start ) // _id_PASS_IPUMP or _id_PASS_IPUMP_K1
+#ifdef __RK__ /*Runge-Kutta 2*/ 
+void hnak_pump::calc_ipump1( size_t currstep, double step, hhn_process **start ) // _id_PASS_IPUMP or _id_PASS_IPUMP_K1
+{
+#if defined( __IONS__ON__ )
+	for( ; *start != NULL; ++start ){
+		hnak_pump *pump = ( hnak_pump *)*start;
+		pump->calc_ipump1( step );
+	}
+#endif /*__IONS__ON__*/
+}
+#endif /*__RK__*/
+
+void hnak_pump::calc_ipump( size_t currstep, double step, hhn_process **start )
 {
 #if defined( __IONS__ON__ )
 	for( ; *start != NULL; ++start ){
@@ -207,22 +206,21 @@ void hnak_pump::calc_ipump( size_t currstep, double step, hhn_process **start ) 
 	}
 #endif /*__IONS__ON__*/
 }
-
-#ifdef __RK__
-void hnak_pump::calc_ipump2( size_t currstep, double step, hhn_process **start ) // _id_PASS_IPUMP_K2
-{
-#if defined( __IONS__ON__ )
-	for( ; *start != NULL; ++start ){
-		hnak_pump *pump = ( hnak_pump *)*start;
-		pump->calc_ipump2( step );
-	}
-#endif /*__IONS__ON__*/
-}
-#endif /*RK*/
-
 //////////////////////////////////////////////////////////////////////
 // class hca_pump
-void hca_pump::calc_ipump( size_t currstep, double step, hhn_process **start ) // _id_PASS_IPUMP
+#ifdef __RK__ /*Runge-Kutta 2*/ 
+void hca_pump::calc_ipump1( size_t currstep, double step, hhn_process **start ) // _id_PASS_IPUMP
+{
+#if defined( __IONS__ON__ )
+	for( ; *start != NULL; ++start ){
+		hca_pump *pump = ( hca_pump *)*start;
+		pump->calc_ipump1( step );
+	}
+#endif /*__IONS__ON__*/
+}
+#endif /*__RK__*/
+
+void hca_pump::calc_ipump( size_t currstep, double step, hhn_process **start )
 {
 #if defined( __IONS__ON__ )
 	for( ; *start != NULL; ++start ){
@@ -231,19 +229,6 @@ void hca_pump::calc_ipump( size_t currstep, double step, hhn_process **start ) /
 	}
 #endif /*__IONS__ON__*/
 }
-
-#ifdef __RK__
-void hca_pump::calc_ipump2( size_t currstep, double step, hhn_process **start ) // _id_PASS_IPUMP_K2
-{
-#if defined( __IONS__ON__ )
-	for( ; *start != NULL; ++start ){
-		hca_pump *pump = ( hca_pump *)*start;
-		pump->calc_ipump2( step );
-	}
-#endif /*__IONS__ON__*/
-}
-#endif /*RK*/
-
 ///////////////////////////////////////////////////////////////////////////////
 // channels
 ///////////////////////////////////////////////////////////////////////////////

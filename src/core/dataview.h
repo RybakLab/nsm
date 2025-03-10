@@ -52,7 +52,7 @@ static		void storedata_chart( size_t currstep, double step, hhn_process **start 
 		long save_header( ostream &file, CSimulate *manager, long num, double *calibr );
 		void save( ostream &file, const hhn_pair<int> &wnd, double step, size_t prec_t, size_t prec_a, CSimulate *manager );
 		void set_buffer( void *currdata, const unit_code &code, size_t size );
-		void alloc_buffer( void );
+		void alloc_buffer( size_t reserved_size );
 	private:
 		void free_buffer( void );
 	private:

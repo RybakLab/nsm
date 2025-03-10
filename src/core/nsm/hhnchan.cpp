@@ -143,7 +143,7 @@ void gen_channel::reg_unit( runman *man  )
 	::reg_unit( this, gen_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void gen_channel::copy_to( hhn_channel **chan )
+void gen_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new gen_channel( *this );
 }
@@ -238,7 +238,7 @@ void hgna_channel::reg_unit( runman *man  )
 }
 
 //--- overrided function
-void hgna_channel::copy_to( hhn_channel **chan )
+void hgna_channel::copy_to( hhn_channel **chan ) const
 {
  *chan = new hgna_channel( *this );
 }
@@ -290,7 +290,7 @@ hgnap_channel::hgnap_channel( const hgnap_channel &channel )
 }
 
 //--- overrided function
-void hgnap_channel::copy_to( hhn_channel **chan )
+void hgnap_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hgnap_channel( *this );
 }
@@ -361,7 +361,7 @@ void hgkdr_channel::init_channel( double mk, double v12m, double km, double v12t
 }
 
 //--- overrided function
-void hgkdr_channel::copy_to( hhn_channel **chan )
+void hgkdr_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hgkdr_channel( *this );
 }
@@ -442,7 +442,7 @@ void hgka_channel::reg_unit( runman *man  )
 	::reg_unit( this, hgka_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hgka_channel::copy_to( hhn_channel **chan )
+void hgka_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hgka_channel( *this );
 }
@@ -516,7 +516,7 @@ void hgkca_channel::reg_unit( runman *man  )
 	::reg_unit( this, hgkca_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hgkca_channel::copy_to( hhn_channel **chan )
+void hgkca_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hgkca_channel( *this );
 }
@@ -573,7 +573,7 @@ void hgcan_channel::reg_unit( runman *man  )
 	::reg_unit( this, hgcan_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hgcan_channel::copy_to( hhn_channel **chan )
+void hgcan_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hgcan_channel( *this );
 }
@@ -642,7 +642,7 @@ void hgh_channel::reg_unit( runman *man  )
 	::reg_unit( this, hgh_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hgh_channel::copy_to( hhn_channel **chan )
+void hgh_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hgh_channel( *this );
 }
@@ -702,7 +702,7 @@ void hna_channel::reg_unit( runman *man  )
 	::reg_unit( this, hna_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hna_channel::copy_to( hhn_channel **chan )
+void hna_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hna_channel( *this );
 }
@@ -761,7 +761,7 @@ void hk_channel::reg_unit( runman *man  )
 	::reg_unit( this, hk_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hk_channel::copy_to( hhn_channel **chan )
+void hk_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hk_channel( *this );
 }
@@ -819,7 +819,7 @@ void hnaf_channel::reg_unit( runman *man  )
 	::reg_unit( this, hnaf_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hnaf_channel::copy_to( hhn_channel **chan )
+void hnaf_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hnaf_channel( *this );
 }
@@ -869,7 +869,7 @@ void hnap_channel::reg_unit( runman *man  )
 	::reg_unit( this, hnap_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hnap_channel::copy_to( hhn_channel **chan )
+void hnap_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hnap_channel( *this );
 }
@@ -918,7 +918,7 @@ void hkdr_channel::reg_unit( runman *man  )
 	::reg_unit( this, hkdr_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hkdr_channel::copy_to( hhn_channel **chan )
+void hkdr_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hkdr_channel( *this );
 }
@@ -982,7 +982,7 @@ void hka_channel::reg_unit( runman *man  )
 	::reg_unit( this, hka_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hka_channel::copy_to( hhn_channel **chan )
+void hka_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hka_channel( *this );
 }
@@ -1050,7 +1050,7 @@ void hcal_channel::reg_unit( runman *man  )
 	::reg_unit( this, hcal_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hcal_channel::copy_to( hhn_channel **chan )
+void hcal_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hcal_channel( *this );
 }
@@ -1102,7 +1102,7 @@ void hm_channel::reg_unit( runman *man  )
 	::reg_unit( this, hm_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hm_channel::copy_to( hhn_channel **chan )
+void hm_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hm_channel( *this );
 }
@@ -1155,7 +1155,7 @@ void hcat_channel::reg_unit( runman *man  )
 	::reg_unit( this, hcat_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hcat_channel::copy_to( hhn_channel **chan )
+void hcat_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hcat_channel( *this );
 }
@@ -1215,7 +1215,7 @@ void hcan_channel::reg_unit( runman *man  )
 	::reg_unit( this, hcan_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hcan_channel::copy_to( hhn_channel **chan )
+void hcan_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hcan_channel( *this );
 }
@@ -1272,7 +1272,7 @@ void hkc_channel::reg_unit( runman *man  )
 	::reg_unit( this, hkc_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hkc_channel::copy_to( hhn_channel **chan )
+void hkc_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hkc_channel( *this );
 }
@@ -1327,7 +1327,7 @@ void hkca_channel::reg_unit( runman *man  )
 	::reg_unit( this, hkca_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hkca_channel::copy_to( hhn_channel **chan )
+void hkca_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hkca_channel( *this );
 }
@@ -1389,7 +1389,7 @@ void hh_channel::reg_unit( runman *man  )
 	::reg_unit( this, hh_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hh_channel::copy_to( hhn_channel **chan )
+void hh_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hh_channel( *this );
 }
@@ -1451,7 +1451,7 @@ void hleak_channel::reg_unit( runman *man  )
 	::reg_unit( this, hleak_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hleak_channel::copy_to( hhn_channel **chan )
+void hleak_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hleak_channel( *this );
 }
@@ -1508,7 +1508,7 @@ void hsoma_channel::reg_unit( runman *man  )
 	::reg_unit( this, hsoma_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hsoma_channel::copy_to( hhn_channel **chan )
+void hsoma_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hsoma_channel( *this );
 }
@@ -1563,7 +1563,7 @@ void hdendr_channel::reg_unit( runman *man  )
 	::reg_unit( this, hdendr_channel::calc_g, _id_PASS_G, size_t( Hhn ), man ); 
 }
 
-void hdendr_channel::copy_to( hhn_channel **chan )
+void hdendr_channel::copy_to( hhn_channel **chan ) const
 {
 	*chan = new hdendr_channel( *this );
 }

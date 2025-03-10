@@ -31,7 +31,7 @@ virtual		size_t get_gchanid( void ) const{ return -1; };
 		void set_kione( double *e ){ pKIonsE = e; };
 		void init_channel( double g, double tm, double th ){ Gmax = g; Tm = tm; Th = th; };
 		void reg_unit( runman *man ) = 0;
-virtual		void copy_to( hhn_channel **chan ) = 0;
+virtual		void copy_to( hhn_channel **chan ) const = 0;
 	public:
 		double I;			// Channel's current
 		double G;			// Current channel's conductance  
@@ -68,7 +68,7 @@ virtual		~gen_channel( void ){};
 		void init_channel( double m, double mk, double hvm, double slpm, double tm0, double hvtm, double slptm, size_t powm, 
 					double h, double hk, double hvh, double slph, double th0, double hvth, double slpth, size_t powh );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -115,7 +115,7 @@ virtual		~hgna_channel( void ){};
 						   double hna, double v12h, double kh, double v12th, double kth, size_t h_power, 
 						   double shifttm = 0, double ktm_1 = 0, double shiftth = 0, double kth_1 = 0 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
       private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -148,7 +148,7 @@ virtual		~hgnap_channel( void ){};
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public: //--- overrided function
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -169,7 +169,7 @@ virtual		~hgkdr_channel( void ){};
 	public:
 		void init_channel( double mk, double v12m, double km, double v12tm, double ktm, size_t m_power,	double shifttm = 0, double ktm_1 = 0 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -199,7 +199,7 @@ virtual		~hgka_channel( void ){};
 		void init_channel( double mka, double v12m, double km, double v12tm, double ktm, size_t m_power, 
 			double hka, double v12h, double kh, double v12th, double kth, size_t h_power, double shifttm = 0, double ktm_1 = 0, double shiftth = 0, double kth_1 = 0 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -235,7 +235,7 @@ virtual		~hgkca_channel( void ){};
 	public:
 		void init_channel( double minit, double alpha, double lymdba, size_t power );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -259,7 +259,7 @@ virtual		~hgcan_channel( void ){};
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -282,7 +282,7 @@ virtual		~hgh_channel( void ){};
 	public:
 		void init_channel( double eds, double hh, double v12h, double kh, double v12th, double kth );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -308,7 +308,7 @@ virtual		~hna_channel( void ){};
 	public:
 		void init_channel( double mna, double hna );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -327,7 +327,7 @@ virtual		~hk_channel( void ){};
 	public:
 		void init_channel( double mk );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -345,7 +345,7 @@ virtual		~hnaf_channel( void ){};
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -363,7 +363,7 @@ virtual		~hnap_channel( void ){};
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -382,7 +382,7 @@ virtual		~hkdr_channel( void ){};
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -403,7 +403,7 @@ virtual		~hka_channel( void ){};
 	public:
 		void init_channel( double mka1, double hka1, double mka2, double hka2 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -425,7 +425,7 @@ virtual		~hcal_channel( void ){};
 	public:
 		void init_channel( double mcal, double hcal = 0 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -444,7 +444,7 @@ virtual		~hm_channel( void ){};
 	public:
 		void init_channel( double mm );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -463,7 +463,7 @@ virtual		~hcat_channel( void ){};
 	public:
 		void init_channel( double mcat, double hcat );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -482,7 +482,7 @@ virtual		~hcan_channel( void ){};
 	public:
 		void init_channel( double mcan, double hcan );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -501,7 +501,7 @@ virtual		~hkc_channel( void ){};
 	public:
 		void init_channel( double mkc );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -520,7 +520,7 @@ virtual		~hkca_channel( void ){};
 	public:
 		void init_channel( double mkca );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -541,7 +541,7 @@ virtual		~hh_channel( void ){};
 	public:
 		void init_channel( double mh, double eds = -43 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	public:
 		double Eh;
 	private:
@@ -564,7 +564,7 @@ virtual		~hleak_channel( void ){};
 	public:
 		void init_channel( double eds = -57 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const override;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -588,7 +588,7 @@ virtual		~hsoma_channel( void ){};
 	public:
 		void init_channel( const hhn_compart *soma, double p = 0.1 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );
@@ -613,7 +613,7 @@ virtual		~hdendr_channel( void ){};
 	public:
 		void init_channel( const hhn_compart *dendr, double p = 0.1 );
 		void reg_unit( runman *man );
-		void copy_to( hhn_channel **chan );
+		void copy_to( hhn_channel **chan ) const final;
 	private:
 		void calc_g( double step );
 static		void calc_g( size_t currstep, double step, hhn_process **start );

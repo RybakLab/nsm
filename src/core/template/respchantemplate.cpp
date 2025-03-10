@@ -86,9 +86,20 @@ void trnap_channel::copy_to( hhn_process **unit, hhn_process *parent )
 trkdr_channel::trkdr_channel( uni_template *parent, int is_active ) 
 	: tk_channel( parent, is_active )
 {
-	Gmax = 90; Tm = 4.0; // Tm = 1.0 in merged nsm 
+	Gmax = 90; 
+	Tm = 4.0;
+#ifdef __COMPATIBLE__
+	Tm = 1.0;
+#endif /*__COMPATIBLE__*/ 
 	UnitId = _id_resp_KdrChan;
 	Name = _ChannelNames[UnitId];
+	DList.insert( make_pair( "Activation\tTime constant\tMagitude\nTm", &Tm )); 
+}
+
+trkdr_channel::trkdr_channel( const trkdr_channel &channel ) 
+	: tk_channel( channel )
+{
+	DList.insert( make_pair( "Activation\tTime constant\tMagitude\nTm", &Tm )); 
 }
 
 //--- overrided function

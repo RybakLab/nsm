@@ -34,20 +34,19 @@ void hhn_viewbuffer::set_buffer( void *currdata, const unit_code &code, size_t s
 	NumSteps = size;
 }
 
-void hhn_viewbuffer::alloc_buffer( void )
+void hhn_viewbuffer::alloc_buffer( size_t reserved_size )
 {
 	if( ParCode.is_stat() ){
-		for( size_t i = 0; i < StatValue.size(); StatValue[i].clear(), ++i );
+		for( auto &v: StatValue ){ v.clear(); }
 		StatValue.clear();
-		if( CurrData && ReservedSize > 0 ){
+		ReservedSize = 0;
+		if( CurrData && reserved_size > 0 ){
 			StatValue.reserve((( lvector *)CurrData )->size() );
 			std::generate_n( std::back_inserter( StatValue ), (( lvector *)CurrData )->size(), []{ return lvector(); });
-			for( size_t i = 0; i < StatValue.size(); ++i ){
-				StatValue[i].reserve( ReservedSize );
-			}
+			for( auto &v: StatValue ){ v.reserve( ReservedSize ); }
+			ReservedSize = reserved_size;
 		}
-	}
-	else{
+	} else{
 		ViewValue.clear();
 		if( NumSteps > 0 ){
 			ViewValue.reserve( NumSteps );
@@ -63,8 +62,8 @@ void hhn_viewbuffer::free_buffer( void )
 	NumSteps = 0;
 	nsm_vector(float) chart_tmp;
 	nsm_vector(lvector) stat_tmp;
+	for( auto &v: StatValue ){ v.clear(); }
 	ViewValue.clear();
-	for( size_t i = 0; i < StatValue.size(); StatValue[i].clear(), ++i );
 	StatValue.clear();
 	ViewValue.swap( chart_tmp );
 	StatValue.swap( stat_tmp );
@@ -76,29 +75,29 @@ void hhn_viewbuffer::save( ostream &file, const hhn_pair<int> &wnd, double step,
 	size_t y = size_t( wnd.Y/step ); y = ( y >= ViewValue.size())? ViewValue.size()-1: y;
 	if( ParCode.is_stat() ){
 		string name = manager->Network.get_nnunit( ParCode )->get_name();
-		file << "<Spikes " << name << ">" << endl;
+		file << "<Spikes " << name << ">" << "\n";
 		for( size_t i = 0; i < StatValue.size(); i++ ){
-			file << "<Neuron " << i << ">" << endl;
+			file << "<Neuron " << i << ">" << "\n";
 			ios_base::fmtflags old_flags = file.flags( ios::fixed );
 			for( size_t j = 0; j < StatValue[i].size(); j++ ){
 				if( StatValue[i][j] >= x && StatValue[i][j] <= y ){
-					file << setprecision( prec_t ) << float( StatValue[i][j]*step ) << endl;
+					file << setprecision( prec_t ) << float( StatValue[i][j]*step ) << "\n";
 				}
 			}
 			file.flags( old_flags );
-			file << "</Neuron>" << endl;
+			file << "</Neuron>" << "\n";
 		}
 		file << "</Spikes>" << endl;
 	}
 	else{
 		string name;
 		ParCode.get_fullname( manager, name );
-		file << "<Wave form " << name << ">" << endl;
+		file << "<Wave form " << name << ">" << "\n";
 		ios_base::fmtflags old_flags = file.flags( ios::fixed );
 		// TODO the parameter prec_t can effect the total number of points stored in the file, 
 		// currently every point stores, but the loop may be implemented as for( size_t j = x; j < y; j += prec_t ){ /*...*/ }
 		for( size_t j = x; j < y; j++ ){
-			file << setprecision( prec_a ) << float( ViewValue[j] ) << endl;
+			file << setprecision( prec_a ) << float( ViewValue[j] ) << "\n";
 		}
 		file.flags( old_flags );
 		file << "</Wave form>" << endl;
@@ -112,7 +111,7 @@ long hhn_viewbuffer::save_header( ostream &file, CSimulate *manager, long num, d
 	if( ParCode.is_stat() ){
 		string name = manager->Network.get_nnunit( ParCode )->get_name();
 		for( size_t i = 0; i < StatValue.size(); ++i ){
-			file << "column_" << num+num_col << " = "<< name << " neuron " << i << "; min = 0; max = 1" <<endl;
+			file << "column_" << num+num_col << " = "<< name << " neuron " << i << "; min = 0; max = 1" << "\n";
 			++num_col;
 		}
 	}
@@ -125,12 +124,11 @@ long hhn_viewbuffer::save_header( ostream &file, CSimulate *manager, long num, d
 		double k = max( fabs( double( max_val )), fabs( double( min_val )));
 		if( k == 0.0 ){
 			*calibr = 0;
-			file << "column_" << num << " = "<< name << "; min = " <<  min_val << "; max = " <<  max_val << "; calibr = " <<  *calibr << endl;
-		}
-		else{
+			file << "column_" << num << " = "<< name << "; min = " <<  min_val << "; max = " <<  max_val << "; calibr = " <<  *calibr << "\n";
+		} else{
 			*calibr = 16384./k;
 			file.setf( ios_base::fixed );
-			file << "column_" << num << " = "<< name << "; min = " <<  min_val << "; max = " <<  max_val << "; calibr = " << setprecision( 10 ) << 1./( *calibr ) << setprecision( 6 ) << endl;
+			file << "column_" << num << " = "<< name << "; min = " <<  min_val << "; max = " <<  max_val << "; calibr = " << setprecision( 10 ) << 1./( *calibr ) << setprecision( 6 ) << "\n";
 			file.unsetf( ios_base::fixed );
 		}
 		num_col = 1;
@@ -142,8 +140,7 @@ void hhn_viewbuffer::reg_unit( runman *man )
 {
 	if( ParCode.is_stat() ){
 		::reg_unit( this, hhn_viewbuffer::storedata_stat, _id_PASS_VIEW, -1, man ); 
-	}
-	else{
+	} else{
 		::reg_unit( this, hhn_viewbuffer::storedata_chart, _id_PASS_VIEW, -1, man ); 
 	}
 }
@@ -182,16 +179,19 @@ CChartBuffer &CChartBuffer::operator = ( const CChartBuffer &buffer )
 
 const void *CChartBuffer::get_buffer( const unit_code &code ) const
 {
-	for( size_t i = 0; i < ParBuffer.size(); i++ )
-		if( ParBuffer[i] == code )
-			return ParBuffer[i].get_buffer();
+	for( auto &buff: ParBuffer ){
+		if( buff == code ){
+			return buff.get_buffer();
+		}
+	}
 	return NULL;
 }
 
 void CChartBuffer::reg_unit( runman *man )
 {
-	for( size_t i = 0; i < ParBuffer.size(); ++i )
-		ParBuffer[i].reg_unit( man );
+	for( auto &buff: ParBuffer ){
+		buff.reg_unit( man );
+	}
 }
 
 void CChartBuffer::next_step( size_t currstep )
@@ -223,8 +223,8 @@ void CChartBuffer::release_all_buffers( void )
 void CChartBuffer::alloc_all_buffers( void )
 {
 	CBufferManager::alloc_all_buffers();
-	for( size_t i = 0; i < ParBuffer.size(); ++i ){
-		ParBuffer[i].alloc_buffer();
+	for( auto &buff: ParBuffer ){
+		buff.alloc_buffer( ReservedSize );
 	}
 }
 
@@ -261,19 +261,19 @@ void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pa
 		switch( format ){
 			case _id_ASCII_GEN: // ASCII (generic)
 			{
-				file << "<Header>" << endl;
-				file << "Generated by " << _ProjectName << endl;
-				file << "</Header>" << endl;
-				file << "<Record>" << endl;
+				file << "<Header>" << "\n";
+				file << "Generated by " << _ProjectName << "\n";
+				file << "</Header>" << "\n";
+				file << "<Record>" << "\n";
 				if( wnd.X >= wnd.Y || wnd.X <= 0 ){
 					wnd.X = 0; wnd.Y = int( ( TimeScale.size()-1 )*ViewStep );
 				}
-				file << "Saved window = [" << wnd.X << "," << wnd.Y << "] msec" << endl;
-				file << "Duration = " << wnd.Y-wnd.X << " msec" << endl;
+				file << "Saved window = [" << wnd.X << "," << wnd.Y << "] msec" << "\n";
+				file << "Duration = " << wnd.Y-wnd.X << " msec" << "\n";
 				if( prec_bin > 1 )
-					file << "Precision = " << prec_t << " msec" << endl;
+					file << "Precision = " << prec_t << " msec" << "\n";
 				else
-					file << "Precision = " << ViewStep << " msec" << endl;
+					file << "Precision = " << ViewStep << " msec" << "\n";
 				for( size_t j = 0; j < ParBuffer.size(); j++ ){
 					for( size_t i = 0; i < buffers.size(); i++ ){
 						if( ParBuffer[j] == buffers[i] ){
@@ -287,13 +287,13 @@ void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pa
 			break;
 			case _id_BIN_SCRC: // SCRC (columns)
 			{
-				file << "<Header>" << endl;
-				file << "Generated by " << _ProjectName << endl;
-				file << "Duration = " << ( TimeScale.size()-1 )*ViewStep << " msec" << endl;
+				file << "<Header>" << "\n";
+				file << "Generated by " << _ProjectName << "\n";
+				file << "Duration = " << ( TimeScale.size()-1 )*ViewStep << " msec" << "\n";
 				if( prec_bin > 1 )
-					file << "Precision = " << prec_t << " msec" << endl;
+					file << "Precision = " << prec_t << " msec" << "\n";
 				else
-					file << "Precision = " << ViewStep << " msec" << endl;
+					file << "Precision = " << ViewStep << " msec" << "\n";
 				vector<double> calibr;
 				for( size_t j = 0, num_col = 0; j < ParBuffer.size(); j++ ){
 					calibr.push_back( 0 );

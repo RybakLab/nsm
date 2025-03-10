@@ -38,7 +38,7 @@ virtual		~hhn_compart( void );
 		//--- overrided function
 		void reg_unit( runman *man ) override;
 		bool init( void ) final;
-virtual		void copy_to( hhn_compart **part ){};
+virtual		void copy_to( hhn_compart **part ) const{};
 	protected:
 virtual		void create_chan( t_compart *tcomp );
 		void create_syn( void );
@@ -66,9 +66,9 @@ static		void calc_vm( size_t currstep, double step, hhn_process **start );
 
 		hhn_populat *Populat;
 		nsm_vector(hhn_synapse *) Syn;	// synapses of the neuron (0 - ex, 1 - inhA, 2 - inhB)
-#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#if defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 		double Area;
-#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
+//#endif // defined( __RESPIRATION__ ) && !defined( __LOCOMOTION__ )
 	protected:
 		double P;			// the ratio of somatic surface to total cell surface area
 		string Name;
@@ -88,7 +88,7 @@ class alignas( 16 ) hhn_soma : public hhn_compart{
 		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
-		void copy_to( hhn_compart **part ) final;
+		void copy_to( hhn_compart **part ) const final;
 		void reg_unit( runman *man ) final;
 	protected:
 		void create_chan( t_compart *tcomp ) final;
@@ -109,7 +109,7 @@ class alignas( 16 ) hhn_dendr : public hhn_compart{
 		void *operator new( size_t size ){ return nsm_alloc( 16, size ); };
 		void operator delete( void * p ){ nsm_free( p ); }; 
 	public:
-		void copy_to( hhn_compart **part ) final;
+		void copy_to( hhn_compart **part ) const final;
 	protected:
 		void create_chan( t_compart *tcomp ) final;
 };
@@ -139,7 +139,7 @@ class alignas( 16 ) hhn_neuron : public hhn_process{
 		size_t size( void ) const{ return Compart.size(); };
 		const hhn_compart *get_compart( size_t id ) const{ hhn_compart *cmp = ( id < Compart.size())? Compart[id]: NULL; return cmp; };
 		double *get_y( int id ) final{ assert( id != -1 ); return &Output[id]; };
-		void copy_to( hhn_neuron **neuron );
+		void copy_to( hhn_neuron **neuron ) const;
 		void reg_unit( int index, runman *man );
 
 		bool init( void ) final;

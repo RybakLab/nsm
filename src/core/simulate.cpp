@@ -1066,9 +1066,9 @@ bool CSimulate::LoadModel( const char *filename, queue<CFrameView *> &viewfifo )
 	file.seekg(0, std::ios::end);
 	std::streamsize fsize = file.tellg();
 	file.seekg( 0, ios::beg );
-	vector<char> buffer( fsize );
+	vector<char> buffer(( size_t )fsize );
 	file.read( buffer.data(), fsize );
-	istringstream inp( string( buffer.begin(), buffer.begin()+file.gcount()));
+	istringstream inp( string( buffer.begin(), buffer.begin()+( size_t )file.gcount()));
 	file.close();
 	string str;
 	CSimulate manager;
