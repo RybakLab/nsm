@@ -169,10 +169,10 @@ BOOL CGridBtnCellBase::DrawBtnCell(CDC* pDC, int /* nRow */, int /* nCol */, CRe
             for( int i1=0; i1 < iCtlNbr; i1++)
             {
                 UINT uiState = GetDrawCtlState( i1);
-/*
+
                 UINT uiType = GetDrawCtlType( i1);
 		xpDrawFrameControl(  pDC->GetSafeHdc(), RectAry[ i1], uiType, uiState);
-*/
+
                 // if button has text, draw it, too
                 const char* pszBtnText = GetDrawCtlBtnText( i1);
                 if( pszBtnText != NULL)

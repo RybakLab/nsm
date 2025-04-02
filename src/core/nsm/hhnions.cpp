@@ -81,7 +81,7 @@ void hhn_ions::calc_idyn1( double step )
 	double alpha = Alpha;
 	double beta = Beta;
 	modifyAB( alpha, beta );
-	InK1 = In+step*( -alpha*I-beta*Ipump/T )/2.;
+	InK1 = In+step*( -alpha*I+beta*Ipump/T )/2.;
 }
 #endif /*__RK__*/
 
@@ -90,7 +90,7 @@ void hhn_ions::calc_idyn( double step )
 	double alpha = Alpha;
 	double beta = Beta;
 	modifyAB( alpha, beta );
-	In = step*( -alpha*I-beta*Ipump/T );
+	In += step*( -alpha*I+beta*Ipump/T );
 #ifdef __RK__
 	InK1 = In;
 #endif /*__RK__*/
@@ -223,7 +223,7 @@ bool hnak_pump::init( void )
 {
 	if( Hhn && Ions ){
 		double kp = Kp; 
-		Ions->Ipump = Rp*( PHI( Ions->In, kp )-PHI( Na0, kp ));
+		Ions->Ipump = Rp*( PHI( Na0, kp )-PHI( Ions->In, kp ));
 		return true;
 	}
 	return false;
@@ -233,13 +233,13 @@ bool hnak_pump::init( void )
 void hnak_pump::calc_ipump1( double step )
 {
 	double kp = Kp;
-	Ions->Ipump = Rp*( PHI( Ions->InK1, kp )-PHI( Na0, kp ));
+	Ions->Ipump = Rp*( PHI( Na0, kp )-PHI( Ions->InK1, kp ));
 }
 #endif /*__RK__*/
 void hnak_pump::calc_ipump( double step )
 {
 	double kp = Kp; 
-	double ipump = Rp*( PHI( Ions->In, kp )-PHI( Na0, kp ));
+	double ipump = Rp*( PHI( Na0, kp )-PHI( Ions->In, kp ));
 	Ions->Ipump = ipump;
 	Hhn->Ipumps -= PumpRV*ipump;
 }
@@ -267,7 +267,7 @@ void hca_pump::copy_to( hhn_pump **pump ) const
 bool hca_pump::init( void )
 {
 	if( Hhn && Ions ){
-		Ions->Ipump = Ions->In-Ca0;
+		Ions->Ipump = Ca0-Ions->In;
 		return true;
 	}
 	return false;
@@ -286,13 +286,13 @@ void hca_pump::reg_unit( runman *man )
 #ifdef __RK__
 void hca_pump::calc_ipump1( double step )
 {
-	Ions->Ipump = Ions->InK1-Ca0;
+	Ions->Ipump = Ca0-Ions->InK1;
 }
 #endif /*__RK__*/
 
 void hca_pump::calc_ipump( double step )
 {
-	double ipump = Ions->In-Ca0;
+	double ipump = Ca0-Ions->In;
 	Ions->Ipump = ipump;
 	Hhn->Ipumps -= PumpRV*ipump;
 }

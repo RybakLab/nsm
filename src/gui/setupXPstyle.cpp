@@ -11,7 +11,7 @@
 static char THIS_FILE[]=__FILE__;
 //#define new DEBUG_NEW
 #endif // _DEBUG
-/*
+
 BOOL xpDrawFrameControl( HDC hdc, LPRECT lprc, UINT DFC_type, UINT DFCS_state )
 {
     XPStyle style;
@@ -209,5 +209,5 @@ BOOL decodeStyle( XPStyle *xpstyle, UINT DFC_type, UINT DFCS_state, UINT CBS_sty
 	xpstyle->State = 0;
 	return FALSE;
 }
-*/
+
 #endif // __CONSOLE__
