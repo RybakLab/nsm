@@ -31,18 +31,7 @@ const double PI = 3.14159265358979323846;
         (( t ) <= EPS ) ? ( y0 ) : ( exp(-(( step )/(t))))*(( y )-( y0 ))+( y0 )
 #define EXP_EULER_EXPT( y, y0, expt ) \
         (( expt ) <= EPS ) ? ( y0 ) : ( expt )*(( y )-( y0 ))+( y0 ) /*expt = exp(-(( step )/(t)))*/
-/*
-#define EPS 1.0e-6
 
-#define GENERIC_G( vm, hvm, slp ) \
-        1./( 1.+EXP((( vm )-( hvm ))/( slp )))
-#define GENERIC_T( t, vm, hvm, slp ) \
-        (( t ) <= EPS ) ? ( 0. ) : ( t )/( COSH((( vm )-( hvm ))/( slp )))
-#define GENERIC_T_MOD( shift, t, vm, hvm, slp_1, slp_2 ) \
-        (( t ) <= EPS ) ? ( shift ) : ( shift )+(2.*( t ))/( EXP((( vm )-( hvm ))/( slp_1 ))+EXP((( vm )-( hvm ))/( slp_2 )))
-#define EXP_EULER( y, y0, step, t ) \
-        (( t ) < step ) ? ( y0 ) : ( EXP(-(( step )/(t))))*(( y )-( y0 ))+( y0 )
-*/
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -79,7 +68,6 @@ bool operator >> ( string &data, T &x )
 	line >> x;
 	return true;
 }
-
 
 extern void message( const char *mess, const char *name );
 extern bool remove_char( const char *filename, char ch );
