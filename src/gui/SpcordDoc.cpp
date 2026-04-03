@@ -82,8 +82,7 @@ void neurosim_doc::popView( void )
 {
 	if( !ViewFIFO.empty()){
 		CFrameView *view = ViewFIFO.front();
-		if( view )
-			delete view;
+		if( view ){ delete view; }
 		ViewFIFO.pop();
 	}
 }

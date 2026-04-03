@@ -281,7 +281,6 @@ void Grafor::Axes_Gr_0(CDC* pDC,float XB0,int xl,double xm0,double ym0,
 			Line_R1_R2(x1,y1,x2,y2,Axe_Color,pDC);
 	 		if(bul==1) {
 	 			sprintf(buff,"%g",xm);
-//				CSize	siz=pDC->GetOutputTextExtent(buff,strlen(buff));
 				if(num_ax==X_axe) y00=y0+i5;
 	 			if(num_ax==Y_axe) {
 	 				if(abs(xo-Region_Rec.left)<5)

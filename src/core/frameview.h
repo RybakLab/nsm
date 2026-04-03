@@ -57,7 +57,9 @@ virtual		~CFrameView( void ){};
 	public:
 		CFrameView &operator = ( const CFrameView &view);
 	public:
-		const char *get_name( void ) const{ return ViewName.c_str(); };
+		const char *get_name( void ) const{ 
+			return ViewName.c_str(); 
+};
 		void set_name( const char *name ){ ViewName = name; };
 		hhn_pair<double> get_xrange( void ){ return LimitView; };
 		size_t get_1step( void ){ return LimitStep.X; };

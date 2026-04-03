@@ -96,10 +96,11 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 void CChildFrame::OnMove(int x, int y) 
 {
 	CMDIChildWnd::OnMove( x, y );
-	neurosim_view *pActiveView = ( neurosim_view * )GetActiveView();
-	if( pActiveView ){
-	    pActiveView->changeViewSize();
-	}
+	//DEBUG
+	//neurosim_view *pActiveView = ( neurosim_view * )GetActiveView();
+	//if( pActiveView ){
+	//    pActiveView->changeViewSize();
+	//}
 }
 
 BOOL CChildFrame::OnCreateClient( LPCREATESTRUCT, CCreateContext* pContext )
@@ -108,10 +109,10 @@ BOOL CChildFrame::OnCreateClient( LPCREATESTRUCT, CCreateContext* pContext )
 		neurosim_view *gui_view = ( neurosim_view * )CreateView( pContext, AFX_IDW_PANE_FIRST );
 		if( gui_view == NULL )
 			return FALSE;
-		neurosim_doc *doc = gui_view->GetDocument();
+		neurosim_doc *doc = gui_view->GetDocument(); assert(doc != NULL);
 		CFrameView *frame_view = doc->get_view();
 		if( frame_view != NULL ){
-			char *view_name = ( char *)frame_view->get_name();
+			char *view_name = ( char * )frame_view->get_name(); assert(view_name != NULL);
 			if( !doc->Model->is_unique_name( view_name ))
 				view_name = ( char *)doc->Model->find_unique_name( view_name, frame_view->prefix());
 			frame_view->set_name( view_name );

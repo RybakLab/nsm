@@ -137,15 +137,20 @@ BOOL neurosim_app::InitInstance( void )
 
 void neurosim_app::initViews( neurosim_doc *doc )
 {
-    (( CMainFrame* )m_pMainWnd )->StatusBarMessage( "Initializing views..." );
+	CMainFrame* pMainFrame = ( CMainFrame* )m_pMainWnd;
+	pMainFrame->StatusBarMessage( "Initializing views..." );
+
+	// Suspend redrawing for the Main Frame and the MDI Client area.
+	pMainFrame->SetRedraw( FALSE );
+	::SendMessage( pMainFrame->m_hWndMDIClient, WM_SETREDRAW, FALSE, 0 );
+
+	(( CMainFrame* )m_pMainWnd )->StatusBarMessage( "Initializing views..." );
 	for( CFrameView *view = doc->get_view(); view != NULL; view = doc->get_view() ){
-		CMDIChildWnd *childWnd = (( CMainFrame* )m_pMainWnd )->MDIGetActive(); ASSERT( childWnd );
-		ASSERT( view );	view->create_view( doc, childWnd );
-		childWnd->MDIActivate();		
-		childWnd->SetActiveView( childWnd->GetActiveView());
+		CMDIChildWnd *childWnd = (( CMainFrame* )m_pMainWnd )->MDIGetActive(); 
+		ASSERT( childWnd ); ASSERT( view );	
+		view->create_view( doc, childWnd );
 	}
-//	top childframe has been already added to the main frame during 
-//	document initialization so it has to be removed
+	// top childframe has been already added to the main frame during initialization so it has to be removed
 	for( CWnd *child = (( CMainFrame* )m_pMainWnd )->MDIGetActive(); child != NULL; child = child->GetNextWindow( GW_HWNDNEXT )){
 		CString title;
 		child->GetWindowText( title );
@@ -154,6 +159,14 @@ void neurosim_app::initViews( neurosim_doc *doc )
 			break;
 		}
 	}
+	// Re-enable redrawing.
+	::SendMessage( pMainFrame->m_hWndMDIClient, WM_SETREDRAW, TRUE, 0 );
+	pMainFrame->SetRedraw( TRUE );
+
+	// invalidate the client area and draw the final state of all the newly created windows at once.
+	::RedrawWindow( pMainFrame->m_hWndMDIClient, NULL, NULL, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW );
+	pMainFrame->RedrawWindow( NULL, NULL, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW | RDW_FRAME );
+	pMainFrame->OnUpdateFrameTitle();
 }
 
 CDocument *neurosim_app::OpenDocumentFile( LPCTSTR lpszFileName ) 
