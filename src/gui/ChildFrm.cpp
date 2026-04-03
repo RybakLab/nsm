@@ -96,11 +96,10 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 void CChildFrame::OnMove(int x, int y) 
 {
 	CMDIChildWnd::OnMove( x, y );
-	//DEBUG
-	//neurosim_view *pActiveView = ( neurosim_view * )GetActiveView();
-	//if( pActiveView ){
-	//    pActiveView->changeViewSize();
-	//}
+	neurosim_view *pActiveView = ( neurosim_view * )GetActiveView();
+	if( pActiveView ){
+	    pActiveView->changeViewSize();
+	}
 }
 
 BOOL CChildFrame::OnCreateClient( LPCREATESTRUCT, CCreateContext* pContext )
