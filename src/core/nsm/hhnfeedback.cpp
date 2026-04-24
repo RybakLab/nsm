@@ -2,7 +2,7 @@
 // hhnfeedback.cpp
 #include "precompile.h"
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 #include "hhnfeedback.h"
 #include "runman.h"
@@ -218,6 +218,4 @@ void hhn_feedback::save( ostream &file )
 	file << "</Feedback>" << endl;
 }
 
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__

@@ -81,16 +81,14 @@ class alignas( 16 ) CSimulateData{
 		bool IsRedrawResults;
 		string Promt;
 		string ModelName;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		bool IsStickDiagram;		// interface flags
 		double LimbOriginX;			// [0:1]
 		double LimbOriginY;			// [0:1]
 		double Slope;				// in deg [-90:90] 
 		unsigned long LimbSkip;
 		unsigned long LimbScale;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -122,12 +120,10 @@ virtual		~CSimulate( void );
 		hhn_pair<int> get_uid(const string &name ) const
 		{
 			hhn_pair<int> unit = Network.get_uid( name );
-		#if defined (__MECHANICS_2D__)
+		#if defined (__MECHANICS__)
 			if( unit.X == -1 )
 				unit = BiomechT.get_uid( name );
-		#elif defined (__MECHANICS_3D__)
-			// TODO implementation 3d model
-		#endif // __MECHANICS_2D__
+		#endif // __MECHANICS__
 			return unit;
 		};
 		const string &GetUnitName( const unit_code &code )
@@ -148,7 +144,7 @@ virtual		~CSimulate( void );
 					  if( Network.get_crtunit( code ) )
 						  return Network.get_crtunit( code )->get_name();
 					 }
-		#if defined (__MECHANICS_2D__)
+		#if defined (__MECHANICS__)
 				case _id_Body:
 				case _id_Vertex:
 				case _id_Link:
@@ -156,9 +152,7 @@ virtual		~CSimulate( void );
 				case _id_Muscle:
 				case _id_Ground:
 					return Walker->get_name( code );	//make sure Walker returns apropriate name
-		#elif defined (__MECHANICS_3D__)
-			// TODO implementation 3d model
-		#endif // __MECHANICS_2D__
+		#endif // __MECHANICS__
 				default:
 					name = "";
 			}
@@ -170,12 +164,10 @@ virtual		~CSimulate( void );
 		size_t GetNumSteps( void ) const{ return NumSteps; };
 		const nsm_vector(float) &GetTimeScale( void ) const{ return ChartBuffer->timescale(); };
 		CChartBuffer &GetChartBuffer( void ) const{ return *ChartBuffer; };
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		void upd_outlist( void );
 		CWalkerBuffer &GetWalkerBuffer( void ) const{ return *WalkerBuffer; };
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 		void SetTimeScale( double begin, double end);
 		void InitViews( void );
 		void ReleaseViews( void );
@@ -199,21 +191,17 @@ virtual		~CSimulate( void );
 		CSimulateData SimData;
 		CHhnNetwork Network;
 		runman *RunMan;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		walker *Walker;
 		t_biomech BiomechT;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	private:
 	////////////////////////////////////////////////////
 	// view buffers
 		CChartBuffer *ChartBuffer;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		CWalkerBuffer *WalkerBuffer;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	////////////////////////////////////////////////////
 	// views framework
 		vector<CFrameView *> Views;
@@ -224,6 +212,8 @@ virtual		~CSimulate( void );
 		size_t NumThreads;
 		size_t NumSteps;
 		size_t CurrStep;
+	public:
+virtual		size_t ctrl_handler( bool *quit, size_t *currstep );
 #ifdef __CONSOLE__
 	public:
 		bool LoadModel( const char *filename );
@@ -263,7 +253,6 @@ virtual		~CSimulate( void );
 		bool StartSimulation( const CSimParameters &par );
 		bool StopSimulation( void );
 		void InitNetwork( CHhnNetwork &network, long seed );
-virtual		size_t ctrl_handler( bool *quit, size_t *currstep );
 	private:
 		void EnableTimer( bool enabled );
 

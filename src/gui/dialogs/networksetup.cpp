@@ -2,11 +2,9 @@
 // networksetup.cpp : implementation file
 #include "precompile.h"
 #include "networksetup.h"
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 #include "biomtemplate.h"
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif //__MECHANICS_2D__
+#endif //__MECHANICS__
 
 #ifndef __CONSOLE__
 
@@ -813,7 +811,7 @@ BOOL COutputNetwork::OnSetActive()
 	return CPropertyPage::OnSetActive();
 }
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CFBProp dialog
 CFBProp::CFBProp(CWnd* pParent /*=NULL*/)
@@ -1300,9 +1298,7 @@ BOOL CFeedbackSetup::OnSetActive()
 	Change();
 	return CPropertyPage::OnSetActive();
 }
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 
 /////////////////////////////////////////////////////////////////////////////
 // CNetworkSetup
@@ -1310,11 +1306,9 @@ IMPLEMENT_DYNAMIC(CNetworkSetup, CPropertySheet)
 
 CNetworkSetup::CNetworkSetup(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 	:CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	, BiomT( NULL )
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 {
 	AddPage( &NetworkParam );
 	AddPage( &PopulatSetup );
@@ -1324,21 +1318,17 @@ CNetworkSetup::CNetworkSetup(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage
 	PopulatSetup.Network = &Network;
 	DriveSetup.Network = &Network;
 	OutputSetup.Network = &Network;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	AddPage( &FeedbackSetup );
 	FeedbackSetup.Network = &Network;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 }
 
 CNetworkSetup::CNetworkSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 	:CPropertySheet(pszCaption, pParentWnd, iSelectPage)
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	, BiomT( NULL )
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 {
 	AddPage( &NetworkParam );
 	AddPage( &PopulatSetup );
@@ -1348,13 +1338,11 @@ CNetworkSetup::CNetworkSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectP
 	PopulatSetup.Network = &Network;
 	DriveSetup.Network = &Network;
 	OutputSetup.Network = &Network;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	AddPage( &FeedbackSetup );
 	FeedbackSetup.Network = &Network;
 	FeedbackSetup.BiomT = &BiomT;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 }
 
 CNetworkSetup::~CNetworkSetup()

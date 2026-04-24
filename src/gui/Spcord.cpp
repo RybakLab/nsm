@@ -91,7 +91,7 @@ BOOL neurosim_app::InitInstance( void )
 	// document type specified in the first document template; and
 	// therefore does not represent the user with a File New dialog.
 	InitCommonControls();
-#if !defined __MECHANICS_2D__ || !defined __MECHANICS_3D__
+#if !defined __MECHANICS__
 	m_pView = new CMultiDocTemplate(IDR_NSMTYPE,
 		RUNTIME_CLASS(neurosim_doc),
 		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
@@ -103,16 +103,14 @@ BOOL neurosim_app::InitInstance( void )
 		RUNTIME_CLASS(CChildFrame), // custom MDI child frame
 		RUNTIME_CLASS(CChartView));
 	AddDocTemplate(m_pView);
-#if defined __MECHANICS_2D__
+#if defined __MECHANICS__
 	m_pLimb = new CMultiDocTemplate(IDR_LIMBVIEW,
         RUNTIME_CLASS(neurosim_doc),
         RUNTIME_CLASS(CChildFrame),
         RUNTIME_CLASS(CLimbView));
 	// create main MDI Frame window
 	AddDocTemplate(m_pLimb);
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif /*__MECHANICS_2D__*/
+#endif /*__MECHANICS__*/
 #endif //__LOCOMOTION__
 	CMainFrame* pMainFrame = new CMainFrame;
 	if( !pMainFrame->LoadFrame( IDR_MAINFRAME ))

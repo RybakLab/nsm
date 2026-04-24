@@ -209,11 +209,9 @@ CHhnNetwork::CHhnNetwork( void )
 CHhnNetwork::CHhnNetwork( CHhnNetwork &network )
 	: nn_unit( network ), NNConnect( network.NNConnect ), Drive( network.Drive ), Output( network.Output ),
 	Control( network.Control ), RunMan( network.RunMan ), Threshold( network.Threshold ), 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	Feedback( network.Feedback ),
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	NetParam( network.NetParam ), TUniList( network.TUniList )
 {
 	for( size_t id = 0; id < network.Synapses.size(); ++id ){
@@ -246,11 +244,9 @@ CHhnNetwork &CHhnNetwork::operator = ( const CHhnNetwork &network )
 	} 
 	Drive = network.Drive;
 	Output = network.Output;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	Feedback = network.Feedback;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	Control = network.Control;
 	NNConnect = network.NNConnect;
 	for( size_t i = 0; i < network.size_pop(); i++ ){
@@ -388,7 +384,7 @@ bool CHhnNetwork::del_out( size_t inx )
 	return false;
 }
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 bool CHhnNetwork::add_fbk( const hhn_feedback &feedback )
 {
 	if( !NNConnect.occupied( feedback.get_name()) ){
@@ -430,9 +426,7 @@ bool CHhnNetwork::del_fbk( size_t inx )
 	}
 	return false;
 }
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 
 bool CHhnNetwork::add_ctr( const hhn_control &control )
 {
@@ -541,11 +535,9 @@ void CHhnNetwork::init( long seed, runman *man, bool rand )
 	init_ions();
 	init_syn();
 	for( size_t i = 0; i < Drive.size(); Drive[i].init(), ++i );
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	for( size_t i = 0; i < Feedback.size(); Feedback[i].init(), ++i );
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif /*__MECHANICS_2D__*/
+#endif /*__MECHANICS__*/
 	for( size_t i = 0; i < Output.size(); Output[i].init(), ++i );
 	for( size_t i = 0; i < Populat.size(); Populat[i].init(), ++i );
 	for( size_t i = 0; i < Control.size(); Control[i].init( this ), ++i );
@@ -560,11 +552,9 @@ void CHhnNetwork::init( long seed, runman *man, bool rand )
 		vector<CNNConnect> weights = NNConnect.sources( trg_name[i] );
 		trg[i]->connect( src, weights );
 	}
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	for( size_t i = 0; i < Feedback.size(); Feedback[i].reg_unit( RunMan ), ++i );
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	for( size_t i = 0; i < Output.size(); Output[i].reg_unit( RunMan ), ++i );
 	for( size_t i = 0; i < Populat.size(); Populat[i].reg_unit( RunMan ), ++i );
 	for( size_t i = 0; i < Control.size(); Control[i].reg_unit( RunMan ), ++i );
@@ -864,15 +854,13 @@ bool CHhnNetwork::LoadNNUnits( istream &file )
 			success &= output.load( file );
 			success &= add_out( output );
 		} 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		else if( str == "<Feedback"){
 			hhn_feedback feedback;
 			success &= feedback.load( file );
 			success &= add_fbk( feedback );
 		}
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 		else{
 			unknown_string( file, str);
 		}
@@ -887,11 +875,9 @@ void CHhnNetwork::SaveNNUnits( ostream &file )
 	for( size_t i = 0; i < Populat.size(); Populat[i].save( file ), ++i );
 	for( size_t i = 0; i < Drive.size(); Drive[i].save( file ), ++i );
 	for( size_t i = 0; i < Output.size(); Output[i].save( file ), ++i );
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	for( size_t i = 0; i < Feedback.size(); Feedback[i].save( file ), ++i );
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	file << "\n</Units>\n";
 }
 
@@ -977,15 +963,13 @@ hhn_pair<int> CHhnNetwork::get_uid( const string &name )const
 			unit = hhn_pair<int>(_id_NNPopulat, i);
 			return unit;
 		}
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	for( i = 0; i < Feedback.size(); i++ )
 		if( name == Feedback[i].get_name()){
 			unit = hhn_pair<int>(_id_NNFeedback, i);
 			return unit;
 		}
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	for( i = 0; i < Drive.size(); i++ )
 		if( name == Drive[i].get_name()){
 			unit = hhn_pair<int>(_id_NNDrive, i);
@@ -1013,13 +997,11 @@ nn_unit *CHhnNetwork::get_nnunit( const unit_code &code )
 		case _id_NNPopulat:
 			if( code.NNIndex < Populat.size() )
 				return &Populat[code.NNIndex];
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		case _id_NNFeedback:
 			if( code.NNIndex < Feedback.size() )
 				return &Feedback[code.NNIndex];
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 		case _id_NNDrive:
 			if( code.NNIndex < Drive.size() )
 				return &Drive[code.NNIndex];
@@ -1037,13 +1019,11 @@ nn_unit *CHhnNetwork::get_nnunit( const string &name )
 	for( size_t i = 0; i < Populat.size(); i++ )
 		if( name == Populat[i].get_name())
 			return &Populat[i];
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	for( size_t i = 0; i < Feedback.size(); i++ )
 		if( name == Feedback[i].get_name())
 			return &Feedback[i];
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	for( size_t i = 0; i < Drive.size(); i++ )
 		if( name == Drive[i].get_name())
 			return &Drive[i];
@@ -1078,11 +1058,9 @@ void CHhnNetwork::clear( void )
 	Populat.clear();
 	Drive.clear();
 	Output.clear();
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	Feedback.clear();
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	Control.clear();
 	NNConnect.clear();
 	for( size_t id = 0; id < Ions.size(); ++id ){

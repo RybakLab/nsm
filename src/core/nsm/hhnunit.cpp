@@ -56,7 +56,7 @@ const char *vw_name( std::string &name, unit_code &code )
 					break;
 				}
 			return name.c_str();
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		case _id_Vertex:
 			switch( code.Param ){
 				case _id_Coordinate_X:
@@ -116,9 +116,7 @@ const char *vw_name( std::string &name, unit_code &code )
 					break;
 				}
 			return name.c_str();
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	}
 	return name.c_str();
 }

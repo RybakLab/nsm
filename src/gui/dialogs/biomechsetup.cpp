@@ -6,7 +6,7 @@
 
 #include "biomechsetup.h"
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 CBiomechSetup::CBiomechSetup( CWnd* pParent ) :
 		CDialog( CBiomechSetup::IDD, pParent ), BiomechT( NULL, GRID_NONE )
@@ -135,7 +135,5 @@ bool CBiomechSetup::DisplayUnitChildren( uni_template *unit, const string &start
 	}
 	return ( pos > 0? true:false );
 }
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __CONSOLE__

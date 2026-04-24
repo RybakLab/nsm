@@ -102,7 +102,7 @@ virtual		~CChartView();
 		CMatrix<CRect> RegionRect;	// rect to draw data ( in your case has to be 30 such rectangles)
 };
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CLimbView view
 class CLimbView : public neurosim_view{
@@ -134,8 +134,6 @@ virtual		~CLimbView();
 		COLORREF EraseColor;
 		COLORREF GroundColor;
 };
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __CONSOLE__
 #endif // __SPCORDVIEW_H

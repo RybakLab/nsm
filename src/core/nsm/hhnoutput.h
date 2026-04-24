@@ -8,11 +8,9 @@
 #ifndef __HHN_OUTPUT_H
 #define __HHN_OUTPUT_H
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 class zmuscle;
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 //////////////////////////////////////////////////////////////////////
 // class hhn_output y = X+K1*t+const; X = input > threshold? LPF(input-threshold): 0
 class alignas( 16 ) hhn_output : public nn_unit, public hhn_process{
@@ -36,11 +34,9 @@ class alignas( 16 ) hhn_output : public nn_unit, public hhn_process{
 		double &slp_t( void ){ return SlopeT; };
 		double &pow_t( void ){ return PowT; };
 		double &cap( void ){ return Cap; };
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		void attach( zmuscle *muscle );
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 		void prerun( double step ) final;
 		bool init( void ) final;
 		//--- overrided function

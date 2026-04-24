@@ -134,12 +134,10 @@ void neurosim_doc::DrawTo( bool complete, double time )
 			neurosim_view *pView = ( neurosim_view *)GetNextView( pos );
 			if( pView->IsKindOf( RUNTIME_CLASS( CChartView )) ) 
 				pView->DrawTo( complete, ( unsigned long )( time/SimData->SimStep ));
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 			else if( pView->IsKindOf( RUNTIME_CLASS( CLimbView )))
 				pView->DrawTo( complete, ( unsigned long )( time/SimData->SimStep ));
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif //__MECHANICS_2D__
+#endif //__MECHANICS__
 		}
 		::ReleaseMutex( IsPlotting );
 	}

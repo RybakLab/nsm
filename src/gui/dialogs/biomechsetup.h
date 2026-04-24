@@ -16,7 +16,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 class CBiomechSetup : public CDialog{
 		DECLARE_MESSAGE_MAP()
@@ -42,8 +42,6 @@ enum		{ IDD = IDD_BIOMECH_PARAMETERS };
 		CGridSetup BiomechView;
 };
 
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __BIOMECH_SETUP_H
 #endif // __CONSOLE__

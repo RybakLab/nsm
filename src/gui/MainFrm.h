@@ -60,7 +60,7 @@ virtual	~CMainFrame();
 		afx_msg	LRESULT OnSetMessageString(WPARAM wParam, LPARAM lParam);
 		afx_msg	LRESULT OnUpdateResults( WPARAM hint, LPARAM counter );
 		afx_msg	LRESULT OnStopTimer( WPARAM hint, LPARAM counter );
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	public:
 		bool OpenLimbWindow( void );
 		bool CloseLimbWindow( void );
@@ -71,9 +71,7 @@ virtual	~CMainFrame();
 		afx_msg	void OnBiomechanics();
 		afx_msg	void OnIsStick();
 		afx_msg	void OnUpdateIsStick(CCmdUI* pCmdUI);
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	private:
 		unsigned long CurrStep;
 		unsigned int TimerHandle;

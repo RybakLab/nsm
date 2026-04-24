@@ -189,9 +189,9 @@ hgna_channel::hgna_channel( hhn_compart *neuron )
 	hhn_channel::init_channel( 4., 10., 1. );
 	init_channel( 0.02, -40., -6., -40., -12., 1, 0.3, -48., 6, -48., 12., 1 );
 	Th = 1.;
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__
 	Th = 0.33;
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 }
 
 hgna_channel::hgna_channel( const hgna_channel &channel )
@@ -679,9 +679,9 @@ hna_channel::hna_channel( hhn_compart *neuron )
 	init_channel( 0.02, 0.3 );
 #endif // __LOCOMOTION__
 	Th = 1.;
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__
 	Th = 0.33;
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 }
 
 hna_channel::hna_channel( const hna_channel &channel )
@@ -739,9 +739,9 @@ hk_channel::hk_channel( hhn_compart *neuron )
 	init_channel( 0.03 );
 	H = 1;
 	Tm = 1.;
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__
 	Tm = 0.33;
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 }
 
 hk_channel::hk_channel( const hk_channel &channel )

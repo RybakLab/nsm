@@ -104,7 +104,7 @@ virtual		BOOL OnInitDialog();
 		afx_msg void OnDeltaposSpinHistNorm(NMHDR* pNMHDR, LRESULT* pResult);
 };
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CSimLimbSetup dialog
 class CSimLimbSetup : public CPropertyPage{
@@ -139,9 +139,7 @@ virtual		BOOL OnInitDialog();
 		afx_msg void OnUpdateEditLimbOriginY();
 		afx_msg void OnDeltaposSpinLimbOriginY(NMHDR *pNMHDR, LRESULT *pResult);
 };
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 
 /////////////////////////////////////////////////////////////////////////////
 // CSimulateSetup
@@ -158,11 +156,9 @@ virtual		~CSimulateSetup( void );
 	private:
 		CSimParamSetup SimParamSetup;
 		CSimViewSetup SimViewSetup;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		CSimLimbSetup SimLimbSetup;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 };
 
 #endif // __CONSOLE__

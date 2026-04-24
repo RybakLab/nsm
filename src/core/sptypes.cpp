@@ -116,11 +116,11 @@ const char *_FormatNames[_id_MAX_FORMAT] = {
 	"BINARY (SCRC format)",
 };
 
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__ 
 	const char *_ProjectName = "Spcord v2.05";
 #else
 	const char *_ProjectName = "NSM v2.05";
-#endif //__MECHANICS_2D__
+#endif //__MECHANICS__
 
 double _FileVersion = 2.05;
 

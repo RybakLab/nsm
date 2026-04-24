@@ -239,12 +239,10 @@ bool CChartBuffer::add_buffer( const unit_code &code )
 			hhn_control *control = Manager->Network.get_crtunit( code );
 			if( control )
 				data = ( void *)( control->select(( unit_code *)&code ));
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 			else
 				data = ( void *)Manager->Walker->select(( unit_code *)&code );
-#elif defined (__MECHANICS_3D__)
-			// TODO select the variables and parameters of 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 		}
 		if( !data )	return false;
 		ParBuffer.push_back( hhn_viewbuffer());
@@ -326,7 +324,7 @@ void CChartBuffer::save( ostream &file, const vector<unit_code> &buffers, hhn_pa
 	}
 }
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerVertex class
 CWalkerVertex::CWalkerVertex( void )
@@ -434,5 +432,4 @@ void CWalkerBuffer::release_all_buffers( void )
 	Buffer.swap( buff_tmp );
 	CBufferManager::release_all_buffers();
 }
-#elif defined (__MECHANICS_3D__)
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__

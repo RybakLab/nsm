@@ -241,7 +241,7 @@ class COutputNetwork : public CPropertyPage{
 		int NewOutput;
 };
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 class t_biomech;
 /////////////////////////////////////////////////////////////////////////////
 // CFBProp dialog
@@ -340,9 +340,7 @@ class CFeedbackSetup : public CPropertyPage{
 	private:
 		int NewFeedback;
 };
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 
 /////////////////////////////////////////////////////////////////////////////
 // CNetworkSetup
@@ -354,21 +352,17 @@ class CNetworkSetup : public CPropertySheet{
 virtual		~CNetworkSetup( void );
 	public:
 		CHhnNetwork Network;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		t_biomech BiomT;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	private:
 		CNetworkParam NetworkParam;
 		CPopulatSetup PopulatSetup;
 		CDriveSetup DriveSetup;
 		COutputNetwork OutputSetup;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		CFeedbackSetup FeedbackSetup;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 };
 
 /////////////////////////////////////////////////////////////////////////////

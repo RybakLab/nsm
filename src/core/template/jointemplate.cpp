@@ -2,7 +2,7 @@
 // jointemplate.h
 #include "precompile.h"
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 #include "jointemplate.h"
 #include "walker.h"
@@ -317,6 +317,4 @@ void t_ankle::copy_to( walker *w, int side )
 	}
 }
 
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif //__MECHANICS_2D__
+#endif //__MECHANICS__

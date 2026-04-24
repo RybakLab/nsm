@@ -7,7 +7,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 #include "hhnunit.h"
 #include "muscle.h"
@@ -251,7 +251,5 @@ extern const char *get_jname( size_t joint );
 extern const char *get_tname( size_t tg );
 extern const char *get_vname( size_t ver );
 
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __WALKER_H

@@ -335,7 +335,7 @@ void CChartFrameView::save( ostream &file, CSimulate *manager )
 	CFrameView::save( file, manager );
 }
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerFrameView class
 void CWalkerFrameView::init_view( CSimulate *manager )
@@ -369,6 +369,5 @@ void CWalkerFrameView::save( ostream &file, CSimulate *manager )
 	file << endl << "<View Walker>" << endl;
 	CFrameView::save( file, manager );
 }
-#elif defined (__MECHANICS_3D__)
-// TOD implementation for 3d model
-#endif // __MECHANICS_2D__
+
+#endif // __MECHANICS__

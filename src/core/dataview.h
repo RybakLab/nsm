@@ -158,7 +158,7 @@ virtual		~CChartBuffer( void ){	release_all_buffers(); };
 		nsm_vector(hhn_viewbuffer) ParBuffer;
 };
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerVertex class
 class CWalkerVertex{
@@ -199,7 +199,5 @@ virtual		~CWalkerBuffer( void ){};
 		void *CurrData;
 		nsm_vector(CWalkerVertex) Buffer;
 };
-#elif defined (__MECHANICS_3D__)
-// TODO implementation for 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __DATA_VIEW_H

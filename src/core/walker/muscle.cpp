@@ -3,7 +3,7 @@
 //---------------------------------------------------------------------
 #include "precompile.h"
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 #include "hhnoutput.h"
 #include "walker.h"
@@ -497,6 +497,4 @@ void j2muscle::proc( wjoint *joints )
 	V = H1*dalpha1+H2*dalpha2;
 }
 #undef __IS_BLOCK
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__

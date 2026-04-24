@@ -27,21 +27,8 @@
 // uncomment the definition below if you want to include
 // the bio-mechanical part of the project 
 // (2D mechanical model of a cat)
-//#define __MECHANICS_2D__ 
+#define __MECHANICS__ 
 
-/////////////////////////////////////////////////////////////////////////////
-// uncomment the definition below if you want to include
-// the bio-mechanical part of the project 
-// (3D mechanical model of a cat based on MuJoCo engine)
-//#define __MECHANICS_3D__ 
-
-#if defined (__MECHANICS_2D__)
-#undef __MECHANICS_3D__
-/////////////////////////////////////////////////////////////////////////////
-// uncomment the definition below if you want to use
-// the latest model of a muscle
-//#define __NEW_MUSCLE__
-#endif //__MECHANICS_2D__
 #endif /*__LOCOMOTION__*/
 
 /////////////////////////////////////////////////////////////////////////////
@@ -57,7 +44,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // uncomment the definition below if you want to use
 // OpenMP optimized version of the project
-#define __OMP__ 
+//#define __OMP__ 
 
 /////////////////////////////////////////////////////////////////////////////
 // uncomment the definition below if you want to use
@@ -73,7 +60,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // uncomment the definition below if you want to use
 // boost specific memory managements
-#define __BOOST__ 
+//#define __BOOST__ 
 
 #include "nsmdebug.h"
 #endif // _CONFIG_H_

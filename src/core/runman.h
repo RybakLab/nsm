@@ -31,11 +31,9 @@ enum _pass_id_{
 	_id_PASS_NNUNIT,
 	_id_PASS_POSTY,		// presynaptic output - smoothing
 // 5.  calculate biomechanics if needed
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	_id_PASS_WALKER,
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif /*__MECHANICS_2D__*/
+#endif /*__MECHANICS__*/
 // 6.  control behavior of the model.
 #ifdef __MPI__
 	_id_PASS_MPI,

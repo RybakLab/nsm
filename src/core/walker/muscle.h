@@ -4,7 +4,7 @@
 #ifndef __MUSCLE_H
 #define __MUSCLE_H
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 #if _MSC_VER > 1000
 	#pragma once
@@ -440,7 +440,5 @@ inline zmuscle *zcreate( const j2scheme &scheme )
 	return ( zmuscle * )new j2muscle( scheme );
 }
 
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __MUSCLE_H

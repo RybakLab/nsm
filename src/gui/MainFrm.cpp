@@ -85,16 +85,14 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE( WM_UPDATE_MAIN_WND, &CMainFrame::OnUpdateResults )
 	ON_MESSAGE( WM_STOP_MAIN_WND_TIMER, &CMainFrame::OnStopTimer )
 	ON_MESSAGE( WM_SETMESSAGESTRING, &CMainFrame::OnSetMessageString )
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	ON_COMMAND( IDM_NEW_LIMB_WINDOW, &CMainFrame::OnNewlimbwindow )
 	ON_COMMAND( ID_BIOMECHANICS, &CMainFrame::OnBiomechanics )
 	ON_COMMAND( ID_IS_STICK, &CMainFrame::OnIsStick )
 	ON_UPDATE_COMMAND_UI( IDM_NEW_LIMB_WINDOW, &CMainFrame::OnUpdateNewlimbwindow )
 	ON_UPDATE_COMMAND_UI( ID_BIOMECHANICS, &CMainFrame::OnUpdateMenuItem )
 	ON_UPDATE_COMMAND_UI( ID_IS_STICK, &CMainFrame::OnUpdateIsStick )
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 END_MESSAGE_MAP()
 
 static UINT BASED_CODE indicators[] = {
@@ -148,7 +146,7 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 {
 	if( CMDIFrameWnd::OnCreate( lpCreateStruct ) == -1 )
 		return -1;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	if( !defaultToolBar.CreateEx( this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!defaultToolBar.LoadToolBar( IDR_LOCOTYPE ) ){
@@ -163,7 +161,7 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
 		TRACE0( "Failed to create toolbar\n" );
 		return -1;      // fail to create
 	}
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	if( !m_wndStatusBar.Create( this ) ||
 		!m_wndStatusBar.SetIndicators( indicators, sizeof(indicators)/sizeof(UINT)) ){
 		TRACE0( "Failed to create status bar\n" );
@@ -247,11 +245,9 @@ void CMainFrame::OnNetworkSetup()
 	neurosim_doc *pDoc = ( neurosim_doc *)GetActiveDoc(); if( !pDoc ) return;
 	CNetworkSetup dlg("Network Setup");
 	dlg.Network = pDoc->Model->Network;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	dlg.BiomT = pDoc->Model->BiomechT;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	GlobalNet = &( dlg.Network );
 	if( dlg.DoModal() == IDOK ){
 		dlg.Network.init( pDoc->Model->SimData.Seed, NULL ); // -->>> mod !!!
@@ -571,7 +567,7 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 	return nIDLast;
 }
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 bool CMainFrame::IsLimbWnd( void )
 {
 	neurosim_doc *pDoc = ( neurosim_doc *)GetActiveDoc(); if( !pDoc ) return false;
@@ -655,7 +651,5 @@ void CMainFrame::OnUpdateIsStick(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck( pDoc->SimData->IsStickDiagram );
 	pCmdUI->Enable( pDoc->SimData->IsSimComplete );
 }
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __CONSOLE__

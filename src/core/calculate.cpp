@@ -11,16 +11,14 @@ static char THIS_FILE[]=__FILE__;
 #endif // _DEBUG
 #endif // __LINUX__
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 ///////////////////////////////////////////////////////////////////////////////
 // walker
 void walker::calc_biomech( size_t currstep, double step, hhn_process **start )
 {
 	(( walker *)*start )->calc_biomech( step );
 }
-#elif defined (__MECHANICS_3D__)
-	// TODO run simulation for 3d graphics
-#endif /*__MECHANICS_2D__*/
+#endif /*__MECHANICS__*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // control
@@ -66,7 +64,7 @@ void hhn_input::calc_g( size_t currstep, double step, hhn_process **start )
 
 ///////////////////////////////////////////////////////////////////////////////
 // feedback
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 void hhn_feedback::feedback( size_t currstep, double step, hhn_process **start )
 {
 	for( ; *start != NULL; ++start ){
@@ -74,9 +72,7 @@ void hhn_feedback::feedback( size_t currstep, double step, hhn_process **start )
 		fb->feedback( step );
 	}
 }
-#elif defined (__MECHANICS_3D__)
-	// TODO run feedback model (could be the same model)
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 
 ///////////////////////////////////////////////////////////////////////////////
 // output (nsm object)

@@ -37,11 +37,9 @@ virtual		CDocument* OpenDocumentFile(LPCTSTR lpszFileName);
 		void initViews( neurosim_doc *doc );
 	public:
 		CMultiDocTemplate* m_pView; 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		CMultiDocTemplate* m_pLimb;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 };
 
 #endif // __CONSOLE__

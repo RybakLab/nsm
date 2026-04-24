@@ -81,16 +81,14 @@ BOOL CControlledSetup::OnInitDialog()
 	code.UnitId = _id_NNOutput;
 	mainItems[3] = Tree_Controlled.InsertItem("Outputs", 0, TVI_ROOT);
 	Tree_Controlled.SetItemData(mainItems[3], code.encode() );
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	// Feedbacks
 	code = unit_code();
 	code.UnitId = _id_NNFeedback;
 	code.NNIndex = 0;
 	mainItems[4] = Tree_Controlled.InsertItem("Feedbacks", 0, TVI_ROOT);
 	Tree_Controlled.SetItemData(mainItems[4], code.encode() );
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	// Populations
 	if( pNetwork->size_pop() ){
 		HTREEITEM *items = new HTREEITEM[pNetwork->size_pop()];
@@ -210,7 +208,7 @@ BOOL CControlledSetup::OnInitDialog()
 		delete []items;
 
 	}
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	// Feedbacks
 	if( pNetwork->size_fbk() ){
 		HTREEITEM *items = new HTREEITEM[pNetwork->size_fbk()];
@@ -224,9 +222,7 @@ BOOL CControlledSetup::OnInitDialog()
 		}
 		delete []items;
 	}
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	List_Controlled.InsertColumn( 0, "");
 	ShowListBox();
 	return TRUE; 

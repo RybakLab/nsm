@@ -576,7 +576,7 @@ void CChartView::OnInitialUpdate()
 	SetView();
 }
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CLimbView diagnostics
 #ifdef _DEBUG
@@ -720,7 +720,5 @@ void CLimbView::PrepareDC( CDC* pDC, CRect &rect )
 	pDC->DPtoLP(lp_rect);
 	pDC->SetWindowOrg( -int( lp_rect.Width()*pDoc->SimData->LimbOriginX ), -int( lp_rect.Height()*(1-pDoc->SimData->LimbOriginY )));
 }
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __CONSOLE__

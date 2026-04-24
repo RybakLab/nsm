@@ -1,6 +1,6 @@
 #include "precompile.h"
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 #include "biomtemplate.h"
 #include "walker.h"
@@ -805,6 +805,4 @@ void t_biomech::nail( void )
 	}
 }
 */
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif //__MECHANICS_2D__
+#endif //__MECHANICS__

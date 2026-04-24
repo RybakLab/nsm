@@ -130,7 +130,7 @@ class CHhnNetwork : public nn_unit{
 	public:
 		double Threshold;
 	public:
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 		size_t size_fbk( void ) const{ return Feedback.size(); };
 		hhn_feedback &get_fbk( size_t inx ){ return Feedback[inx]; };
 		bool add_fbk( const hhn_feedback &feedback );
@@ -138,9 +138,7 @@ class CHhnNetwork : public nn_unit{
 		bool del_fbk( size_t inx );
 	private:
 		vector<hhn_feedback> Feedback; // Array of feedbacks for the network (ONLY SOURCES)
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 // temporary solution ------- begin
      public:
 		t_network NetParam;

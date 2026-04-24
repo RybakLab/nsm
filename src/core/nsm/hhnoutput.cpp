@@ -5,11 +5,9 @@
 #include "hhnoutput.h"
 #include "hhn.h"
 #include "runman.h"
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 #include "walker.h"
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 
 #ifndef __LINUX__ 
 #ifdef _DEBUG
@@ -77,14 +75,12 @@ hhn_output &hhn_output::operator = ( const hhn_output &output )
 	return *this;
 }
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 void hhn_output::attach( zmuscle *muscle )
 {
 	muscle->MN = &Output;
 }
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 
 bool hhn_output::init( void )
 {

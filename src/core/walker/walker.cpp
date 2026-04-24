@@ -2,7 +2,7 @@
 // walker.cpp
 #include "precompile.h"
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 #include "walker.h"
 #include "hhnnetwork.h"
@@ -959,6 +959,4 @@ void walker::init_qp( void )
 	P[A_FR] = P[A_SR]-Joint[A_AR].dA;
 }
 
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__

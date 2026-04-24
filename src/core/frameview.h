@@ -147,7 +147,7 @@ class CChartFrameView : public CFrameView{
 		vector<CViewParam> NNParam;
 };
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CWalkerFrameView class
 class CWalkerFrameView : public CFrameView{
@@ -165,7 +165,5 @@ class CWalkerFrameView : public CFrameView{
 		bool create_view( CDocument* pDoc, CMDIChildWnd *pChild );
 #endif // __CONSOLE__
 };
-#elif defined (__MECHANICS_3D__)
-// TODO implementation for 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __FRAME_VIEW_H

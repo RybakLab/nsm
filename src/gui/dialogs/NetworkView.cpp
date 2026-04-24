@@ -193,25 +193,21 @@ BOOL CNetworkView::OnInitDialog()
 	int OUTPUT = 3;
 	int CONTROL = 4;
 	int MAXITEM = 5;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	int FEEDBACK = 5;
 	int BODY = 6;
 	MAXITEM = 7;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	vector<HTREEITEM>mainItems( MAXITEM );
 	mainItems[NETWORK] = ViewTree.InsertItem(Manager->Network.get_name().c_str(), 0, TVI_ROOT);
 	mainItems[POPULAT] = ViewTree.InsertItem("Population", mainItems[NETWORK], mainItems[NETWORK]);
 	mainItems[DRIVE] = ViewTree.InsertItem("External Drive", mainItems[NETWORK], mainItems[POPULAT]);
 	mainItems[OUTPUT] = ViewTree.InsertItem("Output", mainItems[NETWORK], mainItems[DRIVE]);
 	mainItems[CONTROL] = ViewTree.InsertItem("Control", mainItems[NETWORK], mainItems[OUTPUT]);
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	mainItems[FEEDBACK] = ViewTree.InsertItem("Feedback", mainItems[NETWORK], mainItems[CONTROL]);
 	mainItems[BODY] = ViewTree.InsertItem("Body", 0, TVI_ROOT);
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	unit_code code;
 	code.UnitId = _id_Network;
 	ViewTree.SetItemData(mainItems[NETWORK], code.encode());
@@ -223,23 +219,19 @@ BOOL CNetworkView::OnInitDialog()
 	ViewTree.SetItemData(mainItems[OUTPUT], code.encode());
 	code.UnitId = _id_NNControl;
 	ViewTree.SetItemData(mainItems[CONTROL], code.encode());
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	code.UnitId = _id_NNFeedback;
 	ViewTree.SetItemData(mainItems[FEEDBACK], code.encode());
 	code.UnitId = _id_Body;
 	ViewTree.SetItemData(mainItems[BODY], code.encode());
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	vector<HTREEITEM> populatItems( Manager->Network.size_pop() );
 	vector<HTREEITEM> driveItems( Manager->Network.size_drv() );
 	vector<HTREEITEM> outputItems( Manager->Network.size_out() );
 	vector<HTREEITEM> controlItems( Manager->Network.size_ctr() );
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	vector<HTREEITEM> feedbackItems( Manager->Network.size_fbk() );
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	if( Manager->Network.size_pop() ){ // Populations
 		populatItems[0] = ViewTree.InsertItem(Manager->Network.get_pop(0).get_name().c_str(),mainItems[POPULAT],mainItems[POPULAT]);
 		code = unit_code();
@@ -342,7 +334,7 @@ BOOL CNetworkView::OnInitDialog()
 			}
 		}
 	}
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	if( Manager->Network.size_fbk() ){
 		code = unit_code();
 		code.UnitId = _id_NNFeedback;
@@ -356,9 +348,7 @@ BOOL CNetworkView::OnInitDialog()
 			ViewTree.SetItemData(feedbackItems[i], code.encode()); 
 		}
 	}
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	if( Manager->Network.size_drv() ){
 		code = unit_code();
 		code.UnitId = _id_NNDrive;
@@ -399,7 +389,7 @@ BOOL CNetworkView::OnInitDialog()
 		}
 	}
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	// Body
 	vector<HTREEITEM> bodyItems( 5) ; 
 	code = unit_code();
@@ -549,9 +539,7 @@ BOOL CNetworkView::OnInitDialog()
 		parameterItems[1] = ViewTree.InsertItem("Force Y",typeItems[i],parameterItems[0]);
 		ViewTree.SetItemData(parameterItems[1], code.encode());
 	}
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif //__MECHANICS_2D__
+#endif //__MECHANICS__
 	ListView.InsertColumn( 0, "");
 	ShowView();
 	Activate();

@@ -5,7 +5,7 @@
 
 #include "hhnunit.h"
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 
 class zmuscle;
 struct touch;
@@ -49,7 +49,5 @@ static		void feedback( size_t currstep, double step, hhn_process **start );
 static	double _FbNull;
 };
 
-#elif defined (__MECHANICS_3D__)
-// TODO imlementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 #endif // __HHN_FEEDBACK_H

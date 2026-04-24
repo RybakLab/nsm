@@ -407,9 +407,9 @@ tgna_channel::tgna_channel( uni_template *parent, int is_active )
 {
 	M = 0.02; H = 0.3; Gmax = 2.8; 
 	Th = 1.;
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__
 	Th = 0.33; // absent in merged nsm
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	UnitId = _id_generic_NaChan; 
 	Name = _ChannelNames[UnitId];
 	DList.insert( make_pair( "Inactivation\tInit\nH\nHna", &H ));
@@ -592,9 +592,9 @@ tgkdr_channel::tgkdr_channel( uni_template *parent, int is_active )
 {
 	M = 0.03; Gmax = 11.2; 
 	Th = 1.;
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__
 	Th = 0.33;  // absent in merged nsm
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	UnitId = _id_generic_KdrChan; 
 	Name = _ChannelNames[UnitId];
 	DList.insert( make_pair( "Activation\tInit\nM\nMkdr", &M ));
@@ -938,9 +938,9 @@ tna_channel::tna_channel( uni_template *parent, int is_active )
 	Name = _ChannelNames[UnitId];
 #endif // __LOCOMOTION__
 	Th = 1.;
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__
 	Th = 0.33;  // absent in merged nsm
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	DList.insert( make_pair( "Activation\tInit\nM\nMna", &M ));
 	DList.insert( make_pair( "Inactivation\tInit\nH\nHna", &H ));
 }
@@ -981,9 +981,9 @@ tk_channel::tk_channel( uni_template *parent, int is_active )
 	Gmax = 90; 
 #endif // __LOCOMOTION__
 	Tm = 1.;
-#if defined __MECHANICS_2D__ || __MECHANICS_3D__
+#if defined __MECHANICS__
 	Tm = 0.33;  // absent in merged nsm
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 	UnitId = _id_KChan; 
 	Name = _ChannelNames[UnitId];
 	DList.insert( make_pair( "Activation\tInit\nM\nMk", &M ));

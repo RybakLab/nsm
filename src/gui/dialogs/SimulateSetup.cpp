@@ -425,7 +425,7 @@ void CSimViewSetup::OnDeltaposSpinHistNorm(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 /////////////////////////////////////////////////////////////////////////////
 // CSimLimbSetup property page
 IMPLEMENT_DYNCREATE(CSimLimbSetup, CPropertyPage)
@@ -541,9 +541,7 @@ void CSimLimbSetup::OnDeltaposSpinLimbOriginY(NMHDR *pNMHDR, LRESULT *pResult)
 	Edit_LimbOriginY.SetWindowText(( LPCTSTR ) strLimbOriginY );
 	*pResult = 0;
 }
-#elif defined (__MECHANICS_3D__)
-// TODO implementation 3d model
-#endif /*__MECHANICS_2D__*/
+#endif /*__MECHANICS__*/
 
 /////////////////////////////////////////////////////////////////////////////
 // CSimulateSetup
@@ -556,12 +554,10 @@ CSimulateSetup::CSimulateSetup(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPa
 	AddPage( &SimViewSetup );
 	SimParamSetup.pData = &Data;
 	SimViewSetup.pData = &Data;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	AddPage( &SimLimbSetup );
 	SimLimbSetup.pData = &Data;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 }
 
 CSimulateSetup::CSimulateSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
@@ -571,12 +567,10 @@ CSimulateSetup::CSimulateSetup(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelec
 	AddPage( &SimViewSetup );
 	SimParamSetup.pData = &Data;
 	SimViewSetup.pData = &Data;
-#if defined (__MECHANICS_2D__)
+#if defined (__MECHANICS__)
 	AddPage( &SimLimbSetup );
 	SimLimbSetup.pData = &Data;
-#elif defined (__MECHANICS_3D__)
-	// TODO implementation 3d model
-#endif // __MECHANICS_2D__
+#endif // __MECHANICS__
 }
 
 CSimulateSetup::~CSimulateSetup()
